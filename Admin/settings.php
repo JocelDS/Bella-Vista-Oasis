@@ -145,6 +145,24 @@ function sc_switch(string $key, bool $checked, string $label): string
                     </div>
                 </div>
             </article>
+
+            <article class="card">
+                <div class="card-head"><div><p class="label-small">Blocked Dates</p><h2 class="card-title">Special Closures &amp; Holiday Blocks</h2></div><span class="sc-tag">Manual override</span></div>
+                <form id="blockedDateForm" class="sc-inline-form" novalidate>
+                    <div class="field">
+                        <label for="blockedDateInput">Date</label>
+                        <input id="blockedDateInput" name="blocked_date" type="date" required>
+                    </div>
+                    <div class="field field-grow">
+                        <label for="blockedReasonInput">Reason</label>
+                        <input id="blockedReasonInput" name="reason" type="text" maxlength="255" placeholder="Private event, maintenance, holiday...">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Block</button>
+                </form>
+                <div class="sc-list-wrap">
+                    <ul id="blockedDatesList" class="sc-list sc-list-compact"></ul>
+                </div>
+            </article>
         </div>
 
         <aside class="sc-stack">

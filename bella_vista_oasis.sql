@@ -1431,6 +1431,38 @@ ALTER TABLE `therapist_leaves`
   ADD CONSTRAINT `fk_leave_therapist` FOREIGN KEY (`therapist_id`) REFERENCES `therapists` (`id`) ON DELETE CASCADE;
 
 --
+-- Table structure for table `blocked_dates`
+--
+
+CREATE TABLE `blocked_dates` (
+  `id` int(11) NOT NULL,
+  `blocked_date` date NOT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `blocked_dates`
+--
+
+INSERT INTO `blocked_dates` (`id`, `blocked_date`, `reason`, `created_at`) VALUES
+(1, '2026-11-15', 'Special private event', '2026-11-09 09:00:00'),
+(2, '2026-11-22', 'Maintenance & deep clean', '2026-11-09 09:00:00');
+
+--
+-- Indexes for table `blocked_dates`
+--
+ALTER TABLE `blocked_dates`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `blocked_date` (`blocked_date`);
+
+--
+-- AUTO_INCREMENT for table `blocked_dates`
+--
+ALTER TABLE `blocked_dates`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- Constraints for table `therapist_shifts`
 --
 ALTER TABLE `therapist_shifts`
