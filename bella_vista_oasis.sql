@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 09, 2026 at 09:14 AM
+-- Generation Time: Nov 12, 2026 at 06:37 AM
 -- Server version: 10.11.16-MariaDB
 -- PHP Version: 8.5.12
 
@@ -63,39 +63,47 @@ CREATE TABLE `appointments` (
   `end_time` time NOT NULL,
   `appointment_status` varchar(30) DEFAULT 'pending',
   `payment_status` varchar(30) DEFAULT 'pending',
-  `total_amount` decimal(10,2) NOT NULL
+  `total_amount` decimal(10,2) NOT NULL,
+  `guest_count` int(11) NOT NULL DEFAULT 1,
+  `extra_person_fee` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `downpayment_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `health_conditions` text DEFAULT NULL,
+  `health_injuries` text DEFAULT NULL,
+  `is_pregnant` tinyint(1) NOT NULL DEFAULT 0,
+  `cancelled_at` datetime DEFAULT NULL,
+  `cancellation_forfeited` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `appointments`
 --
 
-INSERT INTO `appointments` (`id`, `customer_id`, `service_id`, `room_id`, `therapist_id`, `appointment_date`, `start_time`, `end_time`, `appointment_status`, `payment_status`, `total_amount`) VALUES
-(1, 1, 1, 1, 1, '2026-11-07', '09:00:00', '10:30:00', 'completed', 'paid', 3200.00),
-(2, 1, 2, 2, 2, '2026-10-26', '10:00:00', '11:00:00', 'completed', 'paid', 2400.00),
-(3, 1, 3, 2, 1, '2026-11-08', '10:00:00', '11:30:00', 'confirmed', 'deposit', 3600.00),
-(4, 2, 2, 1, 2, '2026-11-09', '11:00:00', '12:00:00', 'confirmed', 'pending', 2400.00),
-(5, 2, 2, 2, 2, '2026-11-07', '10:00:00', '11:00:00', 'completed', 'paid', 2400.00),
-(6, 2, 4, 4, 4, '2026-10-29', '12:00:00', '13:00:00', 'no_show', 'pending', 2100.00),
-(7, 3, 5, 3, 3, '2026-10-23', '14:00:00', '16:00:00', 'completed', 'paid', 7800.00),
-(8, 3, 5, 3, 3, '2026-11-07', '11:00:00', '13:00:00', 'completed', 'paid', 7800.00),
-(9, 4, 1, 1, 1, '2026-10-31', '11:00:00', '12:30:00', 'completed', 'paid', 3200.00),
-(10, 4, 4, 4, 4, '2026-11-07', '12:30:00', '13:30:00', 'confirmed', 'deposit', 2100.00),
-(11, 5, 3, 2, 3, '2026-11-02', '16:00:00', '17:30:00', 'completed', 'paid', 3600.00),
-(12, 5, 6, 1, 5, '2026-11-07', '13:30:00', '14:30:00', 'confirmed', 'paid', 2600.00),
-(13, 6, 3, 2, 3, '2026-11-07', '14:00:00', '15:30:00', 'confirmed', 'deposit', 3600.00),
-(14, 6, 6, 1, 5, '2026-11-03', '09:00:00', '10:00:00', 'cancelled', 'refunded', 2600.00),
-(15, 7, 1, 1, 1, '2026-11-07', '15:30:00', '17:00:00', 'pending', 'pending', 3200.00),
-(16, 7, 3, 2, 3, '2026-10-18', '11:00:00', '12:30:00', 'cancelled', 'refunded', 3600.00),
-(17, 7, 4, 4, 4, '2026-11-06', '10:00:00', '11:00:00', 'completed', 'paid', 2100.00),
-(18, 8, 2, 2, 2, '2026-11-06', '13:00:00', '14:00:00', 'completed', 'paid', 2400.00),
-(19, 8, 2, 2, 2, '2026-11-07', '16:00:00', '17:00:00', 'confirmed', 'pending', 2400.00),
-(20, 9, 1, 1, 1, '2026-11-05', '14:00:00', '15:30:00', 'no_show', 'pending', 3200.00),
-(21, 9, 4, 4, 4, '2026-11-07', '17:00:00', '18:00:00', 'pending', 'pending', 2100.00),
-(22, 10, 1, 1, 1, '2026-11-07', '18:30:00', '20:00:00', 'cancelled', 'refunded', 3200.00),
-(23, 10, 5, 3, 3, '2026-11-04', '15:00:00', '17:00:00', 'completed', 'paid', 7800.00),
-(24, 4, 2, 4, 2, '2026-11-08', '07:45:00', '08:45:00', 'confirmed', 'pending', 2400.00),
-(25, 6, 4, 2, 4, '2026-11-08', '08:30:00', '09:30:00', 'confirmed', 'pending', 2100.00);
+INSERT INTO `appointments` (`id`, `customer_id`, `service_id`, `room_id`, `therapist_id`, `appointment_date`, `start_time`, `end_time`, `appointment_status`, `payment_status`, `total_amount`, `guest_count`, `extra_person_fee`, `downpayment_amount`, `health_conditions`, `health_injuries`, `is_pregnant`, `cancelled_at`, `cancellation_forfeited`) VALUES
+(1, 1, 1, 1, 1, '2026-11-06', '13:00:00', '14:00:00', 'completed', 'paid', 800.00, 1, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(2, 2, 2, 4, 2, '2026-11-07', '14:30:00', '15:30:00', 'completed', 'paid', 1800.00, 2, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(3, 3, 3, 6, 3, '2026-11-08', '15:00:00', '16:30:00', 'completed', 'paid', 4000.00, 4, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(4, 4, 1, 2, 4, '2026-11-09', '16:00:00', '17:00:00', 'completed', 'paid', 800.00, 1, 0.00, 0.00, 'None', 'Tight neck and shoulders', 0, NULL, 0),
+(5, 5, 3, 7, 5, '2026-11-09', '17:00:00', '18:30:00', 'completed', 'paid', 5500.00, 6, 1500.00, 0.00, 'None', 'None', 0, NULL, 0),
+(6, 6, 1, 1, 6, '2026-11-10', '19:00:00', '20:00:00', 'no_show', 'pending', 800.00, 1, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(7, 7, 2, 5, 2, '2026-11-10', '13:00:00', '14:00:00', 'completed', 'paid', 1800.00, 2, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(8, 8, 1, 3, 1, '2026-11-11', '14:30:00', '15:30:00', 'completed', 'paid', 800.00, 1, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(9, 9, 2, 4, 3, '2026-11-11', '17:30:00', '18:30:00', 'cancelled', 'refunded', 1800.00, 2, 0.00, 500.00, 'None', 'None', 0, '2026-11-10 10:00:00', 0),
+(10, 10, 1, 2, NULL, '2026-11-11', '19:00:00', '20:00:00', 'cancelled', 'deposit', 800.00, 1, 0.00, 300.00, 'None', 'None', 0, '2026-11-11 15:00:00', 1),
+(11, 2, 1, 1, 1, '2026-11-12', '13:00:00', '14:00:00', 'completed', 'paid', 800.00, 1, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(12, 3, 3, 6, 2, '2026-11-12', '13:00:00', '14:30:00', 'confirmed', 'deposit', 4000.00, 4, 0.00, 1000.00, 'None', 'None', 0, NULL, 0),
+(13, 4, 2, 4, 3, '2026-11-12', '14:30:00', '15:30:00', 'confirmed', 'deposit', 1800.00, 2, 0.00, 500.00, 'None', 'None', 0, NULL, 0),
+(14, 5, 1, 2, 4, '2026-11-12', '16:00:00', '17:00:00', 'confirmed', 'paid', 800.00, 1, 0.00, 0.00, 'Pregnant, second trimester', 'None', 1, NULL, 0),
+(15, 6, 3, 7, NULL, '2026-11-12', '17:00:00', '18:30:00', 'pending', 'pending', 4750.00, 5, 750.00, 0.00, 'None', 'None', 0, NULL, 0),
+(16, 7, 1, 3, NULL, '2026-11-12', '19:00:00', '20:00:00', 'pending', 'pending', 800.00, 1, 0.00, 0.00, 'High blood pressure', 'None', 0, NULL, 0),
+(17, 8, 2, 5, 5, '2026-11-12', '17:30:00', '18:30:00', 'confirmed', 'deposit', 1800.00, 2, 0.00, 500.00, 'None', 'None', 0, NULL, 0),
+(18, 9, 1, 1, 1, '2026-11-13', '13:00:00', '14:00:00', 'confirmed', 'deposit', 800.00, 1, 0.00, 200.00, 'None', 'None', 0, NULL, 0),
+(19, 10, 2, 4, 2, '2026-11-13', '14:30:00', '15:30:00', 'confirmed', 'paid', 1800.00, 2, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(20, 1, 3, 6, 3, '2026-11-13', '17:00:00', '18:30:00', 'pending', 'pending', 4000.00, 4, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(21, 3, 1, 2, NULL, '2026-11-13', '16:00:00', '17:00:00', 'pending', 'pending', 800.00, 1, 0.00, 0.00, 'None', 'Right shoulder strain', 0, NULL, 0),
+(22, 4, 3, 7, 4, '2026-11-14', '15:00:00', '16:30:00', 'confirmed', 'deposit', 5500.00, 6, 1500.00, 1500.00, 'None', 'None', 0, NULL, 0),
+(23, 2, 1, 3, 6, '2026-11-14', '19:00:00', '20:00:00', 'confirmed', 'pending', 800.00, 1, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(24, 5, 2, 5, 1, '2026-11-15', '13:00:00', '14:00:00', 'pending', 'pending', 1800.00, 2, 0.00, 0.00, 'None', 'None', 0, NULL, 0),
+(25, 6, 1, 1, NULL, '2026-11-15', '14:30:00', '15:30:00', 'confirmed', 'pending', 800.00, 1, 0.00, 0.00, 'None', 'None', 0, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -125,7 +133,28 @@ CREATE TABLE `appointment_checkins` (
 --
 
 INSERT INTO `appointment_checkins` (`id`, `appointment_id`, `checkin_token_hash`, `token_expires_at`, `verification_status`, `verified_at`, `checkin_method`, `checkin_status`, `checked_in_at`, `checked_in_by`, `checked_in_flag`, `created_by`, `created_at`, `updated_at`) VALUES
-(1, 4, '17e130eaa1509152ddc5f86e4c68183420cee0890441065b50f3cd720868a12c', '2026-11-09 12:00:00', 'verified', '2026-11-09 09:32:22', 'qr', 'checked_in', '2026-11-09 09:32:34', 1, 1, 1, '2026-11-09 09:30:59', '2026-11-09 09:32:34');
+(1, 12, '17e130eaa1509152ddc5f86e4c68183420cee0890441065b50f3cd720868a12c', '2026-11-12 15:00:00', 'verified', '2026-11-12 12:48:00', 'qr', 'checked_in', '2026-11-12 12:50:00', 1, 1, 1, '2026-11-12 12:45:00', '2026-11-12 12:50:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `blocked_dates`
+--
+
+CREATE TABLE `blocked_dates` (
+  `id` int(11) NOT NULL,
+  `blocked_date` date NOT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `blocked_dates`
+--
+
+INSERT INTO `blocked_dates` (`id`, `blocked_date`, `reason`, `created_at`) VALUES
+(1, '2026-11-22', 'Staff training day', '2026-11-12 04:11:23'),
+(2, '2026-12-25', 'Christmas Day', '2026-11-12 04:11:23');
 
 -- --------------------------------------------------------
 
@@ -149,9 +178,9 @@ CREATE TABLE `checkin_activity_logs` (
 
 INSERT INTO `checkin_activity_logs` (`id`, `appointment_id`, `activity_type`, `activity_details`, `processed_by`, `ip_address`, `created_at`) VALUES
 (1, NULL, 'window_updated', 'Check-in window set to 60 min early / 30 min late; pending bookings not allowed.', 1, '::1', '2026-11-09 09:19:28'),
-(2, 4, 'qr_generated', 'QR code issued, valid until Nov 9, 12:00 PM.', 1, '::1', '2026-11-09 09:30:59'),
-(3, 4, 'guest_verified', 'BVO-0004: QR verified on the server; awaiting receptionist confirmation.', 1, '::1', '2026-11-09 09:32:22'),
-(4, 4, 'arrival_confirmed', 'BVO-0004: guest checked in via QR scan (early arrival acknowledged by staff).', 1, '::1', '2026-11-09 09:32:34');
+(2, 12, 'qr_generated', 'QR code issued for BVO-0012.', 1, '::1', '2026-11-12 12:45:00'),
+(3, 12, 'guest_verified', 'BVO-0012: QR verified on the server; awaiting receptionist confirmation.', 1, '::1', '2026-11-12 12:48:00'),
+(4, 12, 'arrival_confirmed', 'BVO-0012: guest checked in via QR scan.', 1, '::1', '2026-11-12 12:50:00');
 
 -- --------------------------------------------------------
 
@@ -338,13 +367,12 @@ CREATE TABLE `loyalty_transactions` (
 --
 
 INSERT INTO `loyalty_transactions` (`id`, `transaction_code`, `customer_id`, `transaction_type`, `points`, `reference_type`, `reference_id`, `description`, `notes`, `status`, `processed_by`, `created_at`) VALUES
-(1, 'LT-261109-68F3B3', 1, 'earned', 48, 'payment', 1, 'Completed appointment BVO-0001 · Gold 1.5x', NULL, 'completed', NULL, '2026-11-07 01:00:00'),
-(2, 'LT-261109-409ED6', 1, 'earned', 36, 'payment', 2, 'Completed appointment BVO-0002 · Gold 1.5x', NULL, 'completed', NULL, '2026-10-26 02:00:00'),
-(3, 'LT-261109-355BCC', 2, 'earned', 30, 'payment', 3, 'Completed appointment BVO-0005 · Silver 1.25x', NULL, 'completed', NULL, '2026-11-07 02:00:00'),
-(4, 'LT-261109-4B548A', 3, 'earned', 156, 'payment', 4, 'Completed appointment BVO-0007 · Platinum 2x', NULL, 'completed', NULL, '2026-10-23 06:00:00'),
-(5, 'LT-261109-7FB514', 3, 'earned', 156, 'payment', 5, 'Completed appointment BVO-0008 · Platinum 2x', NULL, 'completed', NULL, '2026-11-07 03:00:00'),
-(6, 'LT-261109-25FE0A', 4, 'earned', 40, 'payment', 6, 'Completed appointment BVO-0009 · Silver 1.25x', NULL, 'completed', NULL, '2026-10-31 03:00:00'),
-(7, 'LT-261109-5A0076', 5, 'earned', 54, 'payment', 7, 'Completed appointment BVO-0011 · Gold 1.5x', NULL, 'completed', NULL, '2026-11-02 08:00:00');
+(1, 'LT-A1B2C3', 1, 'earned', 12, 'payment', 1, 'Completed appointment BVO-0001 · Gold 1.5x', NULL, 'completed', NULL, '2026-11-06 14:00:00'),
+(2, 'LT-D4E5F6', 2, 'earned', 22, 'payment', 2, 'Completed appointment BVO-0002 · Silver 1.25x', NULL, 'completed', NULL, '2026-11-07 15:30:00'),
+(3, 'LT-A7B8C9', 3, 'earned', 80, 'payment', 3, 'Completed appointment BVO-0003 · Platinum 2x', NULL, 'completed', NULL, '2026-11-08 16:30:00'),
+(4, 'LT-D1E2F3', 4, 'earned', 10, 'payment', 4, 'Completed appointment BVO-0004 · Silver 1.25x', NULL, 'completed', NULL, '2026-11-09 17:00:00'),
+(5, 'LT-A4B5C6', 5, 'earned', 82, 'payment', 5, 'Completed appointment BVO-0005 · Gold 1.5x', NULL, 'completed', NULL, '2026-11-09 18:30:00'),
+(6, 'LT-D7E8F9', 2, 'earned', 10, 'payment', 10, 'Completed appointment BVO-0011 · Silver 1.25x', NULL, 'completed', NULL, '2026-11-12 08:00:00');
 
 -- --------------------------------------------------------
 
@@ -442,9 +470,9 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `admin_id`, `title`, `message`, `created_at`) VALUES
-(1, NULL, 'Pending booking requests', 'Several appointments are waiting for confirmation.', '2026-11-06 18:16:09'),
-(2, NULL, 'Suite maintenance', 'Bamboo Suite 6 is marked under maintenance.', '2026-11-06 18:16:09'),
-(3, NULL, 'Guest checked in', 'Marcus Vance checked in for Deep Tissue Therapy (Jade Suite 1) via QR scan.', '2026-11-09 01:32:34');
+(1, NULL, 'Pending booking requests', 'Several appointments are waiting for confirmation.', '2026-11-12 08:00:00'),
+(2, NULL, 'Late cancellation', 'Olivia Bennett cancelled SR-2 less than 6 hours before the session; the downpayment was forfeited.', '2026-11-12 08:05:00'),
+(3, NULL, 'Guest checked in', 'Elena & Rodrigo Sen checked in for Barkada / Family Spa Lounge (FL-1) via QR scan.', '2026-11-12 08:10:00');
 
 -- --------------------------------------------------------
 
@@ -464,9 +492,10 @@ CREATE TABLE `operational_announcements` (
 --
 
 INSERT INTO `operational_announcements` (`id`, `title`, `description`, `priority`) VALUES
-(1, 'Mandatory 30-min Cleaning Gap', 'Allow a 30-minute reset between every suite booking for sanitation and linen change.', 'high'),
-(2, 'Guest Pre-Arrival Window', 'Confirm each guest 24 hours ahead and note allergies or pressure preferences.', 'normal'),
-(3, 'Therapist Hygiene Standard', 'Fresh uniform, sanitized hands and prepared oils before every session.', 'normal');
+(1, 'Mandatory 30-min Cleaning Gap', 'A 30-minute cleaning gap is blocked after every session before the same room can be booked again.', 'high'),
+(2, 'Arrive 15 Minutes Early', 'Guests must arrive 15 minutes before their schedule. Late arrivals get a shortened session so later bookings stay on time.', 'normal'),
+(3, 'Cancellation Policy', 'Cancel or reschedule at least 6 hours before the appointment. Late cancellation forfeits any downpayment.', 'high'),
+(4, 'Therapist Hygiene Standard', 'Fresh uniform, sanitized hands and prepared oils before every session.', 'normal');
 
 -- --------------------------------------------------------
 
@@ -504,17 +533,23 @@ CREATE TABLE `payments` (
 --
 
 INSERT INTO `payments` (`id`, `appointment_id`, `customer_id`, `amount`, `payment_method`, `payment_status`, `payment_date`) VALUES
-(1, 1, 1, 3200.00, 'GCash', 'paid', '2026-11-07 09:00:00'),
-(2, 2, 1, 2400.00, 'GCash', 'paid', '2026-10-26 10:00:00'),
-(3, 5, 2, 2400.00, 'GCash', 'paid', '2026-11-07 10:00:00'),
-(4, 7, 3, 7800.00, 'GCash', 'paid', '2026-10-23 14:00:00'),
-(5, 8, 3, 7800.00, 'GCash', 'paid', '2026-11-07 11:00:00'),
-(6, 9, 4, 3200.00, 'GCash', 'paid', '2026-10-31 11:00:00'),
-(7, 11, 5, 3600.00, 'GCash', 'paid', '2026-11-02 16:00:00'),
-(8, 12, 5, 2600.00, 'GCash', 'paid', '2026-11-07 13:30:00'),
-(9, 17, 7, 2100.00, 'GCash', 'paid', '2026-11-06 10:00:00'),
-(10, 18, 8, 2400.00, 'GCash', 'paid', '2026-11-06 13:00:00'),
-(11, 23, 10, 7800.00, 'GCash', 'paid', '2026-11-04 15:00:00');
+(1, 1, 1, 800.00, 'GCash', 'paid', '2026-11-06 13:00:00'),
+(2, 2, 2, 1800.00, 'GCash', 'paid', '2026-11-07 14:30:00'),
+(3, 3, 3, 4000.00, 'Cash', 'paid', '2026-11-08 15:00:00'),
+(4, 4, 4, 800.00, 'GCash', 'paid', '2026-11-09 16:00:00'),
+(5, 5, 5, 5500.00, 'GCash', 'paid', '2026-11-09 17:00:00'),
+(6, 7, 7, 1800.00, 'Cash', 'paid', '2026-11-10 13:00:00'),
+(7, 8, 8, 800.00, 'GCash', 'paid', '2026-11-11 14:30:00'),
+(8, 9, 9, 500.00, 'GCash', 'refunded', '2026-11-09 09:00:00'),
+(9, 10, 10, 300.00, 'GCash', 'deposit', '2026-11-10 11:00:00'),
+(10, 11, 2, 800.00, 'Cash', 'paid', '2026-11-12 13:00:00'),
+(11, 12, 3, 1000.00, 'GCash', 'deposit', '2026-11-11 10:00:00'),
+(12, 13, 4, 500.00, 'GCash', 'deposit', '2026-11-11 11:00:00'),
+(13, 14, 5, 800.00, 'GCash', 'paid', '2026-11-11 12:00:00'),
+(14, 17, 8, 500.00, 'Cash', 'deposit', '2026-11-11 13:00:00'),
+(15, 18, 9, 200.00, 'GCash', 'deposit', '2026-11-11 14:00:00'),
+(16, 19, 10, 1800.00, 'GCash', 'paid', '2026-11-11 15:00:00'),
+(17, 22, 4, 1500.00, 'GCash', 'deposit', '2026-11-11 16:00:00');
 
 -- --------------------------------------------------------
 
@@ -545,7 +580,7 @@ CREATE TABLE `rewards` (
 --
 
 INSERT INTO `rewards` (`id`, `reward_name`, `description`, `reward_image`, `reward_category`, `required_points`, `available_quantity`, `redeemed_count`, `maximum_per_member`, `valid_from`, `valid_until`, `minimum_tier_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Spa Treatment Discount', 'Enjoy ₱200 off your next eligible spa treatment.', 'rw_271ea674113b891e.png', 'Discount', 200, 12, 0, 1, '2026-11-09', '2026-12-09', 1, 'active', '2026-11-09 00:10:22', '2026-11-09 00:32:31'),
+(1, 'Spa Treatment Discount', 'Enjoy ₱200 off your next eligible spa treatment.', NULL, 'Discount', 200, 12, 0, 1, '2026-11-09', '2026-12-09', 1, 'active', '2026-11-09 00:10:22', '2026-11-09 00:32:31'),
 (2, 'Signature Treatment Discount', 'Discount on a signature treatment.', NULL, 'Discount', 250, NULL, 0, 2, NULL, NULL, NULL, 'active', '2026-11-09 00:10:22', '2026-11-09 00:10:22'),
 (3, 'Complimentary Wellness Upgrade', 'Upgrade your session to the next wellness tier.', NULL, 'Upgrade', 400, NULL, 0, 1, NULL, NULL, NULL, 'active', '2026-11-09 00:10:22', '2026-11-09 00:10:22'),
 (4, 'Exclusive Spa Experience', 'A private curated spa experience.', NULL, 'Experience', 800, 20, 0, 1, NULL, NULL, NULL, 'active', '2026-11-09 00:10:22', '2026-11-09 00:10:22');
@@ -606,12 +641,13 @@ CREATE TABLE `rooms` (
 --
 
 INSERT INTO `rooms` (`id`, `room_name`, `room_type`, `room_status`, `description`) VALUES
-(1, 'Jade Suite 1', 'Single Massage Suite', 'available', 'Stone-wall single suite'),
-(2, 'Cypress Suite 2', 'Deep Tissue Suite', 'available', 'Quiet suite with garden view'),
-(3, 'Family Soul Lounge 3', 'Couples Suite', 'available', 'Double suite with soaking tub'),
-(4, 'Lotus Facial Room', 'Facial Studio', 'available', 'Soft-light facial studio'),
-(5, 'Sandalwood Suite 5', 'Hot Stone Suite', 'cleaning', 'Heated stone station'),
-(6, 'Bamboo Suite 6', 'Single Massage Suite', 'available', 'Under repair');
+(1, 'SR-1', 'Single Room Massage', 'available', 'Private single massage room with a dedicated therapist.'),
+(2, 'SR-2', 'Single Room Massage', 'available', 'Private single massage room with a dedicated therapist.'),
+(3, 'SR-3', 'Single Room Massage', 'available', 'Private single massage room with a dedicated therapist.'),
+(4, 'CS-1', 'Couples Suite', 'available', 'Private suite for two with complimentary herbal tea.'),
+(5, 'CS-2', 'Couples Suite', 'available', 'Private suite for two with complimentary herbal tea.'),
+(6, 'FL-1', 'Barkada / Family Spa Lounge', 'available', 'Spa lounge for groups of 4 (up to 6 with extra fee).'),
+(7, 'FL-2', 'Barkada / Family Spa Lounge', 'available', 'Spa lounge for groups of 4 (up to 6 with extra fee).');
 
 -- --------------------------------------------------------
 
@@ -634,17 +670,13 @@ CREATE TABLE `room_climate_logs` (
 --
 
 INSERT INTO `room_climate_logs` (`id`, `room_id`, `temperature`, `humidity`, `condition_notes`, `recorded_by`, `recorded_at`) VALUES
-(1, 1, 12.0, 15.0, NULL, 1, '2026-11-08 19:43:00'),
-(2, 1, 15.0, 51.0, NULL, 1, '2026-11-08 19:46:00'),
-(3, 1, 23.5, 48.0, 'Comfortable room condition; within target range.', 1, '2026-11-08 08:00:00'),
-(4, 2, 24.0, 50.0, 'Stable temperature and humidity.', 1, '2026-11-08 08:05:00'),
-(5, 3, 23.0, 52.0, 'Comfortable for couples treatment.', 1, '2026-11-08 08:10:00'),
-(6, 4, 24.5, 45.0, 'Facial room condition is normal.', 1, '2026-11-08 08:15:00'),
-(7, 5, 25.0, 55.0, 'Room is being prepared for cleaning and reset.', 1, '2026-11-08 08:20:00'),
-(8, 6, 26.5, 62.0, 'Room is under maintenance; inspect ventilation before reopening.', 1, '2026-11-08 08:25:00'),
-(9, 1, 11.8, 4.0, NULL, 1, '2026-11-09 03:16:00'),
-(10, 1, 11.6, 1.8, NULL, 1, '2026-11-09 03:17:00'),
-(11, 1, 22.0, 26.0, NULL, 1, '2026-11-09 03:17:00');
+(1, 1, 23.5, 48.0, 'Comfortable room condition; within target range.', 1, '2026-11-11 12:30:00'),
+(2, 2, 24.0, 50.0, 'Stable temperature and humidity.', 1, '2026-11-11 12:32:00'),
+(3, 3, 23.0, 49.0, 'Stable temperature and humidity.', 1, '2026-11-11 12:34:00'),
+(4, 4, 23.0, 52.0, 'Comfortable for couples treatment.', 1, '2026-11-11 12:36:00'),
+(5, 5, 24.0, 51.0, 'Comfortable for couples treatment.', 1, '2026-11-11 12:38:00'),
+(6, 6, 24.5, 47.0, 'Lounge condition is normal.', 1, '2026-11-11 12:40:00'),
+(7, 7, 24.0, 46.0, 'Lounge condition is normal.', 1, '2026-11-11 12:42:00');
 
 -- --------------------------------------------------------
 
@@ -665,11 +697,12 @@ CREATE TABLE `room_details` (
 
 INSERT INTO `room_details` (`id`, `room_id`, `amenities`, `maximum_capacity`) VALUES
 (1, 1, 'Massage bed, aromatherapy diffuser, towel warmer, private shower', 1),
-(2, 2, 'Deep tissue massage bed, garden view, sound system, private shower', 1),
-(3, 3, 'Two massage beds, soaking tub, lounge seating, tea station', 2),
-(4, 4, 'Facial bed, magnifying lamp, skincare station, soft lighting', 1),
-(5, 5, 'Heated stone station, massage bed, towel warmer, ambient lighting', 1),
-(6, 6, 'Massage bed, storage cabinet, private shower', 1);
+(2, 2, 'Massage bed, aromatherapy diffuser, towel warmer, private shower', 1),
+(3, 3, 'Massage bed, aromatherapy diffuser, towel warmer, private shower', 1),
+(4, 4, 'Two massage beds, complimentary herbal tea, lounge seating, private shower', 2),
+(5, 5, 'Two massage beds, complimentary herbal tea, lounge seating, private shower', 2),
+(6, 6, 'Group massage beds, lounge seating, tea station, private restroom', 6),
+(7, 7, 'Group massage beds, lounge seating, tea station, private restroom', 6);
 
 -- --------------------------------------------------------
 
@@ -694,10 +727,9 @@ CREATE TABLE `room_maintenance_logs` (
 --
 
 INSERT INTO `room_maintenance_logs` (`id`, `room_id`, `maintenance_title`, `description`, `maintenance_status`, `scheduled_date`, `completed_at`, `created_by`, `created_at`) VALUES
-(1, 5, 'Post-treatment cleaning and linen reset', 'Replace used linens, sanitize surfaces, and prepare the room for the next guest.', 'completed', '2026-11-08', '2026-11-09 03:06:35', 1, '2026-11-08 11:52:11'),
-(2, 6, 'Repair ventilation and inspect air-conditioning', 'Check the ventilation system and air-conditioning unit. Keep the suite unavailable until inspection is complete.', 'completed', '2026-11-08', '2026-11-09 03:05:59', 1, '2026-11-08 11:52:11'),
-(3, 1, 'Routine equipment inspection', 'Inspect massage bed, diffuser, towel warmer, and electrical connections.', 'completed', '2026-11-10', '2026-11-09 03:06:30', 1, '2026-11-08 11:52:11'),
-(4, 4, 'Facial equipment sanitation', 'Deep-clean facial equipment and verify the magnifying lamp.', 'completed', '2026-11-11', '2026-11-09 03:06:29', 1, '2026-11-08 11:52:11');
+(1, 1, 'Routine equipment inspection', 'Inspect massage bed, diffuser, towel warmer, and electrical connections.', 'completed', '2026-11-08', '2026-11-08 12:00:00', 1, '2026-11-07 11:00:00'),
+(2, 4, 'Linen and tea station reset', 'Replace linens and restock the herbal tea station.', 'completed', '2026-11-09', '2026-11-09 12:00:00', 1, '2026-11-08 11:00:00'),
+(3, 6, 'Air-conditioning inspection', 'Check ventilation and air-conditioning of the family lounge.', 'completed', '2026-11-10', '2026-11-10 12:00:00', 1, '2026-11-09 11:00:00');
 
 -- --------------------------------------------------------
 
@@ -713,6 +745,19 @@ CREATE TABLE `room_pricing` (
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `room_pricing`
+--
+
+INSERT INTO `room_pricing` (`id`, `room_id`, `rate`, `rate_type`, `updated_at`) VALUES
+(1, 1, 800.00, 'per_session', '2026-11-12 08:00:00'),
+(2, 2, 800.00, 'per_session', '2026-11-12 08:00:00'),
+(3, 3, 800.00, 'per_session', '2026-11-12 08:00:00'),
+(4, 4, 1800.00, 'per_session', '2026-11-12 08:00:00'),
+(5, 5, 1800.00, 'per_session', '2026-11-12 08:00:00'),
+(6, 6, 4000.00, 'per_session', '2026-11-12 08:00:00'),
+(7, 7, 4000.00, 'per_session', '2026-11-12 08:00:00');
+
 -- --------------------------------------------------------
 
 --
@@ -722,9 +767,12 @@ CREATE TABLE `room_pricing` (
 CREATE TABLE `services` (
   `id` int(11) NOT NULL,
   `service_name` varchar(150) NOT NULL,
+  `room_code` varchar(4) NOT NULL,
   `description` text DEFAULT NULL,
   `duration` int(11) NOT NULL,
   `price` decimal(10,2) NOT NULL,
+  `base_capacity` smallint(6) NOT NULL DEFAULT 1,
+  `max_capacity` smallint(6) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -732,13 +780,10 @@ CREATE TABLE `services` (
 -- Dumping data for table `services`
 --
 
-INSERT INTO `services` (`id`, `service_name`, `description`, `duration`, `price`, `created_at`) VALUES
-(1, 'Signature Aromatherapy Massage', 'Full-body massage with essential oils', 90, 3200.00, '2026-11-06 18:15:15'),
-(2, 'Deep Tissue Therapy', 'Targeted muscle release', 60, 2400.00, '2026-11-06 18:15:15'),
-(3, 'Hot Stone Ritual', 'Heated basalt stone massage', 90, 3600.00, '2026-11-06 18:15:15'),
-(4, 'Botanical Facial', 'Cleansing and hydrating facial', 60, 2100.00, '2026-11-06 18:15:15'),
-(5, 'Couples Sanctuary Retreat', 'Shared suite, massage and tea ceremony', 120, 7800.00, '2026-11-06 18:15:15'),
-(6, 'Prenatal Comfort Massage', 'Gentle massage for expectant mothers', 60, 2600.00, '2026-11-06 18:15:15');
+INSERT INTO `services` (`id`, `service_name`, `room_code`, `description`, `duration`, `price`, `base_capacity`, `max_capacity`, `created_at`) VALUES
+(1, 'Single Room Massage', 'SR', 'Private room with a dedicated therapist. 1 person, 1 hour.', 60, 800.00, 1, 1, '2026-11-12 08:00:00'),
+(2, 'Couples Suite', 'CS', 'Private room for two with complimentary herbal tea. 2 persons, 1 hour.', 60, 1800.00, 2, 2, '2026-11-12 08:00:00'),
+(3, 'Barkada / Family Spa Lounge', 'FL', 'Spa lounge for 4 persons (max 6). 1.5 hours. Extra PHP 750 per person beyond 4.', 90, 4000.00, 4, 6, '2026-11-12 08:00:00');
 
 -- --------------------------------------------------------
 
@@ -758,15 +803,19 @@ CREATE TABLE `spa_configuration` (
 --
 
 INSERT INTO `spa_configuration` (`id`, `setting_key`, `setting_value`, `updated_at`) VALUES
-(1, 'cleaning_gap_enabled', '1', '2026-11-09 15:57:09'),
-(2, 'cleaning_gap_minutes', '30', '2026-11-09 15:57:09'),
-(3, 'cancellation_notice_hours', '48', '2026-11-09 15:57:09'),
-(4, 'hvac_automation', '1', '2026-11-09 15:57:09'),
-(5, 'housekeeping_standard', '1', '2026-11-09 15:57:09'),
-(6, 'housekeeping_note', 'Surfaces sanitized, linens replaced and oils restocked before the next guest.', '2026-11-09 15:57:09'),
-(7, 'cleaning_verification', '1', '2026-11-09 15:57:09'),
-(8, 'equipment_readiness', '1', '2026-11-09 15:57:09'),
-(9, 'block_maintenance_rooms', '1', '2026-11-09 15:57:09');
+(1, 'cleaning_gap_enabled', '1', '2026-11-12 08:00:00'),
+(2, 'cleaning_gap_minutes', '30', '2026-11-12 08:00:00'),
+(3, 'cancellation_notice_hours', '6', '2026-11-12 08:00:00'),
+(4, 'hvac_automation', '1', '2026-11-12 08:00:00'),
+(5, 'housekeeping_standard', '1', '2026-11-12 08:00:00'),
+(6, 'housekeeping_note', 'Surfaces sanitized, linens replaced and oils restocked before the next guest.', '2026-11-12 08:00:00'),
+(7, 'cleaning_verification', '1', '2026-11-12 08:00:00'),
+(8, 'equipment_readiness', '1', '2026-11-12 08:00:00'),
+(9, 'block_maintenance_rooms', '1', '2026-11-12 08:00:00'),
+(10, 'arrival_minutes_before', '15', '2026-11-12 08:00:00'),
+(11, 'extra_person_fee', '750', '2026-11-12 08:00:00'),
+(12, 'family_base_pax', '4', '2026-11-12 08:00:00'),
+(13, 'family_max_pax', '6', '2026-11-12 08:00:00');
 
 -- --------------------------------------------------------
 
@@ -777,7 +826,7 @@ INSERT INTO `spa_configuration` (`id`, `setting_key`, `setting_value`, `updated_
 CREATE TABLE `spa_operating_hours` (
   `id` int(11) NOT NULL,
   `day_of_week` tinyint(4) NOT NULL COMMENT '1 = Monday ... 7 = Sunday',
-  `opening_time` time NOT NULL DEFAULT '09:00:00',
+  `opening_time` time NOT NULL DEFAULT '13:00:00',
   `closing_time` time NOT NULL DEFAULT '21:00:00',
   `is_open` tinyint(1) NOT NULL DEFAULT 1,
   `updated_at` datetime DEFAULT NULL
@@ -788,13 +837,13 @@ CREATE TABLE `spa_operating_hours` (
 --
 
 INSERT INTO `spa_operating_hours` (`id`, `day_of_week`, `opening_time`, `closing_time`, `is_open`, `updated_at`) VALUES
-(1, 1, '09:00:00', '21:00:00', 1, '2026-11-09 15:57:09'),
-(2, 2, '09:00:00', '21:00:00', 1, '2026-11-09 15:57:09'),
-(3, 3, '09:00:00', '21:00:00', 1, '2026-11-09 15:57:09'),
-(4, 4, '09:00:00', '21:00:00', 1, '2026-11-09 15:57:09'),
-(5, 5, '09:00:00', '21:00:00', 1, '2026-11-09 15:57:09'),
-(6, 6, '09:00:00', '21:00:00', 1, '2026-11-09 15:57:09'),
-(7, 7, '09:00:00', '21:00:00', 1, '2026-11-09 15:57:09');
+(1, 1, '13:00:00', '21:00:00', 1, '2026-11-12 08:00:00'),
+(2, 2, '13:00:00', '21:00:00', 1, '2026-11-12 08:00:00'),
+(3, 3, '13:00:00', '21:00:00', 1, '2026-11-12 08:00:00'),
+(4, 4, '13:00:00', '21:00:00', 1, '2026-11-12 08:00:00'),
+(5, 5, '13:00:00', '21:00:00', 1, '2026-11-12 08:00:00'),
+(6, 6, '13:00:00', '21:00:00', 1, '2026-11-12 08:00:00'),
+(7, 7, '13:00:00', '21:00:00', 1, '2026-11-12 08:00:00');
 
 -- --------------------------------------------------------
 
@@ -829,7 +878,7 @@ INSERT INTO `therapists` (`id`, `full_name`, `specialization`, `availability_sta
 (1, 'Maria Santos', 'Aromatherapy & Swedish', 'available', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active'),
 (2, 'Jerome Reyes', 'Deep Tissue & Sports', 'available', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active'),
 (3, 'Liza Mercado', 'Hot Stone & Reflexology', 'available', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active'),
-(4, 'Carlo Dizon', 'Facials & Skin Care', 'available', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active'),
+(4, 'Carlo Dizon', 'Swedish & Thai Massage', 'available', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active'),
 (5, 'Aya Tanaka', 'Prenatal & Shiatsu', 'available', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active'),
 (6, 'Nico Villanueva', 'Deep Tissue', 'available', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active');
 
@@ -854,8 +903,9 @@ CREATE TABLE `therapist_assignment_logs` (
 --
 
 INSERT INTO `therapist_assignment_logs` (`id`, `appointment_id`, `previous_therapist_id`, `new_therapist_id`, `assigned_by`, `notes`, `created_at`) VALUES
-(1, 24, 5, 2, 1, NULL, '2026-11-08 12:56:45'),
-(2, 3, 3, 1, 1, 'Override: not a specialization match.', '2026-11-08 12:59:07');
+(1, 12, NULL, 2, 1, 'Assigned before the session.', '2026-11-12 08:20:00'),
+(2, 13, NULL, 3, 1, NULL, '2026-11-12 08:21:00'),
+(3, 8, 6, 1, 1, 'Therapist swap.', '2026-11-11 15:00:00');
 
 -- --------------------------------------------------------
 
@@ -918,7 +968,10 @@ ALTER TABLE `administrators`
 -- Indexes for table `appointments`
 --
 ALTER TABLE `appointments`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_appt_date_room` (`appointment_date`,`room_id`),
+  ADD KEY `idx_appt_therapist` (`therapist_id`,`appointment_date`),
+  ADD KEY `idx_appt_customer` (`customer_id`);
 
 --
 -- Indexes for table `appointment_checkins`
@@ -930,6 +983,13 @@ ALTER TABLE `appointment_checkins`
   ADD KEY `idx_checkin_when` (`checked_in_at`),
   ADD KEY `fk_checkin_by` (`checked_in_by`),
   ADD KEY `fk_checkin_creator` (`created_by`);
+
+--
+-- Indexes for table `blocked_dates`
+--
+ALTER TABLE `blocked_dates`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_blocked_date` (`blocked_date`);
 
 --
 -- Indexes for table `checkin_activity_logs`
@@ -1045,7 +1105,8 @@ ALTER TABLE `password_resets`
 -- Indexes for table `payments`
 --
 ALTER TABLE `payments`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_payments_appt` (`appointment_id`);
 
 --
 -- Indexes for table `rewards`
@@ -1074,7 +1135,8 @@ ALTER TABLE `reward_tiers`
 -- Indexes for table `rooms`
 --
 ALTER TABLE `rooms`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_room_name` (`room_name`);
 
 --
 -- Indexes for table `room_climate_logs`
@@ -1110,7 +1172,8 @@ ALTER TABLE `room_pricing`
 -- Indexes for table `services`
 --
 ALTER TABLE `services`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_service_room_code` (`room_code`);
 
 --
 -- Indexes for table `spa_configuration`
@@ -1186,10 +1249,28 @@ ALTER TABLE `appointment_checkins`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `blocked_dates`
+--
+ALTER TABLE `blocked_dates`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `checkin_activity_logs`
 --
 ALTER TABLE `checkin_activity_logs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `checkin_settings`
+--
+ALTER TABLE `checkin_settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `climate_settings`
+--
+ALTER TABLE `climate_settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `configuration_logs`
@@ -1213,13 +1294,13 @@ ALTER TABLE `gift_certificates`
 -- AUTO_INCREMENT for table `login_attempts`
 --
 ALTER TABLE `login_attempts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `loyalty_transactions`
 --
 ALTER TABLE `loyalty_transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `memberships`
@@ -1249,7 +1330,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `operational_announcements`
 --
 ALTER TABLE `operational_announcements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `password_resets`
@@ -1261,7 +1342,7 @@ ALTER TABLE `password_resets`
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `rewards`
@@ -1279,43 +1360,43 @@ ALTER TABLE `reward_redemptions`
 -- AUTO_INCREMENT for table `rooms`
 --
 ALTER TABLE `rooms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `room_climate_logs`
 --
 ALTER TABLE `room_climate_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `room_details`
 --
 ALTER TABLE `room_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `room_maintenance_logs`
 --
 ALTER TABLE `room_maintenance_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `room_pricing`
 --
 ALTER TABLE `room_pricing`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `spa_configuration`
 --
 ALTER TABLE `spa_configuration`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `spa_operating_hours`
@@ -1333,7 +1414,7 @@ ALTER TABLE `therapists`
 -- AUTO_INCREMENT for table `therapist_assignment_logs`
 --
 ALTER TABLE `therapist_assignment_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `therapist_capacity`
@@ -1429,38 +1510,6 @@ ALTER TABLE `therapist_capacity`
 ALTER TABLE `therapist_leaves`
   ADD CONSTRAINT `fk_leave_admin` FOREIGN KEY (`created_by`) REFERENCES `administrators` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_leave_therapist` FOREIGN KEY (`therapist_id`) REFERENCES `therapists` (`id`) ON DELETE CASCADE;
-
---
--- Table structure for table `blocked_dates`
---
-
-CREATE TABLE `blocked_dates` (
-  `id` int(11) NOT NULL,
-  `blocked_date` date NOT NULL,
-  `reason` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `blocked_dates`
---
-
-INSERT INTO `blocked_dates` (`id`, `blocked_date`, `reason`, `created_at`) VALUES
-(1, '2026-11-15', 'Special private event', '2026-11-09 09:00:00'),
-(2, '2026-11-22', 'Maintenance & deep clean', '2026-11-09 09:00:00');
-
---
--- Indexes for table `blocked_dates`
---
-ALTER TABLE `blocked_dates`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `blocked_date` (`blocked_date`);
-
---
--- AUTO_INCREMENT for table `blocked_dates`
---
-ALTER TABLE `blocked_dates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for table `therapist_shifts`
