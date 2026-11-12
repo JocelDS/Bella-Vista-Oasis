@@ -123,7 +123,7 @@
 }
 
 .btn-soft {
-    background: rgba(16, 43, 34, 0.05);
+    background: rgba(74,46,61, 0.05);
     border-color: var(--border);
     color: var(--forest);
 }
@@ -160,8 +160,8 @@
 .card-revenue::before { background: var(--forest); }
 .card-appointments::before { background: var(--gold); }
 .card-average::before { background: var(--sage); }
-.card-utilization::before { background: #D0B39E; }
-.card-memberships::before { background: #B58A78; }
+.card-utilization::before { background: #dfc0ba; }
+.card-memberships::before { background: #8a5a6e; }
 
 .summary-top {
     display: flex;
@@ -178,7 +178,7 @@
     width: 32px;
     height: 32px;
     border-radius: 10px;
-    background: rgba(16, 43, 34, 0.04);
+    background: rgba(74,46,61, 0.04);
     color: var(--forest);
     font-weight: 700;
 }
@@ -197,8 +197,8 @@
     color: var(--gray);
 }
 
-.summary-meta.up { color: #2d6a4f; }
-.summary-meta.down { color: #9d4f42; }
+.summary-meta.up { color: #5e3e50; }
+.summary-meta.down { color: #9b2226; }
 
 .analytics-shell {
     display: grid;
@@ -235,7 +235,7 @@
 }
 
 .chip-total {
-    background: rgba(16, 43, 34, 0.05);
+    background: rgba(74,46,61, 0.05);
     color: var(--forest);
     border-radius: 999px;
     padding: 7px 10px;
@@ -327,7 +327,7 @@
 }
 
 .data-table thead th {
-    background: rgba(16,43,34,0.04);
+    background: rgba(74,46,61, 0.04);
     color: var(--forest);
     font-family: var(--sans);
     font-size: 11px;

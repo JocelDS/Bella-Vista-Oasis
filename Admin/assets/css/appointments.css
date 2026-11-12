@@ -27,8 +27,8 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 .stat-hl {
-  background: #edf1e8;
-  border-color: rgba(163, 170, 145, 0.6);
+  background: #f3e6e2;
+  border-color: rgba(196,154,148, 0.6);
 }
 .stat-hl .stat-ico {
   background: var(--white);
@@ -76,7 +76,7 @@
   color: var(--cream);
 }
 .tab.is-active .count {
-  background: rgba(245, 242, 234, 0.16);
+  background: rgba(250,245,240, 0.16);
   color: var(--cream);
 }
 
@@ -97,7 +97,7 @@
 }
 .ctl:focus {
   border-color: var(--sage);
-  box-shadow: 0 0 0 3px rgba(163, 170, 145, 0.25);
+  box-shadow: 0 0 0 3px rgba(196,154,148, 0.25);
 }
 .ctl-sm {
   padding: 6px 8px;
@@ -192,7 +192,7 @@
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 14px 40px rgba(16, 43, 34, 0.16);
+  box-shadow: 0 14px 40px rgba(74,46,61, 0.16);
 }
 .row-menu-pop .dd-item {
   font-size: 13px;

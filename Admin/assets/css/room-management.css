@@ -76,7 +76,7 @@
 }
 .field textarea:focus {
   border-color: var(--sage);
-  box-shadow: 0 0 0 3px rgba(163, 170, 145, 0.25);
+  box-shadow: 0 0 0 3px rgba(196,154,148, 0.25);
 }
 .modal-xl {
   max-width: 760px;
@@ -91,7 +91,7 @@
 .rm-note {
   margin: -6px 0 16px;
   padding: 10px 14px;
-  background: #f3f0e6;
+  background: #f4ece7;
   border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 12.5px;
@@ -120,12 +120,12 @@
   min-width: 0;
 }
 .room-card.rc-cleaning {
-  background: #fbf8ef;
-  border-color: rgba(196, 181, 141, 0.6);
+  background: #fbf5ec;
+  border-color: rgba(200,157,102, 0.6);
 }
 .room-card.rc-maintenance {
-  background: #fbf4f2;
-  border-color: rgba(178, 107, 94, 0.35);
+  background: #fbf1ef;
+  border-color: rgba(179,38,30, 0.35);
 }
 .rc-head {
   display: flex;
@@ -158,7 +158,7 @@
 }
 .rc-cond {
   padding: 12px 14px;
-  background: #f3f0e6;
+  background: #f4ece7;
   border: 1px solid var(--border);
   border-radius: 12px;
   display: grid;
@@ -214,28 +214,28 @@
   white-space: nowrap;
 }
 .cb-ok {
-  background: rgba(163, 170, 145, 0.28);
-  color: #3f5a39;
+  background: rgba(196,154,148, 0.28);
+  color: #5a3a4b;
 }
 .cb-low {
-  background: rgba(196, 181, 141, 0.3);
-  color: #7a6a3e;
+  background: rgba(200,157,102, 0.3);
+  color: #6e5122;
 }
 .cb-high {
-  background: rgba(178, 107, 94, 0.16);
-  color: #8e4b3f;
+  background: rgba(179,38,30, 0.16);
+  color: #9b2226;
 }
 .mb-scheduled {
-  background: #eceae3;
+  background: #efe8e3;
   color: var(--gray);
 }
 .mb-in_progress {
-  background: rgba(196, 181, 141, 0.3);
-  color: #7a6a3e;
+  background: rgba(200,157,102, 0.3);
+  color: #6e5122;
 }
 .mb-completed {
-  background: rgba(163, 170, 145, 0.28);
-  color: #3f5a39;
+  background: rgba(196,154,148, 0.28);
+  color: #5a3a4b;
 }
 .rc-details {
   display: grid;
@@ -268,8 +268,8 @@
 .rc-warn {
   padding: 8px 12px;
   border-radius: 10px;
-  background: rgba(178, 107, 94, 0.1);
-  color: #8e4b3f;
+  background: rgba(179,38,30, 0.1);
+  color: #9b2226;
   font-size: 12px;
   font-weight: 500;
 }
@@ -296,13 +296,13 @@
   gap: 10px;
   align-content: start;
   padding: 16px;
-  background: #f8f6ee;
+  background: #f8f1ec;
   border: 1px solid var(--border);
   border-radius: 12px;
 }
 .clim-card.is-warn {
-  border-color: rgba(178, 107, 94, 0.4);
-  background: #fbf4f2;
+  border-color: rgba(179,38,30, 0.4);
+  background: #fbf1ef;
 }
 .clim-head {
   display: flex;
@@ -386,7 +386,7 @@
 }
 .log-item {
   padding: 14px 16px;
-  background: #f8f6ee;
+  background: #f8f1ec;
   border: 1px solid var(--border);
   border-radius: 12px;
   display: grid;

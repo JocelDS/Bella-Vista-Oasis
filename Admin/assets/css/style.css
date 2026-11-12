@@ -1,12 +1,12 @@
 :root {
-  --forest: #102b22;
-  --dark: #0d251e;
-  --cream: #f5f2ea;
+  --forest: #4a2e3d;
+  --dark: #33202b;
+  --cream: #faf5f0;
   --white: #ffffff;
-  --muted: #85877f;
-  --border: #e5e2da;
-  --gold: #c9b078;
-  --danger: #9b2c2c;
+  --muted: #8b8185;
+  --border: #e8ddd6;
+  --gold: #c89d66;
+  --danger: #b3261e;
   --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -42,7 +42,7 @@ textarea {
   font: inherit;
 }
 :focus-visible {
-  outline: 2px solid rgba(201, 176, 120, 0.9);
+  outline: 2px solid rgba(200,157,102, 0.9);
   outline-offset: 2px;
 }
 .label-small {
@@ -92,7 +92,7 @@ textarea {
 .btn-ghost {
   background: transparent;
   color: var(--cream);
-  border: 1px solid rgba(245, 242, 234, 0.4);
+  border: 1px solid rgba(250,245,240, 0.4);
   padding: 7px 14px;
   border-radius: 4px;
   cursor: pointer;
@@ -100,7 +100,7 @@ textarea {
   font-size: 12px;
 }
 .btn-ghost:hover {
-  background: rgba(245, 242, 234, 0.1);
+  background: rgba(250,245,240, 0.1);
 }
 .admin-main {
   flex: 1;
@@ -152,9 +152,9 @@ textarea {
   background:
     linear-gradient(
       180deg,
-      rgba(13, 37, 30, 0.55) 0%,
-      rgba(13, 37, 30, 0.35) 45%,
-      rgba(13, 37, 30, 0.85) 100%
+      rgba(51,32,43, 0.55) 0%,
+      rgba(51,32,43, 0.35) 45%,
+      rgba(51,32,43, 0.85) 100%
     ),
     url("../images/spa-background.jpg") center/cover no-repeat,
     var(--dark);
@@ -177,7 +177,7 @@ textarea {
   width: 48px;
   height: 48px;
   border-radius: 10px;
-  border: 1px solid rgba(201, 176, 120, 0.5);
+  border: 1px solid rgba(200,157,102, 0.5);
 }
 .gold {
   color: var(--gold);
@@ -202,7 +202,7 @@ textarea {
   margin: 0;
   font-size: 13px;
   line-height: 1.7;
-  color: rgba(245, 242, 234, 0.78);
+  color: rgba(250,245,240, 0.78);
 }
 
 /* Right form panel (42%) */
@@ -249,7 +249,7 @@ label {
   align-items: baseline;
 }
 .req {
-  color: #b33a3a;
+  color: #b3261e;
 }
 .link-small {
   font-size: 11px;
@@ -273,7 +273,7 @@ label {
 }
 .input:focus-within {
   border-color: var(--forest);
-  box-shadow: 0 0 0 3px rgba(16, 43, 34, 0.1);
+  box-shadow: 0 0 0 3px rgba(74,46,61, 0.1);
 }
 .input .ico {
   width: 16px;
@@ -294,7 +294,7 @@ label {
   min-width: 0;
 }
 .input input::placeholder {
-  color: #b5b6ae;
+  color: #b9afab;
 }
 .toggle-pw {
   border: 0;
@@ -413,9 +413,9 @@ label {
   border: 1px solid #ebc4c4;
 }
 .alert-ok {
-  background: #eaf3ee;
-  color: #1d4b38;
-  border: 1px solid #c5ddcf;
+  background: #f3e7e4;
+  color: #4a2e3d;
+  border: 1px solid #e2c7c1;
 }
 .alert-dev {
   background: #fff8e6;
