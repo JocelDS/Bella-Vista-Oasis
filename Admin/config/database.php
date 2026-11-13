@@ -12,7 +12,7 @@ define('MAX_ATTEMPTS', 5);
 define('LOCK_MINUTES', 15);
 define('RESET_TOKEN_MINUTES', 60);
 define('REMEMBER_DAYS', 30);
-define('SHOW_RESET_LINK', true);            
+define('SHOW_RESET_LINK', false);            
 
 date_default_timezone_set('Asia/Manila');
 

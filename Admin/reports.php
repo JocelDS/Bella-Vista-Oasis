@@ -10,9 +10,13 @@ require_once __DIR__ . '/includes/analytics-data.php';
 $pdo = db();
 $adminId = (int)($_SESSION['admin_id'] ?? 0);
 $notifications = get_notifications($pdo, $adminId);
-$selectedPeriod = analytics_normalize_period($_GET['period'] ?? '30d');
+$selectedPeriod = analytics_normalize_period($_GET['period'] ?? 'today');
 $startFilter = analytics_normalize_date($_GET['start'] ?? null);
 $endFilter = analytics_normalize_date($_GET['end'] ?? null);
+
+$todayDate = date('Y-m-d');
+$dailyDay = analytics_normalize_date($_GET['day'] ?? null) ?? $todayDate;
+$daily = analytics_daily_report($pdo, $dailyDay);
 
 $range = analytics_period($selectedPeriod, $startFilter, $endFilter);
 $summary = analytics_summary($pdo, $range['start'], $range['end'], $range['prevStart'], $range['prevEnd']);
@@ -44,6 +48,86 @@ require __DIR__ . '/includes/header.php';
             <?php endforeach; ?>
         </div>
     </div>
+</section>
+
+<section class="daily-report" aria-labelledby="dailyTitle">
+    <form method="get" action="<?= e(url('/reports.php')) ?>" class="report-toolbar">
+        <input type="hidden" name="period" value="<?= e($selectedPeriod) ?>">
+        <?php if ($selectedPeriod === 'custom'): ?>
+            <input type="hidden" name="start" value="<?= e($range['start']) ?>">
+            <input type="hidden" name="end" value="<?= e($range['end']) ?>">
+        <?php endif; ?>
+        <div class="range-inline">
+            <div class="report-period">
+                <span class="label-small">Daily report</span>
+                <strong id="dailyTitle"><?= e($daily['label']) ?><?= $dailyDay === $todayDate ? ' · Today' : '' ?></strong>
+            </div>
+            <div class="date-pickers">
+                <label>
+                    <span>Report date</span>
+                    <input type="date" name="day" value="<?= e($dailyDay) ?>">
+                </label>
+            </div>
+            <div class="report-actions">
+                <button type="submit" class="btn btn-primary"><?= icon('refresh') ?><span>View Day</span></button>
+                <?php if ($dailyDay !== $todayDate): ?>
+                    <a href="<?= e(url('/reports.php')) ?>?period=<?= e($selectedPeriod) ?>" class="btn btn-soft">Back to Today</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </form>
+
+    <div class="summary-grid" aria-label="Daily summary">
+        <article class="summary-card card-appointments">
+            <div class="summary-top"><span class="label-small">Total Bookings</span><span class="summary-icon">⌁</span></div>
+            <p class="summary-value"><?= number_format($daily['total']) ?></p>
+            <p class="summary-meta"><?= (int)$daily['active'] ?> active · <?= (int)$daily['counts']['cancelled'] ?> cancelled · <?= (int)$daily['counts']['no_show'] ?> no-show</p>
+        </article>
+        <article class="summary-card card-utilization">
+            <div class="summary-top"><span class="label-small">Active Therapists</span><span class="summary-icon">◎</span></div>
+            <p class="summary-value"><?= number_format(count($daily['therapists'])) ?></p>
+            <p class="summary-meta"><?= $daily['unassigned'] > 0 ? (int)$daily['unassigned'] . ' booking(s) still without a therapist' : 'Every active booking has a therapist' ?></p>
+        </article>
+        <article class="summary-card card-revenue">
+            <div class="summary-top"><span class="label-small">Total Revenue</span><span class="summary-icon">₱</span></div>
+            <p class="summary-value"><?= e(peso($daily['revenue'])) ?></p>
+            <p class="summary-meta">Paid <?= e(peso($daily['paid'])) ?> + downpayments <?= e(peso($daily['down'])) ?></p>
+        </article>
+    </div>
+
+    <article class="card data-card">
+        <div class="card-head">
+            <div>
+                <p class="label-small">Active therapist schedules</p>
+                <h2 class="card-title">Sessions by therapist</h2>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Therapist</th><th>Time</th><th>Service</th><th>Suite</th><th>Guest</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    <?php if ($daily['therapists']): ?>
+                        <?php foreach ($daily['therapists'] as $th): ?>
+                            <?php foreach ($th['sessions'] as $i => $s): ?>
+                                <tr>
+                                    <td><?php if ($i === 0): ?><strong><?= e($th['name']) ?></strong><br><span class="label-small"><?= e($th['specialization']) ?> · <?= count($th['sessions']) ?> session<?= count($th['sessions']) === 1 ? '' : 's' ?></span><?php endif; ?></td>
+                                    <td><?= e($s['time']) ?></td>
+                                    <td><?= e($s['service']) ?></td>
+                                    <td><?= e($s['room']) ?></td>
+                                    <td><?= e($s['customer']) ?></td>
+                                    <td><?= e($s['status']) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr><td colspan="6" class="empty-cell">No therapist sessions are scheduled for this day.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </article>
 </section>
 
 <form id="periodForm" method="get" action="<?= e(url('/reports.php')) ?>" class="report-toolbar">

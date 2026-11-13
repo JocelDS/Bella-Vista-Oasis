@@ -1,12 +1,79 @@
 <?php
 declare(strict_types=1);
 
+function analytics_daily_report(PDO $pdo, string $day): array
+{
+    $stmt = $pdo->prepare('SELECT appointment_status, COUNT(*) AS c FROM appointments WHERE appointment_date = ? GROUP BY appointment_status');
+    $stmt->execute([$day]);
+    $counts = ['pending' => 0, 'confirmed' => 0, 'completed' => 0, 'cancelled' => 0, 'no_show' => 0];
+    foreach ($stmt->fetchAll() as $r) {
+        $counts[(string)$r['appointment_status']] = (int)$r['c'];
+    }
+    $total  = array_sum($counts);
+    $active = $counts['pending'] + $counts['confirmed'] + $counts['completed'];
+
+    $stmt = $pdo->prepare("SELECT COALESCE(SUM(p.amount), 0) FROM payments p JOIN appointments a ON a.id = p.appointment_id WHERE p.payment_status = 'paid' AND a.appointment_date = ?");
+    $stmt->execute([$day]);
+    $paid = (float)$stmt->fetchColumn();
+
+    $stmt = $pdo->prepare(
+        "SELECT COALESCE(SUM(downpayment_amount), 0) FROM appointments
+         WHERE appointment_date = ? AND payment_status = 'deposit' AND downpayment_amount > 0
+           AND (appointment_status IN ('pending', 'confirmed', 'completed') OR cancellation_forfeited = 1)"
+    );
+    $stmt->execute([$day]);
+    $down = (float)$stmt->fetchColumn();
+
+    $stmt = $pdo->prepare(
+        "SELECT a.id, a.start_time, a.end_time, a.appointment_status, t.id AS tid, t.full_name AS therapist, t.specialization,
+                s.service_name, r.room_name, c.full_name AS customer
+         FROM appointments a
+         JOIN therapists t ON t.id = a.therapist_id
+         LEFT JOIN services s ON s.id = a.service_id
+         LEFT JOIN rooms r ON r.id = a.room_id
+         LEFT JOIN customers c ON c.id = a.customer_id
+         WHERE a.appointment_date = ? AND a.appointment_status IN ('pending', 'confirmed', 'completed')
+         ORDER BY t.full_name ASC, a.start_time ASC"
+    );
+    $stmt->execute([$day]);
+    $therapists = [];
+    foreach ($stmt->fetchAll() as $r) {
+        $tid = (int)$r['tid'];
+        if (!isset($therapists[$tid])) {
+            $therapists[$tid] = ['name' => (string)$r['therapist'], 'specialization' => (string)$r['specialization'], 'sessions' => []];
+        }
+        $therapists[$tid]['sessions'][] = [
+            'time'     => date('g:i A', strtotime((string)$r['start_time'])) . ' – ' . date('g:i A', strtotime((string)$r['end_time'])),
+            'service'  => (string)($r['service_name'] ?? '—'),
+            'room'     => (string)($r['room_name'] ?? '—'),
+            'customer' => (string)($r['customer'] ?? '—'),
+            'status'   => ucfirst(str_replace('_', ' ', (string)$r['appointment_status'])),
+        ];
+    }
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM appointments WHERE appointment_date = ? AND therapist_id IS NULL AND appointment_status IN ('pending', 'confirmed')");
+    $stmt->execute([$day]);
+
+    return [
+        'day'        => $day,
+        'label'      => date('l, F j, Y', strtotime($day)),
+        'total'      => $total,
+        'active'     => $active,
+        'counts'     => $counts,
+        'paid'       => $paid,
+        'down'       => $down,
+        'revenue'    => $paid + $down,
+        'therapists' => array_values($therapists),
+        'unassigned' => (int)$stmt->fetchColumn(),
+    ];
+}
+
 function analytics_normalize_period(?string $period): string
 {
     $allowed = ['today', '7d', '30d', 'month', 'custom'];
-    $value = trim((string)($period ?? '30d'));
+    $value = trim((string)($period ?? 'today'));
 
-    return in_array($value, $allowed, true) ? $value : '30d';
+    return in_array($value, $allowed, true) ? $value : 'today';
 }
 
 function analytics_normalize_date(?string $value): ?string

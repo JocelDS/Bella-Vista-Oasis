@@ -1,91 +1,63 @@
 # Bella Vista Oasis Spa Management System
 
-A web-based spa management system designed to streamline daily operations, improve customer service, and simplify spa administration.
+Admin portal for Bella Vista Oasis Spa (school final project). PHP 8, PDO, MySQL, vanilla JavaScript. Runs on localhost with XAMPP.
 
-## Project Overview
+The spa is open daily, Monday to Sunday, 1:00 PM to 9:00 PM. Only the Admin side is built; `customer/` is a placeholder page.
 
-Bella Vista Oasis is a web-based management system developed to help organize and manage spa operations through a centralized platform. It provides administrative tools for handling appointments, customers, therapists, rooms, memberships, and other spa-related activities.
+## Setup (XAMPP)
 
-## Features
+1. Install XAMPP with PHP 8 or newer and start **Apache** and **MySQL**.
+2. Copy the project folder into `C:\xampp\htdocs\` and name it exactly `bella-vista-oasis` (lowercase, the URLs below depend on it).
+3. Open http://localhost/phpmyadmin, create a database named `bella_vista_oasis` (collation `utf8mb4_unicode_ci`).
+4. Select that database, open **Import**, choose `bella_vista_oasis.sql` and click **Import**.
+5. Database settings are in `Admin/config/database.php` (default: host `localhost`, user `root`, empty password). Change them only if your MySQL differs.
+6. Open http://localhost/bella-vista-oasis/admin/
 
-- **Admin Dashboard** – Overview of spa operations and activities.
-- **Appointment Management** – Manage and monitor customer appointments.
-- **Customer Management** – Organize and maintain customer records.
-- **Therapist Assignment** – Manage therapists and appointment assignments.
-- **Room Management** – Monitor room availability and assignments.
-- **QR Code Check-in** – Support digital customer check-in.
-- **Membership and Loyalty Rewards** – Manage memberships and customer rewards.
-- **Analytics and Reports** – Monitor and review spa operations.
-- **System Settings** – Manage system configurations.
+## Admin login
 
-## Technologies Used
+- URL: http://localhost/bella-vista-oasis/admin/auth/login.php
+- Email: `director.wellness@bellavista-oasis.com`
+- Password: the account password stored in the imported database. If you do not know it, run this in phpMyAdmin (SQL tab) to set it to `BellaVista@2026`:
 
-- PHP
-- MySQL
-- HTML5
-- CSS3
-- JavaScript
-- XAMPP
-
-## Installation Guide
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/JocelDS/Bella-Vista-Oasis.git
+```sql
+UPDATE administrators SET password = '$2y$12$nM2pr3FGXIsZq4Xbfx9HQOMb9C9nsYBdyftlzTSAsUIadZ30vo2G2' WHERE id = 1;
+DELETE FROM login_attempts;
 ```
 
-### 2. Move the Project
+After 5 failed logins an account is locked for 15 minutes; the second statement clears that.
 
-Place the project folder inside:
+## Main pages
 
-```text
-C:\xampp\htdocs\
-```
+| Page | URL (after /bella-vista-oasis/admin/) |
+| --- | --- |
+| Dashboard | dashboard.php |
+| Appointments | appointments.php |
+| Appointment Calendar | appointment-calendar.php |
+| Customers | customers.php |
+| Therapist Assignment | therapist-assignment.php |
+| Room Management | room-management.php |
+| QR Check-in | qr-checkin.php |
+| Memberships & Loyalty | memberships.php |
+| Reports (daily report first) | reports.php |
+| Analytics | analytics.php |
+| Settings (hours, rates, blocked dates) | settings.php |
 
-### 3. Start XAMPP
+## Services, rooms and rates
 
-Start Apache and MySQL from the XAMPP Control Panel.
+| Service | Rooms | Capacity | Rate |
+| --- | --- | --- | --- |
+| Single Room Massage | SR-1, SR-2, SR-3 | 1 | PHP 800 / 1 hour |
+| Couples Suite | CS-1, CS-2 | 2 | PHP 1,800 / 1 hour |
+| Barkada / Family Spa Lounge | FL-1, FL-2 | 4 (max 6) | PHP 4,000 / 1.5 hours, plus PHP 750 per extra person beyond 4 |
 
-### 4. Import the Database
+## Main features
 
-1. Open http://localhost/phpmyadmin
-2. Create a database named `bella_vista_oasis`.
-3. Import the `bella_vista_oasis.sql` file included in the project.
-
-### 5. Configure Database Connection
-
-Check the database connection settings in the PHP configuration files and make sure they match your local MySQL credentials.
-
-### 6. Run the System
-
-Open your browser:
-
-```text
-http://localhost/Bella-Vista-Oasis/
-```
-
-## Project Structure
-
-```text
-Bella-Vista-Oasis/
-│
-├── Admin/
-├── customer/
-├── bella_vista_oasis.sql
-├── index.php
-└── README.md
-```
-
-## Project Purpose
-
-This project aims to provide a centralized and efficient solution for managing spa operations while applying web development and database management technologies.
-
-## Repository
-
-GitHub: https://github.com/JocelDS/Bella-Vista-Oasis
-
----
-
-**Bella Vista Oasis Spa Management System**  
-*Simplifying Spa Operations. Enhancing Customer Experience.*
+- Booking rules enforced on every booking path: operating hours, blocked and closed dates, fixed start-time grid, room must match the service, guest capacity, server-computed total with the extra-person fee, and an automatic 30-minute cleaning gap between sessions in the same room.
+- Date picker that disables unavailable dates (past, closed, blocked, fully booked, maintenance) and explains why.
+- Time slot picker showing only valid free start times for the chosen service, date and room.
+- Health declaration (medical conditions, injuries, pregnancy) required on every booking, with a pregnancy badge.
+- Policies: 6-hour cancellation and reschedule notice (late cancellation forfeits the downpayment), downpayment and balance tracking, late-arrival handling at QR check-in with a 15-minute arrival reminder.
+- Appointment Calendar with real-time room bookings, In Session status and cleaning-gap blocks for all 7 rooms.
+- Therapist Assignment for bookings without a therapist, limited to therapists who are on shift, not on leave and not double-booked, with an assignment log.
+- Daily Report: bookings for the day, active therapist schedules, and total revenue (paid payments plus downpayments).
+- Customer management, room management, memberships and rewards, analytics and settings.

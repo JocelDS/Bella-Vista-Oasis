@@ -300,8 +300,9 @@ function rm_schedule(PDO $pdo, int $roomId): array
             'status'    => ucfirst(str_replace('_', ' ', $st)),
         ];
     }
-    $wins = [];
-    foreach (cal_free_windows($busy, CAL_OPEN_HOUR * 60, CAL_CLOSE_HOUR * 60, spa_cleaning_gap($pdo), 30) as [$a, $b]) {
+    $wins  = [];
+    $hours = cal_hours($pdo, $today);
+    foreach (cal_free_windows($busy, $hours[0], $hours[1], spa_cleaning_gap($pdo), 30) as [$a, $b]) {
         $wins[] = cal_time_label($a) . ' – ' . cal_time_label($b);
     }
     return ['items' => $items, 'free_today' => $wins];

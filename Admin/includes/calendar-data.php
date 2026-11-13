@@ -3,9 +3,32 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/appointments-data.php';
 
-const CAL_OPEN_HOUR  = 9;
-const CAL_CLOSE_HOUR = 21;
 const CAL_VIEWS      = ['multi', 'day', 'week'];
+
+function cal_hours(PDO $pdo, ?string $date = null): array
+{
+    $open  = 13 * 60;
+    $close = 21 * 60;
+    try {
+        $row = false;
+        if ($date !== null) {
+            $stmt = $pdo->prepare('SELECT opening_time AS o, closing_time AS c FROM spa_operating_hours WHERE day_of_week = ? AND is_open = 1 LIMIT 1');
+            $stmt->execute([(int)date('N', strtotime($date))]);
+            $row = $stmt->fetch();
+        }
+        if (!$row) {
+            $row = $pdo->query('SELECT MIN(opening_time) AS o, MAX(closing_time) AS c FROM spa_operating_hours WHERE is_open = 1')->fetch();
+        }
+        if ($row && $row['o'] !== null && $row['c'] !== null) {
+            $open  = appt_minutes((string)$row['o']);
+            $close = appt_minutes((string)$row['c']);
+        }
+    } catch (Throwable $e) {
+        $open  = 13 * 60;
+        $close = 21 * 60;
+    }
+    return [$open, $close];
+}
 
 function cal_params(array $src): array
 {
@@ -270,8 +293,7 @@ function cal_fetch(PDO $pdo, array $p): array
 
     $items = cal_load_items($pdo, $p, $from, $to, $today, $nowMin);
 
-    $open  = CAL_OPEN_HOUR * 60;
-    $close = CAL_CLOSE_HOUR * 60;
+    [$open, $close] = cal_hours($pdo, $p['view'] === 'week' ? null : $p['date']);
     $axisStart = $open;
     $axisEnd   = $close;
     foreach ($items as $it) {
