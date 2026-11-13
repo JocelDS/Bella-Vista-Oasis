@@ -252,6 +252,13 @@
         if (action === 'view') { openDetail(id); return; }
         if (action === 'edit') { openEdit(id); return; }
         var def = ACTIONS[action];
+        if (action === 'cancel') {
+            post('/appointment-action.php', { action: 'cancel_preview', id: String(id) }).then(function (d) {
+                if (!d.ok) { toast(d.error || 'Action failed.'); return; }
+                askConfirm(d.late ? 'Late cancellation' : def.title, d.message + ' Cancel this appointment?', def.button, function () { runAction(action, id); });
+            }).catch(function () { toast('Network error. Please try again.'); });
+            return;
+        }
         askConfirm(def.title, def.text, def.button, function () { runAction(action, id); });
     }
 
@@ -294,6 +301,22 @@
     window.addEventListener('resize', hideMenu);
     window.addEventListener('scroll', hideMenu, true);
 
+    (function () {
+        var pay = document.getElementById('ap_pay');
+        var wrap = document.getElementById('apDownWrap');
+        var down = document.getElementById('ap_down');
+        if (!pay || !wrap || !down) { return; }
+        function sync() {
+            var on = pay.value === 'deposit';
+            wrap.hidden = !on;
+            down.required = on;
+            if (!on) { down.value = ''; }
+        }
+        pay.addEventListener('change', sync);
+        if (pay.form) { pay.form.addEventListener('reset', function () { setTimeout(sync, 0); }); }
+        sync();
+    }());
+
     var detailModal = $('#detailModal');
     function dtItem(dl, label, value, sub) {
         var wrap = el('div');
@@ -328,6 +351,8 @@
             dtItem(dl, 'Room', a.room_name);
             dtItem(dl, 'Total Amount', a.total_label);
             dtItem(dl, 'Amount Received', a.paid_label);
+            dtItem(dl, 'Downpayment', a.downpayment_label, a.forfeited ? 'Forfeited (late cancellation or reschedule)' : '');
+            dtItem(dl, 'Balance Due', a.balance_label);
             box.appendChild(dl);
 
             box.appendChild(el('p', 'detail-h', 'Payment Records'));
@@ -432,6 +457,8 @@
             fEnd.value = a.end;
             fAmount.value = a.total;
             $('#ap_pay').value = a.payment_status === 'refunded' ? 'pending' : a.payment_status;
+            $('#ap_pay').dispatchEvent(new Event('change'));
+            $('#ap_down').value = a.payment_status === 'deposit' ? a.downpayment : '';
             $('#ap_status').value = a.status;
             $('#apptModalKicker').textContent = 'Appointment #' + a.code;
             $('#apptModalTitle').textContent = 'Edit Appointment';
@@ -445,15 +472,28 @@
         var missing = $$('select[required], input[required], textarea[required]', form).some(function (f) { return !f.value; });
         if (missing) { showErr('Please complete every required field.'); return; }
 
+        save(false);
+    });
+
+    function save(confirmLate) {
         submitBtn.disabled = true;
-        api('/appointment-action.php', { method: 'POST', body: new FormData(form) }).then(function (d) {
-            if (!d.ok) { showErr(d.error || 'Unable to save the appointment.'); return; }
+        var fd = new FormData(form);
+        if (confirmLate) { fd.append('confirm_late', '1'); }
+        api('/appointment-action.php', { method: 'POST', body: fd }).then(function (d) {
+            if (!d.ok) {
+                if (d.code === 'late_notice') {
+                    askConfirm('Late reschedule', d.error, 'Reschedule anyway', function () { save(true); });
+                    return;
+                }
+                showErr(d.error || 'Unable to save the appointment.');
+                return;
+            }
             closeModal(apptModal);
             toast(d.message || 'Appointment saved.');
             load();
         }).catch(function () { showErr('Network error. Please try again.'); })
             .then(function () { submitBtn.disabled = false; });
-    });
+    }
 
     var availModal = $('#availModal');
     var availDate = $('#availDate');

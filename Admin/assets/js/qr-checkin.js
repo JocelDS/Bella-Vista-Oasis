@@ -488,6 +488,14 @@
         box.appendChild(document.createTextNode(res.message));
         spotBody.appendChild(box);
 
+        var lt = c && c.late;
+        if (lt && c.checkin.arrival !== 'checked_in') {
+            var lb = el('div', 'qr-alert tone-warn');
+            lb.appendChild(el('strong', null, 'Late arrival: ' + lt.late_label + ' late'));
+            lb.appendChild(document.createTextNode('The session will be shortened to ' + lt.session_label + ' and still ends at ' + lt.end_label + ', so the next booking is not affected.'));
+            spotBody.appendChild(lb);
+        }
+
         /* actions */
         var identity = null;
         if (res.can_manual && !res.can_confirm) {
@@ -533,7 +541,10 @@
             ['Checked In At', k.checked_in_at],
             ['Processed By', k.checked_in_by || '—'],
             ['Session', a.start_label + ' – ' + a.end_label]
-        ], 'is-verif'));
+        ].concat(card.late ? [
+            ['Late Arrival', card.late.late_label + ' late'],
+            ['Shortened Session', card.late.session_label, 'Ends at the original ' + card.late.end_label]
+        ] : []), 'is-verif'));
         var actions = el('div', 'qr-spot-actions');
         actions.appendChild(btn('Scan Next Guest', 'btn btn-primary', clearSpot, 'scan'));
         actions.appendChild(viewLink());

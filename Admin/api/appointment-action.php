@@ -35,6 +35,12 @@ if ($action === 'update') {
     }
     action_out(appt_save($pdo, $_POST, $id));
 }
+if ($action === 'cancel_preview') {
+    if ($id < 1) {
+        action_out(['ok' => false, 'error' => 'Invalid appointment.']);
+    }
+    action_out(appt_cancel_preview($pdo, $id));
+}
 if (isset(appt_transitions()[$action])) {
     if ($id < 1) {
         action_out(['ok' => false, 'error' => 'Invalid appointment.']);
@@ -42,4 +48,4 @@ if (isset(appt_transitions()[$action])) {
     action_out(appt_transition($pdo, $id, $action));
 }
 
-action_out(['ok' => false, 'error' => 'Unknown action.']); 
+action_out(['ok' => false, 'error' => 'Unknown action.']);

@@ -107,7 +107,7 @@ function rm_load(PDO $pdo): array
     $s     = rm_settings($pdo);
     $today = date('Y-m-d');
     $now   = cal_now_minutes();
-    $gap   = ROOM_GAP_MINUTES;
+    $gap   = spa_cleaning_gap($pdo);
 
     $rooms = $pdo->query(
         'SELECT r.id, r.room_name, r.room_type, r.room_status, r.description, d.amenities, d.maximum_capacity
@@ -301,7 +301,7 @@ function rm_schedule(PDO $pdo, int $roomId): array
         ];
     }
     $wins = [];
-    foreach (cal_free_windows($busy, CAL_OPEN_HOUR * 60, CAL_CLOSE_HOUR * 60, ROOM_GAP_MINUTES, 30) as [$a, $b]) {
+    foreach (cal_free_windows($busy, CAL_OPEN_HOUR * 60, CAL_CLOSE_HOUR * 60, spa_cleaning_gap($pdo), 30) as [$a, $b]) {
         $wins[] = cal_time_label($a) . ' – ' . cal_time_label($b);
     }
     return ['items' => $items, 'free_today' => $wins];

@@ -81,6 +81,27 @@ function qr_dur(int $min): string
     return $h . ' hr' . ($m ? ' ' . $m . ' min' : '');
 }
 
+function qr_late_info(array $a, ?string $checkedInAt, DateTimeImmutable $now): ?array
+{
+    if ($checkedInAt === null && (string)$a['appointment_date'] !== $now->format('Y-m-d')) {
+        return null;
+    }
+    $ref   = $checkedInAt !== null ? new DateTimeImmutable($checkedInAt) : $now;
+    $start = qr_dt((string)$a['appointment_date'], (string)$a['start_time']);
+    $late  = intdiv($ref->getTimestamp() - $start->getTimestamp(), 60);
+    if ($late < 1) {
+        return null;
+    }
+    $session = max(0, (int)$a['duration'] - $late);
+    return [
+        'minutes'         => $late,
+        'session_minutes' => $session,
+        'late_label'      => qr_dur($late),
+        'session_label'   => qr_dur($session),
+        'end_label'       => appt_time_label((string)$a['end_time']),
+    ];
+}
+
 function qr_ts_label(?string $ts): string
 {
     $t = $ts ? strtotime($ts) : false;
@@ -452,6 +473,7 @@ function qr_card(array $a, array $state): array
             'checked_in_by'      => $state['checked_in_by'],
             'verified_at'        => qr_ts_label($state['verified_at'] ?: null),
         ],
+        'late'     => qr_late_info($a, $state['checked_in_at'] ?: null, qr_now()),
         'window'   => $elig['window'],
         'eligible' => $elig['ok'] && $state['arrival'] !== 'checked_in',
         'block'    => ($elig['ok'] || $state['arrival'] === 'checked_in') ? null : ['code' => $elig['code'], 'message' => $elig['message']],
@@ -837,6 +859,10 @@ function qr_confirm(PDO $pdo, string $raw, int $adminId, bool $ackWindow): array
         }
 
         $note = $elig['window']['state'] === 'ok' ? '' : ' (' . strtolower($elig['window']['state']) . ' arrival acknowledged by staff)';
+        $lateInfo = qr_late_info($a, $stamp, $now);
+        if ($lateInfo) {
+            $note .= ' — ' . $lateInfo['late_label'] . ' late; session shortened to ' . $lateInfo['session_label'] . ', still ending at ' . $lateInfo['end_label'];
+        }
         qr_log($pdo, $apptId, 'arrival_confirmed', $code . ': guest checked in via QR scan' . $note . '.', $adminId);
         qr_notify($pdo, 'Guest checked in',
             ($a['customer_name'] ?? 'A guest') . ' checked in for ' . ($a['service_name'] ?? 'their treatment')
@@ -861,9 +887,11 @@ function qr_after_checkin(PDO $pdo, int $apptId, array $s): array
     $a     = qr_appt($pdo, $apptId);
     $rows  = qr_rows($pdo, [$apptId]);
     $state = qr_state($a, $rows[$apptId] ?? [], $s, $now);
+    $late = qr_late_info($a, $state['checked_in_at'] ?: null, $now);
     return [
         'ok'      => true,
-        'message' => ($a['customer_name'] ?? 'Guest') . ' is checked in.',
+        'message' => ($a['customer_name'] ?? 'Guest') . ' is checked in.'
+            . ($late ? ' Arrived ' . $late['late_label'] . ' late: session shortened to ' . $late['session_label'] . ', still ending at ' . $late['end_label'] . '.' : ''),
         'card'    => qr_card($a, $state),
     ];
 }
@@ -1012,6 +1040,10 @@ function qr_manual_confirm(PDO $pdo, int $apptId, int $adminId, bool $identityOk
         )->execute([$apptId, $stamp, $adminId, $adminId, $stamp, $stamp]);
 
         $note = $elig['window']['state'] === 'ok' ? '' : ' (' . strtolower($elig['window']['state']) . ' arrival acknowledged by staff)';
+        $lateInfo = qr_late_info($a, $stamp, $now);
+        if ($lateInfo) {
+            $note .= ' — ' . $lateInfo['late_label'] . ' late; session shortened to ' . $lateInfo['session_label'] . ', still ending at ' . $lateInfo['end_label'];
+        }
         qr_log($pdo, $apptId, 'manual_checkin', $code . ': guest checked in manually after identity check' . $note . '.', $adminId);
         qr_notify($pdo, 'Guest checked in (manual)',
             ($a['customer_name'] ?? 'A guest') . ' was checked in manually for ' . ($a['service_name'] ?? 'their treatment')

@@ -69,6 +69,62 @@ function bk_grid(int $openMin, int $closeMin, int $duration, int $gap): array
     return $starts;
 }
 
+function bk_notice(PDO $pdo, string $date, string $start): array
+{
+    $hours = 6;
+    try {
+        $stmt = $pdo->prepare("SELECT setting_value FROM spa_configuration WHERE setting_key = 'cancellation_notice_hours' LIMIT 1");
+        $stmt->execute();
+        $v = $stmt->fetchColumn();
+        if ($v !== false && ctype_digit((string)$v)) {
+            $hours = (int)$v;
+        }
+    } catch (Throwable $e) {
+        $hours = 6;
+    }
+    $ts   = strtotime($date . ' ' . substr($start, 0, 8));
+    $left = $ts === false ? 0.0 : ($ts - time()) / 3600;
+    return ['hours' => $hours, 'hours_left' => $left, 'late' => $left < $hours];
+}
+
+function bk_cancel_policy(PDO $pdo, array $a): array
+{
+    $n    = bk_notice($pdo, (string)$a['appointment_date'], (string)$a['start_time']);
+    $down = (float)($a['downpayment_amount'] ?? 0);
+    $ps   = (string)($a['payment_status'] ?? 'pending');
+    if ($n['late']) {
+        return [
+            'late'    => true,
+            'refund'  => false,
+            'message' => 'Late cancellation: less than ' . $n['hours'] . ' hours before the appointment. '
+                . ($down > 0 ? 'The downpayment of ' . peso($down) . ' is forfeited and will not be refunded.' : 'No downpayment is on file to forfeit.'),
+        ];
+    }
+    $received = in_array($ps, ['deposit', 'paid'], true);
+    return [
+        'late'    => false,
+        'refund'  => $received,
+        'message' => 'Cancellation with enough notice (' . $n['hours'] . ' hours or more). '
+            . ($received ? 'The payment received will be marked as refunded.' : 'No payment has been received, so nothing needs refunding.'),
+    ];
+}
+
+function bk_resched_policy(PDO $pdo, array $a): array
+{
+    $n    = bk_notice($pdo, (string)$a['appointment_date'], (string)$a['start_time']);
+    $down = (float)($a['downpayment_amount'] ?? 0);
+    if (!$n['late']) {
+        return ['late' => false, 'forfeit' => false, 'message' => ''];
+    }
+    return [
+        'late'    => true,
+        'forfeit' => $down > 0,
+        'message' => 'Late reschedule: the appointment starts in less than ' . $n['hours'] . ' hours. '
+            . ($down > 0 ? 'Moving it forfeits the downpayment of ' . peso($down) . '.' : 'No downpayment is on file.')
+            . ' Reschedule anyway?',
+    ];
+}
+
 function bk_health(array $in): array
 {
     $fail = static fn(string $m): array => ['ok' => false, 'error' => $m];

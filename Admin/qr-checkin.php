@@ -19,6 +19,16 @@ try {
     exit('Unable to load QR check-in: ' . e(get_class($e) . ': ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')'));
 }
 
+$arriveBefore = 15;
+try {
+    $v = $pdo->query("SELECT setting_value FROM spa_configuration WHERE setting_key = 'arrival_minutes_before' LIMIT 1")->fetchColumn();
+    if ($v !== false && ctype_digit((string)$v) && (int)$v > 0) {
+        $arriveBefore = (int)$v;
+    }
+} catch (Throwable $e) {
+    $arriveBefore = 15;
+}
+
 /** Icons this page needs that the shared icon set does not have. */
 function qr_ico(string $name): string
 {
@@ -199,6 +209,9 @@ require __DIR__ . '/includes/header.php';
                 Check-in opens <strong id="polEarly"><?= (int)$policy['early'] ?></strong> min before and stays open <strong id="polLate"><?= (int)$policy['late'] ?></strong> min after the start time.
                 <span id="polPending"><?= $policy['allow_pending'] ? 'Pending bookings may be checked in.' : 'Only confirmed bookings can be checked in.' ?></span>
                 Arrivals outside the window need a staff acknowledgement.
+            </p>
+            <p class="qr-policy" id="arriveText">
+                <strong>Arrival reminder:</strong> guests must arrive <strong><?= (int)$arriveBefore ?> minutes</strong> before their scheduled time. A guest who arrives after the start time gets a shortened session that still ends at the original time, so later bookings stay on schedule.
             </p>
         </section>
     </div>

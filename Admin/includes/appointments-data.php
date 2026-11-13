@@ -156,7 +156,7 @@ function appt_fetch(PDO $pdo, array $f): array
                 c.full_name AS customer_name, c.email AS customer_email, c.phone AS customer_phone,
                 s.service_name, s.duration,
                 t.full_name AS therapist_name, r.room_name,
-                COALESCE(p.paid_amount, 0) AS paid_amount, a.is_pregnant'
+                COALESCE(p.paid_amount, 0) AS paid_amount, a.is_pregnant, a.downpayment_amount'
         . APPT_FROM . ' WHERE ' . $where
         . ' ORDER BY a.appointment_date DESC, a.start_time ASC, a.id DESC LIMIT ' . $per . ' OFFSET ' . $offset
     );
@@ -242,7 +242,10 @@ function appt_render_rows(array $rows, bool $filtered): string
         $contact = (string)($r['customer_email'] ?: $r['customer_phone']);
         $actions = implode(',', appt_actions_for($st));
         $paid    = (float)$r['paid_amount'];
-        $payNote = $paid > 0 ? 'Received ' . peso($paid) : 'Total ' . peso($r['total_amount']);
+        $downAmt = (float)($r['downpayment_amount'] ?? 0);
+        $payNote = $ps === 'deposit' && $downAmt > 0
+            ? 'Down ' . peso($downAmt) . ' · Bal ' . peso(max(0, (float)$r['total_amount'] - $downAmt))
+            : ($paid > 0 ? 'Received ' . peso($paid) : 'Total ' . peso($r['total_amount']));
         $custName = (string)($r['customer_name'] ?? 'Unknown guest');
         $therapist = (string)($r['therapist_name'] ?? '—');
         ?>
@@ -318,7 +321,7 @@ function appt_detail(PDO $pdo, int $id): ?array
                 s.service_name, s.duration,
                 t.full_name AS therapist_name, r.room_name,
                 COALESCE(p.paid_amount, 0) AS paid_amount,
-                a.health_conditions, a.health_injuries, a.is_pregnant'
+                a.health_conditions, a.health_injuries, a.is_pregnant, a.downpayment_amount, a.cancellation_forfeited'
         . APPT_FROM . ' WHERE a.id = ?'
     );
     $stmt->execute([$id]);
@@ -343,6 +346,15 @@ function appt_detail(PDO $pdo, int $id): ?array
     $pmap = dash_payment_map();
     $st   = (string)$a['appointment_status'];
     $ps   = (string)$a['payment_status'];
+    $total = (float)$a['total_amount'];
+    $down  = (float)$a['downpayment_amount'];
+    if (in_array($st, ['cancelled', 'no_show'], true) || in_array($ps, ['paid', 'refunded'], true)) {
+        $balance = 0.0;
+    } elseif ($ps === 'deposit') {
+        $balance = max(0.0, $total - $down);
+    } else {
+        $balance = $total;
+    }
 
     return [
         'id'              => (int)$a['id'],
@@ -371,6 +383,10 @@ function appt_detail(PDO $pdo, int $id): ?array
         'total'           => number_format((float)$a['total_amount'], 2, '.', ''),
         'total_label'     => peso($a['total_amount']),
         'paid_label'      => peso($a['paid_amount']),
+        'downpayment'     => number_format($down, 2, '.', ''),
+        'downpayment_label' => peso($down),
+        'balance_label'   => peso($balance),
+        'forfeited'       => (int)$a['cancellation_forfeited'] === 1,
         'health_conditions' => (string)($a['health_conditions'] ?? ''),
         'health_injuries' => (string)($a['health_injuries'] ?? ''),
         'is_pregnant'     => (int)$a['is_pregnant'],
@@ -419,9 +435,18 @@ function appt_save(PDO $pdo, array $in, ?int $id): array
         return $fail((string)$health['error']);
     }
 
+    $down = 0.0;
+    if ($payStatus === 'deposit') {
+        $downRaw = trim((string)($in['downpayment_amount'] ?? ''));
+        if ($downRaw === '' || !is_numeric($downRaw) || (float)$downRaw <= 0) {
+            return $fail('Enter the downpayment amount received (more than 0).');
+        }
+        $down = round((float)$downRaw, 2);
+    }
+
     $existing = null;
     if ($id !== null) {
-        $stmt = $pdo->prepare('SELECT service_id, room_id, guest_count, appointment_date, start_time, appointment_status FROM appointments WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT service_id, room_id, guest_count, appointment_date, start_time, appointment_status, payment_status, downpayment_amount FROM appointments WHERE id = ?');
         $stmt->execute([$id]);
         $existing = $stmt->fetch();
         if (!$existing) {
@@ -440,6 +465,14 @@ function appt_save(PDO $pdo, array $in, ?int $id): array
         || substr((string)$existing['start_time'], 0, 8) !== $start
         || (int)$existing['service_id'] !== $serviceId
         || (int)$existing['room_id'] !== $roomId;
+
+    $lateResched = ['late' => false, 'forfeit' => false, 'message' => ''];
+    if ($existing !== null && $scheduleChanged) {
+        $lateResched = bk_resched_policy($pdo, $existing);
+        if ($lateResched['late'] && (string)($in['confirm_late'] ?? '') !== '1') {
+            return ['ok' => false, 'code' => 'late_notice', 'needs_confirm' => true, 'error' => $lateResched['message']];
+        }
+    }
 
     try {
         $stmt = $pdo->prepare('SELECT id FROM customers WHERE id = ?');
@@ -464,26 +497,34 @@ function appt_save(PDO $pdo, array $in, ?int $id): array
             return $fail((string)$v['error']);
         }
 
+        if ($payStatus === 'deposit' && $down >= (float)$v['total']) {
+            $pdo->rollBack();
+            return $fail('The downpayment must be less than the total of ' . peso($v['total']) . '. Use Paid if the booking is fully paid.');
+        }
+
         $therapistValue = $v['therapist_id'] > 0 ? $v['therapist_id'] : null;
 
         if ($id === null) {
             $stmt = $pdo->prepare(
                 'INSERT INTO appointments
                  (customer_id, service_id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status, payment_status, total_amount, guest_count, extra_person_fee,
-                  health_conditions, health_injuries, is_pregnant)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                  health_conditions, health_injuries, is_pregnant, downpayment_amount)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
-            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra'], $health['conditions'], $health['injuries'], $health['pregnant']]);
+            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra'], $health['conditions'], $health['injuries'], $health['pregnant'], $down]);
             $savedId = (int)$pdo->lastInsertId();
         } else {
             $stmt = $pdo->prepare(
                 'UPDATE appointments
                  SET customer_id = ?, service_id = ?, room_id = ?, therapist_id = ?, appointment_date = ?, start_time = ?, end_time = ?,
                      appointment_status = ?, payment_status = ?, total_amount = ?, guest_count = ?, extra_person_fee = ?,
-                     health_conditions = ?, health_injuries = ?, is_pregnant = ?
+                     health_conditions = ?, health_injuries = ?, is_pregnant = ?, downpayment_amount = ?
                  WHERE id = ?'
             );
-            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra'], $health['conditions'], $health['injuries'], $health['pregnant'], $id]);
+            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra'], $health['conditions'], $health['injuries'], $health['pregnant'], $down, $id]);
+            if ($lateResched['forfeit']) {
+                $pdo->prepare('UPDATE appointments SET cancellation_forfeited = 1 WHERE id = ?')->execute([$id]);
+            }
             $savedId = $id;
         }
 
@@ -508,7 +549,9 @@ function appt_save(PDO $pdo, array $in, ?int $id): array
     return [
         'ok'      => true,
         'id'      => $savedId,
-        'message' => $id === null ? 'Appointment ' . appt_code($savedId) . ' created.' : 'Appointment ' . appt_code($savedId) . ' updated.',
+        'message' => $id === null
+            ? 'Appointment ' . appt_code($savedId) . ' created.'
+            : 'Appointment ' . appt_code($savedId) . ' updated.' . ($lateResched['forfeit'] ? ' The downpayment is forfeited because of the late reschedule.' : ''),
     ];
 }
 
@@ -519,9 +562,10 @@ function appt_transition(PDO $pdo, int $id, string $action): array
         return ['ok' => false, 'error' => 'Unknown action.'];
     }
 
+    $policyNote = '';
     try {
         $pdo->beginTransaction();
-        $stmt = $pdo->prepare('SELECT appointment_status, appointment_date FROM appointments WHERE id = ? FOR UPDATE');
+        $stmt = $pdo->prepare('SELECT appointment_status, appointment_date, start_time, payment_status, downpayment_amount FROM appointments WHERE id = ? FOR UPDATE');
         $stmt->execute([$id]);
         $row = $stmt->fetch();
 
@@ -538,7 +582,18 @@ function appt_transition(PDO $pdo, int $id, string $action): array
             return ['ok' => false, 'error' => 'Only appointments scheduled for today or earlier can be updated this way.'];
         }
 
-        $pdo->prepare('UPDATE appointments SET appointment_status = ? WHERE id = ?')->execute([$map[$action]['to'], $id]);
+        if ($action === 'cancel') {
+            $pol = bk_cancel_policy($pdo, $row);
+            $pdo->prepare('UPDATE appointments SET appointment_status = ?, cancelled_at = ?, cancellation_forfeited = ? WHERE id = ?')
+                ->execute(['cancelled', now(), $pol['late'] ? 1 : 0, $id]);
+            if ($pol['refund']) {
+                $pdo->prepare("UPDATE appointments SET payment_status = 'refunded' WHERE id = ?")->execute([$id]);
+                $pdo->prepare("UPDATE payments SET payment_status = 'refunded' WHERE appointment_id = ? AND payment_status = 'paid'")->execute([$id]);
+            }
+            $policyNote = ' ' . $pol['message'];
+        } else {
+            $pdo->prepare('UPDATE appointments SET appointment_status = ? WHERE id = ?')->execute([$map[$action]['to'], $id]);
+        }
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
@@ -548,5 +603,20 @@ function appt_transition(PDO $pdo, int $id, string $action): array
     }
 
     $labels = ['confirm' => 'confirmed', 'complete' => 'marked as completed', 'no_show' => 'marked as no show', 'cancel' => 'cancelled'];
-    return ['ok' => true, 'message' => 'Appointment ' . appt_code($id) . ' ' . $labels[$action] . '.'];
+    return ['ok' => true, 'message' => 'Appointment ' . appt_code($id) . ' ' . $labels[$action] . '.' . $policyNote];
+}
+
+function appt_cancel_preview(PDO $pdo, int $id): array
+{
+    $stmt = $pdo->prepare('SELECT appointment_status, appointment_date, start_time, payment_status, downpayment_amount FROM appointments WHERE id = ?');
+    $stmt->execute([$id]);
+    $row = $stmt->fetch();
+    if (!$row) {
+        return ['ok' => false, 'error' => 'That appointment no longer exists.'];
+    }
+    if (!in_array($row['appointment_status'], ['pending', 'confirmed'], true)) {
+        return ['ok' => false, 'error' => 'This action is not allowed for the current status. Refresh the list and try again.'];
+    }
+    $pol = bk_cancel_policy($pdo, $row);
+    return ['ok' => true, 'late' => $pol['late'], 'message' => $pol['message']];
 }

@@ -418,7 +418,7 @@ function cal_prepare_move(PDO $pdo, int $id, array $in, bool $lock = false): arr
 {
     $fail = static fn(string $m): array => ['ok' => false, 'error' => $m];
 
-    $stmt = $pdo->prepare('SELECT id, service_id, room_id, therapist_id, guest_count, appointment_date, start_time, end_time, appointment_status FROM appointments WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, service_id, room_id, therapist_id, guest_count, appointment_date, start_time, end_time, appointment_status, payment_status, downpayment_amount FROM appointments WHERE id = ?');
     $stmt->execute([$id]);
     $cur = $stmt->fetch();
     if (!$cur) {
@@ -477,9 +477,11 @@ function cal_check(PDO $pdo, int $id, array $in): array
     if (!$m['ok']) {
         return ['ok' => true, 'available' => false, 'message' => $m['error']];
     }
+    $pol = bk_resched_policy($pdo, $m['current']);
     return [
         'ok'        => true,
         'available' => true,
+        'warn'      => $pol['late'] ? rtrim(str_replace(' Reschedule anyway?', '', $pol['message'])) : '',
         'message'   => ($m['therapist_id'] > 0 ? 'Room and therapist are free.' : 'Room is free.') . ' Session runs ' . cal_time_label($m['start_min']) . ' – ' . cal_time_label($m['end_min']) . '.',
     ];
 }
@@ -501,9 +503,17 @@ function cal_reschedule(PDO $pdo, int $id, array $in): array
             $pdo->rollBack();
             return ['ok' => false, 'error' => 'Nothing changed. Pick a different date, time, room or therapist.'];
         }
+        $pol = bk_resched_policy($pdo, $cur);
+        if ($pol['late'] && (string)($in['confirm_late'] ?? '') !== '1') {
+            $pdo->rollBack();
+            return ['ok' => false, 'code' => 'late_notice', 'needs_confirm' => true, 'error' => $pol['message']];
+        }
         $pdo->prepare(
             'UPDATE appointments SET room_id = ?, therapist_id = ?, appointment_date = ?, start_time = ?, end_time = ? WHERE id = ?'
         )->execute([$m['room_id'], $m['therapist_id'] > 0 ? $m['therapist_id'] : null, $m['date'], $m['start'], $m['end'], $id]);
+        if ($pol['forfeit']) {
+            $pdo->prepare('UPDATE appointments SET cancellation_forfeited = 1 WHERE id = ?')->execute([$id]);
+        }
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
@@ -516,7 +526,7 @@ function cal_reschedule(PDO $pdo, int $id, array $in): array
     return [
         'ok'      => true,
         'id'      => $id,
-        'message' => 'Appointment ' . appt_code($id) . ' moved to ' . appt_date_label($m['date']) . ', ' . cal_time_label($m['start_min']) . ' – ' . cal_time_label($m['end_min']) . '.',
+        'message' => 'Appointment ' . appt_code($id) . ' moved to ' . appt_date_label($m['date']) . ', ' . cal_time_label($m['start_min']) . ' – ' . cal_time_label($m['end_min']) . '.' . ($pol['forfeit'] ? ' The downpayment is forfeited because of the late reschedule.' : ''),
     ];
 }
 

@@ -587,6 +587,8 @@
         dlItem(dl, 'Time Slot', a.start_label + ' – ' + a.end_label, a.date_label + ' · ' + fmtDur(a.duration));
         dlItem(dl, 'Ritual', a.service_name, a.duration + ' min');
         dlItem(dl, 'Total Amount', a.total_label, 'Received ' + a.paid_label);
+        dlItem(dl, 'Downpayment', a.downpayment_label, a.forfeited ? 'Forfeited (late cancellation or reschedule)' : '');
+        dlItem(dl, 'Balance Due', a.balance_label);
         box.appendChild(dl);
 
         var th = el('div', 'ins-therapist');
@@ -759,6 +761,22 @@
     var bkService = $('#bk_service');
     var bkStart = $('#bk_start');
     var bkEnd = $('#bk_end');
+    (function () {
+        var pay = document.getElementById('bk_pay');
+        var wrap = document.getElementById('bkDownWrap');
+        var down = document.getElementById('bk_down');
+        if (!pay || !wrap || !down) { return; }
+        function sync() {
+            var on = pay.value === 'deposit';
+            wrap.hidden = !on;
+            down.required = on;
+            if (!on) { down.value = ''; }
+        }
+        pay.addEventListener('change', sync);
+        if (pay.form) { pay.form.addEventListener('reset', function () { setTimeout(sync, 0); }); }
+        sync();
+    }());
+
     var bkAmount = $('#bk_amount');
     var bkDate = $('#bk_date');
     bkDate.setAttribute('data-today', bkDate.min);
@@ -833,8 +851,8 @@
         api('/calendar-check.php?' + p.toString()).then(function (d) {
             if (seq !== checkSeq) { return; }
             if (!d.ok) { reschedCheck.hidden = true; return; }
-            reschedCheck.textContent = d.message;
-            reschedCheck.classList.toggle('is-bad', !d.available);
+            reschedCheck.textContent = d.message + (d.warn ? ' ' + d.warn + '.' : '');
+            reschedCheck.classList.toggle('is-bad', !d.available || !!d.warn);
             reschedCheck.hidden = false;
         }).catch(function () { reschedCheck.hidden = true; });
     }
@@ -864,10 +882,24 @@
     reschedForm.addEventListener('submit', function (ev) {
         ev.preventDefault();
         reschedError.hidden = true;
+        submitResched(false);
+    });
+
+    function submitResched(confirmLate) {
         var btn = $('#reschedSubmit');
         btn.disabled = true;
-        api('/calendar-action.php', { method: 'POST', body: new FormData(reschedForm) }).then(function (d) {
-            if (!d.ok) { reschedError.textContent = d.error || 'Unable to reschedule.'; reschedError.hidden = false; return; }
+        var fd = new FormData(reschedForm);
+        if (confirmLate) { fd.append('confirm_late', '1'); }
+        api('/calendar-action.php', { method: 'POST', body: fd }).then(function (d) {
+            if (!d.ok) {
+                if (d.code === 'late_notice') {
+                    askConfirm('Late reschedule', d.error, 'Reschedule anyway', function () { submitResched(true); });
+                    return;
+                }
+                reschedError.textContent = d.error || 'Unable to reschedule.';
+                reschedError.hidden = false;
+                return;
+            }
             closeModal(reschedModal);
             toast(d.message || 'Appointment rescheduled.');
             load();
@@ -875,7 +907,7 @@
             reschedError.textContent = 'Network error. Please try again.';
             reschedError.hidden = false;
         }).then(function () { btn.disabled = false; });
-    });
+    }
 
     $$('#viewSwitch .seg-btn').forEach(function (b) {
         b.addEventListener('click', function () {

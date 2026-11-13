@@ -257,6 +257,10 @@ require __DIR__ . '/includes/header.php';
                         <option value="paid">Paid</option>
                     </select>
                 </div>
+                <div class="field" id="bkDownWrap" hidden>
+                    <label for="bk_down">Downpayment Amount (₱)</label>
+                    <input type="number" id="bk_down" name="downpayment_amount" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+                </div>
                 <div class="field">
                     <label for="bk_status">Appointment Status</label>
                     <select id="bk_status" name="appointment_status">
