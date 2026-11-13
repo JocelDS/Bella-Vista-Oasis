@@ -604,7 +604,7 @@
         clearErrors(walkForm, $('#cwError'));
         var bad = [];
         var existing = !!$('#cwCustomerId').value;
-        var req = existing ? ['cwService', 'cwDate', 'cwTime'] : ['cwName', 'cwPhone', 'cwService', 'cwDate', 'cwTime'];
+        var req = existing ? ['cwService', 'cwDate', 'cwTime', 'cwHealth', 'cwInjuries', 'cwPreg'] : ['cwName', 'cwPhone', 'cwService', 'cwDate', 'cwTime', 'cwHealth', 'cwInjuries', 'cwPreg'];
         req.forEach(function (id) { var n = $('#' + id); if (!n.value.trim()) { n.classList.add('is-invalid'); bad.push(id); } });
         if (bad.length) {
             $('#cwError').textContent = 'Please complete the highlighted fields.';

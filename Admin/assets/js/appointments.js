@@ -421,6 +421,9 @@
             fId.value = String(a.id);
             $('#ap_customer').value = String(a.customer_id);
             fService2.value = String(a.service_id);
+            $('#ap_health').value = a.health_conditions || '';
+            $('#ap_injuries').value = a.health_injuries || '';
+            $('#ap_preg').value = (a.health_conditions || a.health_injuries) ? String(a.is_pregnant) : '';
             $('#ap_therapist').value = String(a.therapist_id);
             $('#ap_room').value = String(a.room_id);
             fDate2.min = a.date < fDate2.getAttribute('data-today') ? a.date : fDate2.getAttribute('data-today');
@@ -439,7 +442,7 @@
     form.addEventListener('submit', function (ev) {
         ev.preventDefault();
         errBox.hidden = true;
-        var missing = $$('select[required], input[required]', form).some(function (f) { return !f.value; });
+        var missing = $$('select[required], input[required], textarea[required]', form).some(function (f) { return !f.value; });
         if (missing) { showErr('Please complete every required field.'); return; }
 
         submitBtn.disabled = true;

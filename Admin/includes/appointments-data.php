@@ -156,7 +156,7 @@ function appt_fetch(PDO $pdo, array $f): array
                 c.full_name AS customer_name, c.email AS customer_email, c.phone AS customer_phone,
                 s.service_name, s.duration,
                 t.full_name AS therapist_name, r.room_name,
-                COALESCE(p.paid_amount, 0) AS paid_amount'
+                COALESCE(p.paid_amount, 0) AS paid_amount, a.is_pregnant'
         . APPT_FROM . ' WHERE ' . $where
         . ' ORDER BY a.appointment_date DESC, a.start_time ASC, a.id DESC LIMIT ' . $per . ' OFFSET ' . $offset
     );
@@ -251,6 +251,7 @@ function appt_render_rows(array $rows, bool $filtered): string
             <td data-label="Customer">
                 <span class="cell-main strong"><?= e($custName) ?></span>
                 <?php if ($contact !== ''): ?><span class="cell-sub"><?= e($contact) ?></span><?php endif; ?>
+                <?php if (!empty($r['is_pregnant'])): ?><span class="badge rs-cleaning">Pregnant</span><?php endif; ?>
             </td>
             <td data-label="Service">
                 <span class="cell-main"><?= e((string)($r['service_name'] ?? '—')) ?></span>
@@ -316,7 +317,8 @@ function appt_detail(PDO $pdo, int $id): ?array
                 c.full_name AS customer_name, c.email AS customer_email, c.phone AS customer_phone,
                 s.service_name, s.duration,
                 t.full_name AS therapist_name, r.room_name,
-                COALESCE(p.paid_amount, 0) AS paid_amount'
+                COALESCE(p.paid_amount, 0) AS paid_amount,
+                a.health_conditions, a.health_injuries, a.is_pregnant'
         . APPT_FROM . ' WHERE a.id = ?'
     );
     $stmt->execute([$id]);
@@ -369,12 +371,15 @@ function appt_detail(PDO $pdo, int $id): ?array
         'total'           => number_format((float)$a['total_amount'], 2, '.', ''),
         'total_label'     => peso($a['total_amount']),
         'paid_label'      => peso($a['paid_amount']),
+        'health_conditions' => (string)($a['health_conditions'] ?? ''),
+        'health_injuries' => (string)($a['health_injuries'] ?? ''),
+        'is_pregnant'     => (int)$a['is_pregnant'],
         'payments'        => $payments,
         'actions'         => appt_actions_for($st),
     ];
 }
 
-function appt_save(PDO $pdo, array $in, ?int $id, int $roomGap = ROOM_GAP_MINUTES): array
+function appt_save(PDO $pdo, array $in, ?int $id): array
 {
     $fail = static fn(string $m): array => ['ok' => false, 'error' => $m];
 
@@ -408,6 +413,11 @@ function appt_save(PDO $pdo, array $in, ?int $id, int $roomGap = ROOM_GAP_MINUTE
         return $fail('Enter a valid number of guests.');
     }
     $guests = $guestsRaw === '' ? null : (int)$guestsRaw;
+
+    $health = bk_health($in);
+    if (!$health['ok']) {
+        return $fail((string)$health['error']);
+    }
 
     $existing = null;
     if ($id !== null) {
@@ -459,19 +469,21 @@ function appt_save(PDO $pdo, array $in, ?int $id, int $roomGap = ROOM_GAP_MINUTE
         if ($id === null) {
             $stmt = $pdo->prepare(
                 'INSERT INTO appointments
-                 (customer_id, service_id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status, payment_status, total_amount, guest_count, extra_person_fee)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                 (customer_id, service_id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status, payment_status, total_amount, guest_count, extra_person_fee,
+                  health_conditions, health_injuries, is_pregnant)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
-            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra']]);
+            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra'], $health['conditions'], $health['injuries'], $health['pregnant']]);
             $savedId = (int)$pdo->lastInsertId();
         } else {
             $stmt = $pdo->prepare(
                 'UPDATE appointments
                  SET customer_id = ?, service_id = ?, room_id = ?, therapist_id = ?, appointment_date = ?, start_time = ?, end_time = ?,
-                     appointment_status = ?, payment_status = ?, total_amount = ?, guest_count = ?, extra_person_fee = ?
+                     appointment_status = ?, payment_status = ?, total_amount = ?, guest_count = ?, extra_person_fee = ?,
+                     health_conditions = ?, health_injuries = ?, is_pregnant = ?
                  WHERE id = ?'
             );
-            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra'], $id]);
+            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra'], $health['conditions'], $health['injuries'], $health['pregnant'], $id]);
             $savedId = $id;
         }
 

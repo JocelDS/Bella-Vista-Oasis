@@ -310,7 +310,7 @@
             ev.preventDefault();
             if (errBox) { errBox.hidden = true; }
 
-            var missing = $$('select[required], input[required]', form).some(function (f) { return !f.value; });
+            var missing = $$('select[required], input[required], textarea[required]', form).some(function (f) { return !f.value; });
             if (missing) { showFormError('Please complete every field.'); return; }
 
             var fd = new FormData(form);

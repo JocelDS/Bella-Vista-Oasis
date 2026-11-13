@@ -165,6 +165,22 @@ require __DIR__ . '/includes/header.php';
                     </select>
                 </div>
                 <div class="field field-full">
+                    <label for="ap_health">Medical conditions</label>
+                    <textarea id="ap_health" name="health_conditions" rows="2" maxlength="500" required placeholder="Type None if the guest has no medical conditions"></textarea>
+                </div>
+                <div class="field">
+                    <label for="ap_injuries">Injuries</label>
+                    <textarea id="ap_injuries" name="health_injuries" rows="2" maxlength="500" required placeholder="Type None if no injuries"></textarea>
+                </div>
+                <div class="field">
+                    <label for="ap_preg">Pregnant?</label>
+                    <select id="ap_preg" name="is_pregnant" required>
+                        <option value="">Select</option>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="field field-full">
                     <label for="ap_service">Service</label>
                     <select id="ap_service" name="service_id" required>
                         <option value="">Select a service</option>

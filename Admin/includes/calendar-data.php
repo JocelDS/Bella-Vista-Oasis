@@ -167,7 +167,7 @@ function cal_load_items(PDO $pdo, array $p, string $from, string $to, string $to
 
     $stmt = $pdo->prepare(
         'SELECT a.id, a.customer_id, a.service_id, a.room_id, a.therapist_id, a.appointment_date, a.start_time, a.end_time,
-                a.appointment_status, a.payment_status, a.total_amount,
+                a.appointment_status, a.payment_status, a.total_amount, a.is_pregnant,
                 c.full_name AS customer_name, s.service_name, s.duration, t.full_name AS therapist_name
          FROM appointments a
          LEFT JOIN customers c  ON c.id = a.customer_id
@@ -213,6 +213,7 @@ function cal_load_items(PDO $pdo, array $p, string $from, string $to, string $to
             'payment'        => $pmap[$ps] ?? ucwords(str_replace('_', ' ', $ps)),
             'amount'         => peso($r['total_amount']),
             'membership'     => $members[(int)$r['customer_id']] ?? '',
+            'pregnant'       => (int)$r['is_pregnant'] === 1,
         ];
     }
     return $out;
@@ -288,6 +289,7 @@ function cal_fetch(PDO $pdo, array $p): array
     }
 
     $minLen    = cal_min_service($pdo);
+    $cleanGap  = spa_cleaning_gap($pdo);
     $canOffer  = $p['date'] >= $today;
     $winStart  = $p['date'] === $today ? max($axisStart, cal_ceil15($nowMin)) : $axisStart;
     $winEnd    = $axisEnd;
@@ -303,7 +305,7 @@ function cal_fetch(PDO $pdo, array $p): array
         $rid     = (int)$r['id'];
         $windows = [];
         if ($canOffer && $r['room_status'] === 'available') {
-            foreach (cal_free_windows($busy[$rid] ?? [], $winStart, $winEnd, ROOM_GAP_MINUTES, $minLen) as [$ws, $we]) {
+            foreach (cal_free_windows($busy[$rid] ?? [], $winStart, $winEnd, $cleanGap, $minLen) as [$ws, $we]) {
                 $w = ['start' => $ws, 'end' => $we, 'minutes' => $we - $ws, 'is_now' => $p['date'] === $today && $ws <= cal_ceil15($nowMin)];
                 $windows[]  = $w;
                 $openings[] = $w + ['room_id' => $rid, 'room' => (string)$r['room_name'], 'type' => (string)$r['room_type'], 'status' => (string)$r['room_status']];
@@ -351,7 +353,7 @@ function cal_fetch(PDO $pdo, array $p): array
         'day_label'   => date('l, F j, Y', strtotime($p['date'])),
         'now_min'     => $p['date'] === $today ? $nowMin : null,
         'axis'        => ['start' => $axisStart, 'end' => $axisEnd],
-        'gap'         => ROOM_GAP_MINUTES,
+        'gap'         => $cleanGap,
         'min_slot'    => $minLen,
         'rooms'       => $rooms,
         'appointments' => $items,
@@ -440,16 +442,6 @@ function cal_prepare_move(PDO $pdo, int $id, array $in, bool $lock = false): arr
         return $fail('Enter a valid start time.');
     }
 
-    $stmt = $pdo->prepare('SELECT room_status FROM rooms WHERE id = ?');
-    $stmt->execute([$roomId]);
-    $room = $stmt->fetch();
-    if (!$room) {
-        return $fail('The selected room no longer exists.');
-    }
-    if ($room['room_status'] !== 'available') {
-        return $fail('That room is ' . $room['room_status'] . ' and cannot take bookings.');
-    }
-
     $sameSlot = (string)$cur['appointment_date'] === $date
         && substr((string)$cur['start_time'], 0, 5) === substr($start, 0, 5)
         && (int)$cur['room_id'] === $roomId;
@@ -530,17 +522,7 @@ function cal_reschedule(PDO $pdo, int $id, array $in): array
 
 function cal_create(PDO $pdo, array $in): array
 {
-    $roomId = (int)($in['room_id'] ?? 0);
-    $stmt   = $pdo->prepare('SELECT room_status FROM rooms WHERE id = ?');
-    $stmt->execute([$roomId]);
-    $room = $stmt->fetch();
-    if (!$room) {
-        return ['ok' => false, 'error' => 'Select a room.'];
-    }
-    if ($room['room_status'] !== 'available') {
-        return ['ok' => false, 'error' => 'That room is ' . $room['room_status'] . ' and cannot take bookings.'];
-    }
-    return appt_save($pdo, $in, null, ROOM_GAP_MINUTES);
+    return appt_save($pdo, $in, null);
 }
 
 function cal_folio(PDO $pdo, int $id): ?array
@@ -616,6 +598,21 @@ function cal_folio(PDO $pdo, int $id): ?array
     $stmt->execute([$cid]);
     $spent = (float)$stmt->fetchColumn();
 
+    $stmt = $pdo->prepare(
+        'SELECT id, appointment_date, health_conditions, health_injuries, is_pregnant FROM appointments
+         WHERE customer_id = ? AND health_conditions IS NOT NULL
+         ORDER BY appointment_date DESC, id DESC LIMIT 1'
+    );
+    $stmt->execute([$cid]);
+    $hr = $stmt->fetch();
+    $health = $hr ? [
+        'conditions' => (string)$hr['health_conditions'],
+        'injuries'   => (string)($hr['health_injuries'] ?? ''),
+        'pregnant'   => (int)$hr['is_pregnant'] === 1,
+        'date'       => appt_date_label((string)$hr['appointment_date']),
+        'code'       => appt_code((int)$hr['id']),
+    ] : null;
+
     $stmt = $pdo->prepare('SELECT membership_type, membership_status, expiry_date FROM memberships WHERE customer_id = ? ORDER BY id DESC LIMIT 1');
     $stmt->execute([$cid]);
     $m = $stmt->fetch();
@@ -628,6 +625,7 @@ function cal_folio(PDO $pdo, int $id): ?array
         'top_therapist' => $therCnt ? (string)array_key_first($therCnt) : '',
         'top_service'   => $svcCnt ? (string)array_key_first($svcCnt) : '',
         'spent'       => peso($spent),
+        'health'      => $health,
         'membership'  => $m ? [
             'type'   => (string)$m['membership_type'],
             'status' => ucfirst((string)$m['membership_status']),

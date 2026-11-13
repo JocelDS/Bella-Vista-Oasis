@@ -45,6 +45,11 @@ if (!preg_match('/^(\d{2}):(\d{2})(?::\d{2})?$/', $time, $tm) || (int)$tm[1] > 2
 }
 $time = $tm[1] . ':' . $tm[2] . ':00';
 
+$health = bk_health($_POST);
+if (!$health['ok']) {
+    booking_fail((string)$health['error']);
+}
+
 $pdo = db();
 $newId = 0;
 $error = null;
@@ -74,12 +79,13 @@ try {
     } else {
         $stmt = $pdo->prepare(
             "INSERT INTO appointments
-             (customer_id, service_id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status, payment_status, total_amount, guest_count, extra_person_fee)
-             VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 'pending', ?, ?, ?)"
+             (customer_id, service_id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status, payment_status, total_amount, guest_count, extra_person_fee, health_conditions, health_injuries, is_pregnant)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 'pending', ?, ?, ?, ?, ?, ?)"
         );
         $stmt->execute([
             $customerId, $serviceId, $roomId, $v['therapist_id'] > 0 ? $v['therapist_id'] : null,
             $date, $v['start'], $v['end'], $v['total'], $v['guests'], $v['extra'],
+            $health['conditions'], $health['injuries'], $health['pregnant'],
         ]);
         $newId = (int)$pdo->lastInsertId();
         $total = (float)$v['total'];

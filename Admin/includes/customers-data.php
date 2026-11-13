@@ -746,6 +746,9 @@ function cm_walkin(PDO $pdo, array $in): array
     if (appt_parse_date($date) === null) { return $fail('Enter a valid appointment date.'); }
     if (appt_parse_time($time) === null) { return $fail('Enter a valid preferred time.'); }
 
+    $health = bk_health($in);
+    if (!$health['ok']) { return $fail((string)$health['error']); }
+
     $customerId = (int)($in['customer_id'] ?? 0);
     $created = false;
     $reused  = false;
@@ -815,6 +818,7 @@ function cm_walkin(PDO $pdo, array $in): array
                 'customer_id' => $customerId, 'service_id' => $serviceId, 'room_id' => (int)$rid, 'therapist_id' => (int)$tid,
                 'appointment_date' => $date, 'start_time' => $time, 'appointment_status' => 'confirmed', 'payment_status' => 'pending',
                 'guest_count' => (string)($in['guest_count'] ?? ''),
+                'health_conditions' => $health['conditions'], 'health_injuries' => $health['injuries'], 'is_pregnant' => (string)$health['pregnant'],
             ], null);
             if (!empty($res['ok'])) {
                 if ($note !== '') {
@@ -824,7 +828,7 @@ function cm_walkin(PDO $pdo, array $in): array
                 return $info + ['ok' => true, 'appointment_id' => $res['id'], 'message' => ($created ? 'Guest registered. ' : '') . $res['message']];
             }
             $lastErr = (string)$res['error'];
-            if (!preg_match('/booked|cleaning gap|on leave|maintenance/i', $lastErr)) {
+            if (!preg_match('/booked|cleaning gap|on leave|maintenance|inactive|scheduled to work|shift hours/i', $lastErr)) {
                 return $abort($lastErr);
             }
         }

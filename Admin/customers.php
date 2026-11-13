@@ -216,6 +216,9 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field"><label for="cwPhone">Contact number *</label><input id="cwPhone" name="phone" type="tel" maxlength="30" required></div>
                 <div class="field"><label for="cwEmail">Email (optional)</label><input id="cwEmail" name="email" type="email" maxlength="150"></div>
+                <div class="field field-full"><label for="cwHealth">Medical conditions *</label><textarea id="cwHealth" name="health_conditions" rows="2" maxlength="500" required placeholder="Type None if the guest has no medical conditions"></textarea></div>
+                <div class="field"><label for="cwInjuries">Injuries *</label><textarea id="cwInjuries" name="health_injuries" rows="2" maxlength="500" required placeholder="Type None if no injuries"></textarea></div>
+                <div class="field"><label for="cwPreg">Pregnant? *</label><select id="cwPreg" name="is_pregnant" required><option value="">Select</option><option value="0">No</option><option value="1">Yes</option></select></div>
                 <div class="field field-full"><label for="cwService">Requested service *</label>
                     <select id="cwService" name="service_id" required>
                         <option value="">Select a service</option>

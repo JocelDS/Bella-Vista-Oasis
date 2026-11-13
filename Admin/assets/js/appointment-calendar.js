@@ -302,7 +302,7 @@
                 top.appendChild(el('span', 'mx-tag', STATE_LABEL[a.state] || a.status_label));
                 top.appendChild(el('span', 'mx-time', fmtTime(a.start) + ' – ' + fmtTime(a.end)));
                 c.appendChild(top);
-                c.appendChild(el('strong', 'mx-name', a.customer));
+                c.appendChild(el('strong', 'mx-name', a.customer + (a.pregnant ? ' · Pregnant' : '')));
                 c.appendChild(el('span', 'mx-svc', a.service + ' · ' + a.duration + 'm'));
                 c.appendChild(el('span', 'mx-ther', a.therapist));
                 c.addEventListener('click', function (ev) { ev.stopPropagation(); selectAppt(a.id, true); });
@@ -390,6 +390,7 @@
         var badges = el('div', 'day-badges');
         badges.appendChild(el('span', 'badge pay-' + a.payment_status, a.payment));
         badges.appendChild(el('span', 'day-line', a.amount));
+        if (a.pregnant) { badges.appendChild(el('span', 'badge rs-cleaning', 'Pregnant')); }
         c.appendChild(badges);
         c.addEventListener('click', function () { selectAppt(a.id, true); });
         return c;
@@ -578,6 +579,7 @@
         badges.appendChild(el('span', 'badge st-' + a.status, a.state === 'session' ? 'In Session' : a.status_label));
         badges.appendChild(el('span', 'badge pay-' + a.payment_status, 'Payment: ' + a.payment_label));
         if (a.membership) { badges.appendChild(el('span', 'badge rs-available', a.membership + ' Member' + (a.membership_until ? ' · until ' + a.membership_until : ''))); }
+        if (a.is_pregnant) { badges.appendChild(el('span', 'badge rs-cleaning', 'Pregnant')); }
         box.appendChild(badges);
 
         var dl = el('dl', 'ins-grid');
@@ -616,7 +618,15 @@
         }
         box.appendChild(pay);
 
-        box.appendChild(el('p', 'ins-note', 'Intake health notes are not stored in the database, so none are shown.'));
+        var hs = el('div', 'ins-pay');
+        hs.appendChild(el('p', 'detail-h', 'Health Declaration'));
+        var hd = el('dl', 'ins-grid');
+        var recorded = !!(a.health_conditions || a.health_injuries);
+        dlItem(hd, 'Medical Conditions', a.health_conditions || 'Not recorded');
+        dlItem(hd, 'Injuries', a.health_injuries || 'Not recorded');
+        dlItem(hd, 'Pregnant', recorded ? (a.is_pregnant ? 'Yes' : 'No') : 'Not recorded');
+        hs.appendChild(hd);
+        box.appendChild(hs);
 
         var actions = el('div', 'ins-actions');
         var primary = el('button', 'btn btn-primary', a.primary.label);
@@ -713,7 +723,18 @@
         }
         box.appendChild(r);
 
-        box.appendChild(el('p', 'ins-note', 'Health conditions, allergies and treatment preferences are not stored in the database, so they are not shown.'));
+        var hf = folioSection('Health Declaration');
+        if (!f.health) {
+            hf.appendChild(el('p', 'cell-sub', 'No health declaration has been recorded for this guest.'));
+        } else {
+            var hl2 = el('dl', 'ins-grid');
+            dlItem(hl2, 'Medical Conditions', f.health.conditions || '—');
+            dlItem(hl2, 'Injuries', f.health.injuries || '—');
+            dlItem(hl2, 'Pregnant', f.health.pregnant ? 'Yes' : 'No', 'Declared for #' + f.health.code + ' · ' + f.health.date);
+            hf.appendChild(hl2);
+            if (f.health.pregnant) { hf.appendChild(el('span', 'badge rs-cleaning', 'Pregnant')); }
+        }
+        box.appendChild(hf);
     }
 
     function openIntake(a) {
@@ -771,7 +792,7 @@
     bookForm.addEventListener('submit', function (ev) {
         ev.preventDefault();
         bookError.hidden = true;
-        var missing = $$('select[required], input[required]', bookForm).some(function (f) { return !f.value; });
+        var missing = $$('select[required], input[required], textarea[required]', bookForm).some(function (f) { return !f.value; });
         if (missing) { bookError.textContent = 'Please complete every required field.'; bookError.hidden = false; return; }
         var btn = $('#bookSubmit');
         btn.disabled = true;

@@ -69,6 +69,90 @@ function bk_grid(int $openMin, int $closeMin, int $duration, int $gap): array
     return $starts;
 }
 
+function bk_health(array $in): array
+{
+    $fail = static fn(string $m): array => ['ok' => false, 'error' => $m];
+    $clean = static fn($v): string => trim((string)preg_replace('/\s+/', ' ', (string)$v));
+
+    $conditions = $clean($in['health_conditions'] ?? '');
+    $injuries   = $clean($in['health_injuries'] ?? '');
+    $pregnant   = (string)($in['is_pregnant'] ?? '');
+
+    if ($conditions === '') {
+        return $fail('Health declaration required: enter the guest’s medical conditions, or type None.');
+    }
+    if ($injuries === '') {
+        return $fail('Health declaration required: enter the guest’s injuries, or type None.');
+    }
+    if ($pregnant !== '0' && $pregnant !== '1') {
+        return $fail('Health declaration required: select whether the guest is pregnant.');
+    }
+    if (mb_strlen($conditions) > 500 || mb_strlen($injuries) > 500) {
+        return $fail('Health declaration entries must be 500 characters or fewer.');
+    }
+
+    return ['ok' => true, 'conditions' => $conditions, 'injuries' => $injuries, 'pregnant' => (int)$pregnant];
+}
+
+function bk_therapist_check(PDO $pdo, int $therapistId, string $date, int $startMin, int $endMin): ?string
+{
+    $stmt = $pdo->prepare('SELECT * FROM therapists WHERE id = ?');
+    $stmt->execute([$therapistId]);
+    $therapist = $stmt->fetch();
+    if (!$therapist) {
+        return 'The selected therapist no longer exists.';
+    }
+    $name = (string)($therapist['full_name'] ?? 'The selected therapist');
+    $dayLabel = date('l, M j', strtotime($date));
+
+    if (($therapist['employment_status'] ?? 'active') === 'inactive') {
+        return $name . ' is inactive and cannot take new bookings.';
+    }
+
+    try {
+        $stmt = $pdo->prepare('SELECT 1 FROM therapist_leaves WHERE therapist_id = ? AND start_date <= ? AND (end_date IS NULL OR end_date >= ?) LIMIT 1');
+        $stmt->execute([$therapistId, $date, $date]);
+        $onLeave = (bool)$stmt->fetchColumn();
+        $hasLeaves = false;
+        if (!$onLeave) {
+            $stmt = $pdo->prepare('SELECT 1 FROM therapist_leaves WHERE therapist_id = ? LIMIT 1');
+            $stmt->execute([$therapistId]);
+            $hasLeaves = (bool)$stmt->fetchColumn();
+        }
+    } catch (Throwable $e) {
+        $onLeave = false;
+        $hasLeaves = false;
+    }
+    if ($onLeave || (!$hasLeaves && ($therapist['availability_status'] ?? '') === 'on_leave')) {
+        return $name . ' is on leave on ' . $dayLabel . '.';
+    }
+
+    try {
+        $stmt = $pdo->prepare('SELECT day_of_week, start_time, end_time, is_available FROM therapist_shifts WHERE therapist_id = ?');
+        $stmt->execute([$therapistId]);
+        $shifts = [];
+        foreach ($stmt->fetchAll() as $r) {
+            $shifts[(int)$r['day_of_week']] = $r;
+        }
+    } catch (Throwable $e) {
+        $shifts = [];
+    }
+    if ($shifts) {
+        $dow = (int)date('N', strtotime($date));
+        $shift = $shifts[$dow] ?? null;
+        if ($shift === null || (int)$shift['is_available'] !== 1) {
+            return $name . ' is not scheduled to work on ' . date('l', strtotime($date)) . 's.';
+        }
+        $ss = bk_min((string)$shift['start_time']);
+        $se = bk_min((string)$shift['end_time']);
+        if ($startMin < $ss || $endMin > $se) {
+            return $name . ' is outside shift hours for this session (shift ' . bk_label($ss) . ' – ' . bk_label($se) . ').';
+        }
+    }
+
+    return null;
+}
+
 function bk_validate(PDO $pdo, array $in, int $excludeId, bool $lock, bool $checkSchedule): array
 {
     $fail = static fn(string $m): array => ['ok' => false, 'error' => $m];
@@ -156,14 +240,9 @@ function bk_validate(PDO $pdo, array $in, int $excludeId, bool $lock, bool $chec
     }
 
     if ($therapistId > 0) {
-        $stmt = $pdo->prepare('SELECT availability_status FROM therapists WHERE id = ?');
-        $stmt->execute([$therapistId]);
-        $therapist = $stmt->fetch();
-        if (!$therapist) {
-            return $fail('The selected therapist no longer exists.');
-        }
-        if ($therapist['availability_status'] === 'on_leave') {
-            return $fail('The selected therapist is on leave.');
+        $therapistErr = bk_therapist_check($pdo, $therapistId, $date, $startMin, $endMin);
+        if ($therapistErr !== null) {
+            return $fail($therapistErr);
         }
     }
 
