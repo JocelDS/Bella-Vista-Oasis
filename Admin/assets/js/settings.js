@@ -78,67 +78,6 @@
     });
     $$('[data-goto]').forEach(function (b) { b.addEventListener('click', function () { showTab(b.getAttribute('data-goto')); window.scrollTo({ top: 0, behavior: 'smooth' }); }); });
 
-    function renderBlockedDates(list) {
-        var ul = $('#blockedDatesList');
-        if (!ul) { return; }
-        ul.innerHTML = '';
-        if (!list || !list.length) {
-            ul.innerHTML = '<li class="empty">No dates blocked right now.</li>';
-            return;
-        }
-        list.forEach(function (item) {
-            var li = document.createElement('li');
-            li.className = 'sc-list-item';
-            var label = document.createElement('span');
-            label.textContent = item.blocked_date + ' · ' + (item.reason || 'Closure');
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'btn btn-outline btn-sm';
-            btn.textContent = 'Remove';
-            btn.addEventListener('click', function () {
-                var fd = new FormData();
-                fd.set('action', 'remove_blocked_date');
-                fd.set('blocked_date', item.blocked_date);
-                fd.set('csrf', csrf);
-                api('/settings.php', { method: 'POST', body: fd })
-                    .then(function (res) {
-                        if (!res.ok) { throw new Error(res.error || 'Unable to remove the block.'); }
-                        renderBlockedDates(res.dates || []);
-                        toast('Blocked date removed.');
-                    })
-                    .catch(function (err) { toast(err.message || 'Unable to remove the block.'); });
-            });
-            li.appendChild(label); li.appendChild(btn);
-            ul.appendChild(li);
-        });
-    }
-
-    function loadBlockedDates() {
-        api('/settings.php?view=blocked_dates').then(function (res) {
-            if (!res.ok) { return; }
-            renderBlockedDates(res.dates || []);
-        }).catch(function () {});
-    }
-
-    var blockedForm = $('#blockedDateForm');
-    if (blockedForm) {
-        blockedForm.addEventListener('submit', function (ev) {
-            ev.preventDefault();
-            var fd = new FormData(blockedForm);
-            fd.set('action', 'add_blocked_date');
-            fd.set('csrf', csrf);
-            api('/settings.php', { method: 'POST', body: fd })
-                .then(function (res) {
-                    if (!res.ok) { throw new Error(res.error || 'Unable to save the blocked date.'); }
-                    blockedForm.reset();
-                    renderBlockedDates(res.dates || []);
-                    toast('Blocked date updated.');
-                })
-                .catch(function (err) { toast(err.message || 'Unable to save the blocked date.'); });
-        });
-    }
-    loadBlockedDates();
-
     /* ---------- Form state ---------- */
     var saveBtn = $('#scSave'), resetBtn = $('#scReset');
     var rows = $$('.sc-table tbody tr[data-day]');

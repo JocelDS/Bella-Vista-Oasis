@@ -20,6 +20,8 @@ $latestNotif = $notifList ? (int)$notifList[0]['id'] : 0;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= e(url('/assets/css/dashboard.css')) ?>">
+    <?php $dpCss = __DIR__ . '/../assets/css/date-picker.css'; ?>
+    <link rel="stylesheet" href="<?= e(url('/assets/css/date-picker.css')) ?>?v=<?= e(is_file($dpCss) ? (string)filemtime($dpCss) : '1') ?>">
     <?php $extraStyles = $extraStyles ?? []; foreach ($extraStyles as $href): ?>
         <link rel="stylesheet" href="<?= e((string)$href) ?>">
     <?php endforeach; ?>

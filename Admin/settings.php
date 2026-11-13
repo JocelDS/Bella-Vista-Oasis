@@ -34,9 +34,11 @@ $on = static fn(string $k, string $d = '1') => ($cfg[$k] ?? $d) === '1';
 
 $pageTitle     = 'Settings';
 $crumb         = 'Settings';
-$footerScripts = $ready && $allowed ? [url('/assets/js/settings.js')] : [];
+$footerScripts = $ready && $allowed ? [url('/assets/js/settings.js'), url('/assets/js/blocked-dates.js')] : [];
 $cssFile       = __DIR__ . '/assets/css/settings.css';
 $cssVer        = is_file($cssFile) ? (string)filemtime($cssFile) : '1';
+$bdCssFile     = __DIR__ . '/assets/css/blocked-dates.css';
+$bdCssVer      = is_file($bdCssFile) ? (string)filemtime($bdCssFile) : '1';
 require __DIR__ . '/includes/header.php';
 
 function sc_switch(string $key, bool $checked, string $label): string
@@ -45,6 +47,7 @@ function sc_switch(string $key, bool $checked, string $label): string
 }
 ?>
 <link rel="stylesheet" href="<?= e(url('/assets/css/settings.css')) ?>?v=<?= e($cssVer) ?>">
+<link rel="stylesheet" href="<?= e(url('/assets/css/blocked-dates.css')) ?>?v=<?= e($bdCssVer) ?>">
 
 <section class="page-head sc-head">
     <div>
@@ -85,6 +88,7 @@ function sc_switch(string $key, bool $checked, string $label): string
     <button type="button" class="sc-tab" role="tab" aria-selected="false" data-tab="pricing"><?= icon('wallet') ?><span>Pricing &amp; Room Rates</span></button>
     <button type="button" class="sc-tab" role="tab" aria-selected="false" data-tab="sanitation"><?= icon('shield') ?><span>Sanitation &amp; Safety Protocols</span></button>
     <button type="button" class="sc-tab" role="tab" aria-selected="false" data-tab="staff"><?= icon('users') ?><span>Staff &amp; Operational Rules</span></button>
+    <button type="button" class="sc-tab" role="tab" aria-selected="false" data-tab="blocked"><?= icon('calendar') ?><span>Blocked Dates</span></button>
 </nav>
 
 <!-- ============ TAB 1 · HOURS ============ -->
@@ -143,24 +147,6 @@ function sc_switch(string $key, bool $checked, string $label): string
                         <div class="sc-num"><input type="number" min="0" max="720" step="1" inputmode="numeric" data-cfg="cancellation_notice_hours" value="<?= e($c('cancellation_notice_hours', '48')) ?>" aria-label="Cancellation notice in hours"><span>Hours prior</span></div>
                         <p class="sc-note">Guests cancelling later than this may forfeit their deposit.</p>
                     </div>
-                </div>
-            </article>
-
-            <article class="card">
-                <div class="card-head"><div><p class="label-small">Blocked Dates</p><h2 class="card-title">Special Closures &amp; Holiday Blocks</h2></div><span class="sc-tag">Manual override</span></div>
-                <form id="blockedDateForm" class="sc-inline-form" novalidate>
-                    <div class="field">
-                        <label for="blockedDateInput">Date</label>
-                        <input id="blockedDateInput" name="blocked_date" type="date" required>
-                    </div>
-                    <div class="field field-grow">
-                        <label for="blockedReasonInput">Reason</label>
-                        <input id="blockedReasonInput" name="reason" type="text" maxlength="255" placeholder="Private event, maintenance, holiday...">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Block</button>
-                </form>
-                <div class="sc-list-wrap">
-                    <ul id="blockedDatesList" class="sc-list sc-list-compact"></ul>
                 </div>
             </article>
         </div>
@@ -261,6 +247,40 @@ function sc_switch(string $key, bool $checked, string $label): string
                 <li>Cleaning gap and operating hours above apply to every therapist’s sessions.</li>
             </ul>
             <p class="sc-note">Per-therapist working hours and daily appointment limits need an extra table and are not part of this release.</p>
+        </aside>
+    </div>
+</section>
+
+<!-- ============ TAB 5 · BLOCKED DATES ============ -->
+<section class="sc-panel" data-panel="blocked" role="tabpanel" hidden>
+    <div class="sc-cols">
+        <article class="card">
+            <div class="card-head"><div><p class="label-small">Blocked Dates</p><h2 class="card-title">Special Closures &amp; Holiday Blocks</h2></div><span class="sc-tag" id="bdCount">Loading…</span></div>
+            <form id="bdForm" class="bd-form" novalidate>
+                <div class="field">
+                    <label for="bdDate">Date</label>
+                    <input type="date" id="bdDate" name="blocked_date" min="<?= e(date('Y-m-d')) ?>" required>
+                </div>
+                <div class="field">
+                    <label for="bdReason">Reason</label>
+                    <input type="text" id="bdReason" name="reason" maxlength="255" placeholder="Private event, maintenance, holiday..." required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="bdSubmit">Add Blocked Date</button>
+            </form>
+            <div class="bd-form-msgs">
+                <p class="form-error" id="bdError" role="alert" hidden></p>
+                <p class="sc-warn" id="bdWarn" role="status" hidden></p>
+            </div>
+            <ul class="bd-list" id="bdList" aria-live="polite"><li class="bd-empty">Loading…</li></ul>
+        </article>
+        <aside class="card">
+            <div class="card-head"><div><p class="label-small">How It Applies</p><h2 class="card-title">Blocked Date Rules</h2></div></div>
+            <ul class="sc-list">
+                <li>Blocked dates are shown as <strong>not available</strong> in every booking date picker.</li>
+                <li>The booking rules also reject them on the server, so they cannot be booked by any path.</li>
+                <li>Only today or later can be blocked. Past entries stay in the list for reference.</li>
+                <li>Existing pending or confirmed bookings are not cancelled automatically. A warning shows how many are affected.</li>
+            </ul>
         </aside>
     </div>
 </section>

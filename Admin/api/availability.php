@@ -1,117 +1,248 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../includes/appointments-data.php';
+require_once __DIR__ . '/booking-rules.php';
 
-api_guard();
+const AV_MAX_DAYS = 366;
 
-function avail_out(array $res, int $code = 200): never
+function av_valid_date(string $date): bool
 {
-    http_response_code($code);
-    echo json_encode($res);
-    exit;
+    $d = DateTime::createFromFormat('Y-m-d', $date);
+    return $d !== false && $d->format('Y-m-d') === $date;
 }
 
-$pdo = db();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!csrf_verify()) {
-        avail_out(['ok' => false, 'error' => 'Your session expired. Refresh the page and try again.'], 419);
-    }
-
-    $type   = (string)($_POST['type'] ?? '');
-    $id     = (int)($_POST['id'] ?? 0);
-    $status = (string)($_POST['status'] ?? '');
-
-    $rules = [
-        'room'      => ['table' => 'rooms',      'column' => 'room_status',         'allowed' => ['available', 'cleaning', 'maintenance']],
-        'therapist' => ['table' => 'therapists', 'column' => 'availability_status', 'allowed' => ['available', 'on_leave']],
-    ];
-
-    if (!isset($rules[$type]) || $id < 1 || !in_array($status, $rules[$type]['allowed'], true)) {
-        avail_out(['ok' => false, 'error' => 'Invalid availability update.'], 422);
-    }
-
-    try {
-        $rule = $rules[$type];
-        $stmt = $pdo->prepare('UPDATE ' . $rule['table'] . ' SET ' . $rule['column'] . ' = ? WHERE id = ?');
-        $stmt->execute([$status, $id]);
-
-        $stmt = $pdo->prepare('SELECT COUNT(*) FROM ' . $rule['table'] . ' WHERE id = ?');
-        $stmt->execute([$id]);
-        if ((int)$stmt->fetchColumn() === 0) {
-            avail_out(['ok' => false, 'error' => 'That record no longer exists.'], 404);
-        }
-    } catch (Throwable $e) {
-        avail_out(['ok' => false, 'error' => 'Unable to update availability right now.'], 500);
-    }
-
-    avail_out(['ok' => true, 'message' => ucfirst($type) . ' availability updated.']);
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    avail_out(['ok' => false, 'error' => 'Method not allowed.'], 405);
-}
-
-$date = appt_parse_date((string)($_GET['date'] ?? '')) ?? date('Y-m-d');
-
-try {
-    $rooms      = $pdo->query('SELECT id, room_name, room_type, room_status FROM rooms ORDER BY id ASC')->fetchAll();
-    $therapists = $pdo->query('SELECT id, full_name, specialization, availability_status FROM therapists ORDER BY id ASC')->fetchAll();
-
-    $stmt = $pdo->prepare(
-        "SELECT a.room_id, a.therapist_id, a.start_time, a.end_time, c.full_name AS customer_name
-         FROM appointments a
-         LEFT JOIN customers c ON c.id = a.customer_id
-         WHERE a.appointment_date = ? AND a.appointment_status NOT IN ('cancelled', 'no_show')
-         ORDER BY a.start_time ASC"
-    );
-    $stmt->execute([$date]);
-    $bookings = $stmt->fetchAll();
-} catch (Throwable $e) {
-    avail_out(['ok' => false, 'error' => 'Unable to load availability right now.'], 500);
-}
-
-$slotsFor = static function (string $field, int $id) use ($bookings): array {
+function av_dates(string $start, int $days): array
+{
     $out = [];
-    foreach ($bookings as $b) {
-        if ((int)$b[$field] === $id) {
-            $out[] = [
-                'time'     => appt_time_label((string)$b['start_time']) . ' – ' . appt_time_label((string)$b['end_time']),
-                'customer' => (string)($b['customer_name'] ?? ''),
-            ];
+    $cursor = new DateTimeImmutable($start);
+    for ($i = 0; $i < $days; $i++) {
+        $out[] = $cursor->modify('+' . $i . ' day')->format('Y-m-d');
+    }
+    return $out;
+}
+
+function av_load(PDO $pdo, string $start, string $end, ?int $serviceId = null, int $excludeId = 0): array
+{
+    $services = [];
+    $byCode = [];
+    foreach ($pdo->query('SELECT id, service_name, room_code, duration FROM services ORDER BY id')->fetchAll() as $s) {
+        $s['id'] = (int)$s['id'];
+        $s['duration'] = (int)$s['duration'];
+        $s['room_code'] = strtoupper((string)$s['room_code']);
+        $services[$s['id']] = $s;
+        $byCode[$s['room_code']] = $s;
+    }
+
+    $service = null;
+    if ($serviceId !== null && $serviceId > 0) {
+        if (!isset($services[$serviceId])) {
+            throw new InvalidArgumentException('The selected service does not exist.');
+        }
+        $service = $services[$serviceId];
+    }
+
+    $rooms = [];
+    foreach ($pdo->query('SELECT id, room_name, room_status FROM rooms ORDER BY id')->fetchAll() as $r) {
+        $rooms[] = [
+            'id'     => (int)$r['id'],
+            'name'   => (string)$r['room_name'],
+            'status' => (string)$r['room_status'],
+            'code'   => bk_room_code((string)$r['room_name']),
+        ];
+    }
+
+    $hours = [];
+    foreach ($pdo->query('SELECT day_of_week, opening_time, closing_time, is_open FROM spa_operating_hours')->fetchAll() as $h) {
+        $hours[(int)$h['day_of_week']] = [
+            'open'    => bk_min((string)$h['opening_time']),
+            'close'   => bk_min((string)$h['closing_time']),
+            'is_open' => (bool)(int)$h['is_open'],
+        ];
+    }
+
+    $blocked = [];
+    $stmt = $pdo->prepare('SELECT blocked_date, reason FROM blocked_dates WHERE blocked_date BETWEEN ? AND ?');
+    $stmt->execute([$start, $end]);
+    foreach ($stmt->fetchAll() as $b) {
+        $blocked[(string)$b['blocked_date']] = trim((string)($b['reason'] ?? ''));
+    }
+
+    $maint = [];
+    $stmt = $pdo->prepare("SELECT room_id, scheduled_date FROM room_maintenance_logs WHERE scheduled_date BETWEEN ? AND ? AND maintenance_status <> 'completed'");
+    $stmt->execute([$start, $end]);
+    foreach ($stmt->fetchAll() as $m) {
+        $maint[(string)$m['scheduled_date']][(int)$m['room_id']] = true;
+    }
+
+    $booked = [];
+    $stmt = $pdo->prepare(
+        "SELECT appointment_date, room_id, start_time, end_time FROM appointments
+         WHERE appointment_date BETWEEN ? AND ? AND id <> ?
+           AND appointment_status NOT IN ('cancelled', 'no_show')"
+    );
+    $stmt->execute([$start, $end, $excludeId]);
+    foreach ($stmt->fetchAll() as $a) {
+        $booked[(string)$a['appointment_date']][(int)$a['room_id']][] = [bk_min((string)$a['start_time']), bk_min((string)$a['end_time'])];
+    }
+
+    return [
+        'start'    => $start,
+        'end'      => $end,
+        'today'    => date('Y-m-d'),
+        'now_min'  => (int)date('G') * 60 + (int)date('i'),
+        'gap'      => spa_cleaning_gap($pdo),
+        'services' => $services,
+        'by_code'  => $byCode,
+        'service'  => $service,
+        'rooms'    => $rooms,
+        'hours'    => $hours,
+        'blocked'  => $blocked,
+        'maint'    => $maint,
+        'booked'   => $booked,
+    ];
+}
+
+function av_day_hours(array $ctx, string $date): array
+{
+    return $ctx['hours'][(int)date('N', strtotime($date))] ?? ['open' => 780, 'close' => 1260, 'is_open' => true];
+}
+
+function av_room_service(array $ctx, array $room): ?array
+{
+    if ($ctx['service'] !== null) {
+        return $room['code'] === $ctx['service']['room_code'] ? $ctx['service'] : null;
+    }
+    return $ctx['by_code'][$room['code']] ?? null;
+}
+
+function av_scope_rooms(array $ctx): array
+{
+    $out = [];
+    foreach ($ctx['rooms'] as $room) {
+        if (av_room_service($ctx, $room) !== null) {
+            $out[] = $room;
         }
     }
     return $out;
-};
-
-$roomOut = [];
-foreach ($rooms as $r) {
-    $roomOut[] = [
-        'id'     => (int)$r['id'],
-        'name'   => (string)$r['room_name'],
-        'type'   => (string)$r['room_type'],
-        'status' => (string)$r['room_status'],
-        'slots'  => $slotsFor('room_id', (int)$r['id']),
-    ];
 }
 
-$therapistOut = [];
-foreach ($therapists as $t) {
-    $therapistOut[] = [
-        'id'     => (int)$t['id'],
-        'name'   => (string)$t['full_name'],
-        'type'   => (string)$t['specialization'],
-        'status' => (string)$t['availability_status'],
-        'slots'  => $slotsFor('therapist_id', (int)$t['id']),
-    ];
+function av_room_usable(array $ctx, string $date, array $room): bool
+{
+    return $room['status'] !== 'maintenance' && empty($ctx['maint'][$date][$room['id']]);
 }
 
-avail_out([
-    'ok'         => true,
-    'date'       => $date,
-    'date_label' => date('l, F j, Y', strtotime($date)),
-    'rooms'      => $roomOut,
-    'therapists' => $therapistOut,
-]);
+function av_free_slots(array $ctx, string $date, array $room, array $service, bool $futureOnly = true): array
+{
+    $day = av_day_hours($ctx, $date);
+    if (!$day['is_open']) {
+        return [];
+    }
+    $duration = (int)$service['duration'];
+    $gap = (int)$ctx['gap'];
+    $busy = $ctx['booked'][$date][$room['id']] ?? [];
+    $cutoff = ($futureOnly && $date === $ctx['today']) ? (int)$ctx['now_min'] : -1;
+    $free = [];
+    foreach (bk_grid($day['open'], $day['close'], $duration, $gap) as $s) {
+        if ($s <= $cutoff) {
+            continue;
+        }
+        $e = $s + $duration;
+        $clash = false;
+        foreach ($busy as [$bs, $be]) {
+            if ($s < $be + $gap && $bs < $e + $gap) {
+                $clash = true;
+                break;
+            }
+        }
+        if (!$clash) {
+            $free[] = $s;
+        }
+    }
+    return $free;
+}
+
+function av_room_slots(array $ctx, string $date, bool $futureOnly = true): array
+{
+    $out = [];
+    foreach (av_scope_rooms($ctx) as $room) {
+        $service = av_room_service($ctx, $room);
+        $usable = av_room_usable($ctx, $date, $room);
+        $out[] = [
+            'room'    => $room,
+            'service' => $service,
+            'usable'  => $usable,
+            'slots'   => $usable ? av_free_slots($ctx, $date, $room, $service, $futureOnly) : [],
+        ];
+    }
+    return $out;
+}
+
+function av_date_status(array $ctx, string $date): ?array
+{
+    if ($date < $ctx['today']) {
+        return ['code' => 'past', 'message' => 'date has passed'];
+    }
+
+    $day = av_day_hours($ctx, $date);
+    if (!$day['is_open']) {
+        return ['code' => 'closed', 'message' => 'the spa is closed on ' . date('l', strtotime($date)) . 's'];
+    }
+
+    if (isset($ctx['blocked'][$date])) {
+        $why = $ctx['blocked'][$date];
+        return ['code' => 'blocked', 'message' => $why !== '' ? 'the spa is closed (' . $why . ')' : 'the spa is closed on this date'];
+    }
+
+    $scope = av_scope_rooms($ctx);
+    if (!$scope) {
+        return ['code' => 'fully_booked', 'message' => 'no rooms available'];
+    }
+
+    $usable = array_values(array_filter($scope, static fn(array $r): bool => av_room_usable($ctx, $date, $r)));
+    if (!$usable) {
+        return [
+            'code'    => 'maintenance',
+            'message' => $ctx['service'] !== null ? 'all ' . $ctx['service']['room_code'] . ' rooms are under maintenance' : 'all rooms are under maintenance',
+        ];
+    }
+
+    foreach ($usable as $room) {
+        if (av_free_slots($ctx, $date, $room, av_room_service($ctx, $room), true)) {
+            return null;
+        }
+    }
+
+    if ($date === $ctx['today']) {
+        foreach ($usable as $room) {
+            if (av_free_slots($ctx, $date, $room, av_room_service($ctx, $room), false)) {
+                return ['code' => 'fully_booked', 'message' => 'no sessions left today'];
+            }
+        }
+    }
+
+    return ['code' => 'fully_booked', 'message' => 'fully booked'];
+}
+
+function av_unavailable(PDO $pdo, string $start, int $days, ?int $serviceId = null): array
+{
+    $days = max(1, min(AV_MAX_DAYS, $days));
+    $dates = av_dates($start, $days);
+    $end = $dates[count($dates) - 1];
+    $ctx = av_load($pdo, $start, $end, $serviceId);
+
+    $out = [];
+    foreach ($dates as $date) {
+        $status = av_date_status($ctx, $date);
+        if ($status !== null) {
+            $out[] = ['date' => $date, 'code' => $status['code'], 'message' => $status['message']];
+        }
+    }
+
+    return [
+        'today'      => $ctx['today'],
+        'start'      => $start,
+        'end'        => $end,
+        'service_id' => $ctx['service']['id'] ?? null,
+        'dates'      => $out,
+    ];
+}

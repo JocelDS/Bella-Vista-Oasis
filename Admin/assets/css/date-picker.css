@@ -1,0 +1,189 @@
+.dp-input {
+  padding-right: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a2e3d' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+  cursor: pointer;
+}
+.dp-input[aria-invalid="true"] {
+  border-color: var(--red, #b3261e);
+  box-shadow: 0 0 0 3px rgba(179, 38, 30, 0.14);
+}
+
+.dp-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--gray, #8b8185);
+}
+.dp-note[hidden] {
+  display: none;
+}
+.dp-note.is-error {
+  color: #9b2226;
+  font-weight: 600;
+}
+.dp-note.is-info {
+  color: var(--forest, #4a2e3d);
+  font-weight: 500;
+}
+
+.dp-pop {
+  position: fixed;
+  z-index: 400;
+  width: 308px;
+  max-width: calc(100vw - 16px);
+  padding: 14px;
+  background: var(--white, #ffffff);
+  border: 1px solid var(--border, #e8ddd6);
+  border-radius: 14px;
+  box-shadow: 0 18px 48px rgba(51, 32, 43, 0.28);
+  font-family: var(--sans, "Inter", system-ui, sans-serif);
+}
+.dp-pop[hidden] {
+  display: none;
+}
+.dp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.dp-title {
+  font-family: var(--serif, "Cormorant Garamond", Georgia, serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--forest, #4a2e3d);
+  text-align: center;
+  flex: 1;
+}
+.dp-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border, #e8ddd6);
+  border-radius: 8px;
+  background: var(--white, #ffffff);
+  color: var(--forest, #4a2e3d);
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+.dp-nav svg {
+  width: 16px;
+  height: 16px;
+}
+.dp-nav:hover:not(:disabled) {
+  background: #f0e7e2;
+}
+.dp-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.dp-nav:focus-visible,
+.dp-day:focus-visible {
+  outline: 2px solid var(--sage, #c49a94);
+  outline-offset: 2px;
+}
+
+.dp-dow,
+.dp-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.dp-dow span {
+  padding: 4px 0;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray, #8b8185);
+}
+.dp-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dp-grid.is-loading .dp-day {
+  opacity: 0.55;
+}
+.dp-blank {
+  height: 36px;
+}
+
+.dp-day {
+  display: block;
+  width: 100%;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--white, #ffffff);
+  color: var(--ink, #2b2227);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.dp-day:hover {
+  background: #f0e7e2;
+}
+.dp-day.is-today {
+  border-color: var(--sage, #c49a94);
+  font-weight: 600;
+}
+.dp-day.is-own {
+  border-style: dashed;
+  border-color: var(--gold, #c89d66);
+}
+.dp-day.is-selected {
+  background: var(--forest, #4a2e3d);
+  border-color: var(--forest, #4a2e3d);
+  color: #ffffff;
+}
+.dp-day.is-selected:hover {
+  background: var(--emerald, #5e3e50);
+}
+.dp-day.is-off,
+.dp-day.is-off:hover {
+  background: repeating-linear-gradient(135deg, #f6efeb 0, #f6efeb 4px, #fbf7f4 4px, #fbf7f4 8px);
+  color: #a79da2;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+.dp-day.is-off.is-selected {
+  border-color: var(--red, #b3261e);
+  color: #9b2226;
+}
+
+.dp-msg {
+  margin: 10px 0 0;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f8f1ec;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--gray, #8b8185);
+}
+.dp-msg.is-error {
+  background: rgba(179, 38, 30, 0.1);
+  color: #9b2226;
+  font-weight: 600;
+}
+
+@media (max-width: 420px) {
+  .dp-pop {
+    padding: 12px;
+  }
+  .dp-day,
+  .dp-blank {
+    height: 34px;
+  }
+}
