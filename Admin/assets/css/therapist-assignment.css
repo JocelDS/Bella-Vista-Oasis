@@ -75,7 +75,7 @@
   color: var(--cream);
 }
 .stat-dark .stat-ico {
-  background: rgba(250,245,240, 0.08);
+  background: rgba(255,255,255, 0.12);
   border-color: rgba(250,245,240, 0.16);
   color: var(--gold);
 }
@@ -172,11 +172,11 @@
 }
 .queue-tag.is-open {
   background: rgba(200,157,102, 0.25);
-  color: #6e5122;
+  color: #E7C68F;
 }
 .queue-tag.is-leave {
   background: rgba(179,38,30, 0.12);
-  color: #9b2226;
+  color: #E18BB9;
 }
 .queue-item .btn {
   justify-self: start;
@@ -220,12 +220,12 @@
   color: var(--gray);
 }
 .ts-available {
-  background: rgba(196,154,148, 0.28);
-  color: #5a3a4b;
+  background: rgba(225,139,185, 0.18);
+  color: #986BC2;
 }
 .ts-on_leave {
-  background: rgba(179,38,30, 0.14);
-  color: #9b2226;
+  background: rgba(225,139,185, 0.18);
+  color: #E18BB9;
 }
 .alert-item {
   display: flex;
@@ -239,7 +239,7 @@
   border-left-width: 3px;
 }
 .alert-item.al-warn {
-  border-left-color: #c89d66;
+  border-left-color: #E7C68F;
 }
 .alert-item.al-danger {
   border-left-color: var(--red);
@@ -313,7 +313,7 @@
 }
 .th-leave {
   font-size: 12px;
-  color: #9b2226;
+  color: #E18BB9;
 }
 .th-stats {
   display: grid;
@@ -349,7 +349,7 @@
 .th-bar {
   height: 8px;
   border-radius: 999px;
-  background: #eee6e1;
+  background: #FFF7FC;
   overflow: hidden;
 }
 .th-bar span {
@@ -365,8 +365,8 @@
 .th-bar.is-empty {
   background: repeating-linear-gradient(
     45deg,
-    #eee6e1,
-    #eee6e1 6px,
+    #FFF7FC,
+    #FFF7FC 6px,
     #f4ece7 6px,
     #f4ece7 12px
   );
@@ -391,7 +391,7 @@
 .th-free {
   margin-top: 4px;
   font-size: 12px;
-  color: #5a3a4b;
+  color: #986BC2;
 }
 .th-svc {
   display: flex;
@@ -473,7 +473,7 @@
   background: rgba(200,157,102, 0.22);
   border-radius: 10px;
   font-size: 12.5px;
-  color: #6e5122;
+  color: #E7C68F;
 }
 .as-override input {
   margin-top: 2px;
@@ -563,7 +563,7 @@ form.is-disabled {
   background: rgba(179,38,30, 0.25);
 }
 .lg-off {
-  background: #eee6e1;
+  background: #FFF7FC;
 }
 .lg-conflict {
   background: var(--red);
@@ -662,7 +662,7 @@ td.is-today {
   font-size: 10.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #9b2226;
+  color: #E18BB9;
 }
 .wk-off .wk-flag {
   color: var(--gray);
@@ -678,7 +678,7 @@ td.is-today {
 }
 .wk-free {
   display: block;
-  color: #5a3a4b;
+  color: #986BC2;
   font-size: 11px;
 }
 .wk-chip {
@@ -700,7 +700,7 @@ td.is-today {
   background: #9b6f7f;
 }
 .wk-chip.is-completed {
-  background: #c49a94;
+  background: #C5A0DD;
   color: var(--forest);
 }
 .wk-chip.is-conflict {
@@ -770,11 +770,11 @@ td.is-today {
   display: block;
 }
 .ts-inactive {
-  background: #eee6e1;
+  background: #FFF7FC;
   color: var(--gray);
 }
 .wk-table td.wk-inactive {
-  background: #eee6e1;
+  background: #FFF7FC;
 }
 .wk-inactive .wk-flag {
   color: var(--gray);
@@ -811,7 +811,7 @@ td.is-today {
   align-items: center;
   gap: 6px;
   font-size: 12.5px;
-  color: #9b2226;
+  color: #E18BB9;
 }
 @media (max-width: 560px) {
   .tf-photo {

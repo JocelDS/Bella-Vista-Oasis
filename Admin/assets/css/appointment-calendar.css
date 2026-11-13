@@ -126,7 +126,7 @@
   border-color: var(--gold);
 }
 .lg-completed {
-  background: #eee6e1;
+  background: #FFF7FC;
   border-color: #ddd2cb;
 }
 .lg-gap {
@@ -142,7 +142,7 @@
   border: 1px dashed var(--sage);
 }
 .lg-off {
-  background: rgba(179,38,30, 0.14);
+  background: rgba(225,139,185, 0.18);
   border: 1px dashed var(--red);
 }
 
@@ -306,7 +306,7 @@
   border: 1.5px dashed var(--sage);
   border-radius: 10px;
   background: rgba(196,154,148, 0.09);
-  color: #7a5568;
+  color: #986BC2;
   font-size: 11px;
   font-weight: 500;
   text-align: center;
@@ -347,7 +347,7 @@
     transform 0.15s;
 }
 .mx-card:hover {
-  box-shadow: 0 6px 16px rgba(74,46,61, 0.14);
+  box-shadow: 0 6px 16px rgba(225,139,185, 0.18);
   transform: translateY(-1px);
   z-index: 5;
 }
@@ -420,27 +420,27 @@
 .is-pending {
   background: #f6ead7;
   border-color: var(--gold);
-  color: #6e5122;
+  color: #E7C68F;
 }
 .is-completed {
-  background: #eee6e1;
+  background: #FFF7FC;
   border-color: #ddd2cb;
   color: #756a6e;
 }
 .is-cancelled {
   background: rgba(179,38,30, 0.1);
   border: 1px dashed var(--red);
-  color: #9b2226;
+  color: #E18BB9;
   opacity: 0.85;
 }
 .is-no_show {
-  background: #efe8e3;
+  background: #FFF7FC;
   border: 1px dashed var(--gray);
   color: #756a6e;
   opacity: 0.85;
 }
 .is-other {
-  background: #efe8e3;
+  background: #FFF7FC;
   border-color: var(--border);
   color: var(--gray);
 }
@@ -524,7 +524,7 @@
   cursor: pointer;
 }
 .day-card:hover {
-  box-shadow: 0 6px 16px rgba(74,46,61, 0.12);
+  box-shadow: 0 6px 16px rgba(152,107,194, 0.12);
 }
 .day-card.is-selected {
   outline: 2px solid var(--gold);
@@ -655,7 +655,7 @@
   min-width: 0;
 }
 .wk-chip:hover {
-  box-shadow: 0 4px 12px rgba(74,46,61, 0.12);
+  box-shadow: 0 4px 12px rgba(152,107,194, 0.12);
 }
 .wk-chip.is-selected {
   outline: 2px solid var(--gold);
@@ -849,7 +849,7 @@
   color: var(--gray);
 }
 .open-item.is-now .open-time {
-  color: #5a3a4b;
+  color: #986BC2;
   font-weight: 600;
 }
 .btn-book {
@@ -883,7 +883,7 @@
   text-decoration: underline;
 }
 .roster-btn.is-active .roster-name {
-  color: #7a5568;
+  color: #986BC2;
 }
 .roster-info {
   flex: 1;
@@ -899,15 +899,15 @@
   color: var(--gray);
 }
 .ts-available {
-  background: rgba(196,154,148, 0.28);
-  color: #5a3a4b;
+  background: rgba(225,139,185, 0.18);
+  color: #986BC2;
 }
 .ts-session {
   background: var(--forest);
   color: var(--cream);
 }
 .ts-on_leave {
-  background: #efe8e3;
+  background: #FFF7FC;
   color: var(--gray);
 }
 
@@ -925,12 +925,12 @@
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 13px;
-  background: rgba(196,154,148, 0.22);
-  color: #5a3a4b;
+  background: rgba(152,107,194, 0.12);
+  color: #986BC2;
 }
 .check-line.is-bad {
   background: rgba(179,38,30, 0.12);
-  color: #9b2226;
+  color: #E18BB9;
 }
 
 @media (max-width: 1100px) {

@@ -1,12 +1,18 @@
 :root {
-  --forest: #4a2e3d;
-  --dark: #33202b;
-  --cream: #faf5f0;
+  --purple: #986BC2;
+  --pink: #E18BB9;
+  --lavender: #C5A0DD;
+  --blush: #F4BED5;
+  --pearl: #FFF7FC;
+  --champagne: #E7C68F;
+  --forest: var(--purple);
+  --dark: var(--purple);
+  --cream: var(--pearl);
   --white: #ffffff;
-  --muted: #8b8185;
-  --border: #e8ddd6;
-  --gold: #c89d66;
-  --danger: #b3261e;
+  --muted: #7A648F;
+  --border: var(--blush);
+  --gold: var(--champagne);
+  --danger: var(--pink);
   --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -42,7 +48,7 @@ textarea {
   font: inherit;
 }
 :focus-visible {
-  outline: 2px solid rgba(200,157,102, 0.9);
+  outline: 2px solid rgba(214,185,138, 0.9);
   outline-offset: 2px;
 }
 .label-small {
@@ -100,7 +106,7 @@ textarea {
   font-size: 12px;
 }
 .btn-ghost:hover {
-  background: rgba(250,245,240, 0.1);
+  background: rgba(255,247,252, 0.2);
 }
 .admin-main {
   flex: 1;
@@ -249,7 +255,7 @@ label {
   align-items: baseline;
 }
 .req {
-  color: #b3261e;
+  color: #E18BB9;
 }
 .link-small {
   font-size: 11px;
@@ -273,7 +279,7 @@ label {
 }
 .input:focus-within {
   border-color: var(--forest);
-  box-shadow: 0 0 0 3px rgba(74,46,61, 0.1);
+  box-shadow: 0 0 0 3px rgba(91,77,102, 0.1);
 }
 .input .ico {
   width: 16px;
@@ -347,7 +353,7 @@ label {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: var(--forest);
+  background: var(--purple);
   color: var(--white);
   border: 0;
   border-radius: 4px;
@@ -360,11 +366,32 @@ label {
   transition: background 0.15s;
 }
 .btn-primary:hover {
-  background: var(--dark);
+  background: var(--pink);
 }
 .btn-primary:focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--champagne);
   outline-offset: 2px;
+}
+.btn-secondary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--pink);
+  color: var(--white);
+  border: 0;
+  border-radius: 4px;
+  padding: 14px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-secondary:hover {
+  background: var(--purple);
 }
 .btn-primary svg {
   width: 15px;
@@ -413,8 +440,8 @@ label {
   border: 1px solid #ebc4c4;
 }
 .alert-ok {
-  background: #f3e7e4;
-  color: #4a2e3d;
+  background: #FFF7FC;
+  color: #986BC2;
   border: 1px solid #e2c7c1;
 }
 .alert-dev {

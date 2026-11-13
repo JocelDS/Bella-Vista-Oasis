@@ -63,8 +63,8 @@
   flex: none;
 }
 .qr-service[data-state="ok"] .dot {
-  background: #7a5568;
-  box-shadow: 0 0 0 4px rgba(122,85,104, 0.25);
+  background: #986BC2;
+  box-shadow: 0 0 0 4px rgba(152,107,194, 0.18);
 }
 .qr-service[data-state="down"] .dot {
   background: var(--red);
@@ -102,7 +102,7 @@
   transition: width 0.5s ease;
 }
 .qr-stats .stat-hl .qr-bar span {
-  background: #7a5568;
+  background: #986BC2;
 }
 
 /* ---------- Layout ---------- */
@@ -133,7 +133,7 @@
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  background: #efe8e3;
+  background: #FFF7FC;
   color: var(--gray);
 }
 .qr-pill::before {
@@ -147,7 +147,7 @@
 .qr-pill[data-state="live"],
 .qr-pill.is-ok {
   background: rgba(196,154,148, 0.34);
-  color: #4a2e3d;
+  color: #986BC2;
 }
 .qr-pill[data-state="live"]::before {
   animation: qrPulse 1.4s ease-in-out infinite;
@@ -155,15 +155,15 @@
 .qr-pill[data-state="warn"],
 .qr-pill.is-warn {
   background: rgba(200,157,102, 0.42);
-  color: #6e5122;
+  color: #E7C68F;
 }
 .qr-pill[data-state="bad"],
 .qr-pill.is-bad {
-  background: rgba(179,38,30, 0.16);
-  color: #9b2226;
+  background: rgba(225,139,185, 0.2);
+  color: #E18BB9;
 }
 .qr-pill.is-muted {
-  background: #efe8e3;
+  background: #FFF7FC;
   color: var(--gray);
 }
 @keyframes qrPulse {
@@ -216,7 +216,7 @@
   min-height: 250px;
   background: radial-gradient(
     circle at 50% 38%,
-    #4a2e3d 0%,
+    #986BC2 0%,
     var(--emerald) 45%,
     var(--dark) 100%
   );
@@ -289,7 +289,7 @@
   border-color: var(--gold);
 }
 .qr-viewport[data-view="camera"][data-paused="1"] .qr-corner {
-  border-color: #c49a94;
+  border-color: #C5A0DD;
 }
 
 .qr-vp-idle,
@@ -306,7 +306,7 @@
   width: 64px;
   height: 64px;
   border-radius: 16px;
-  background: rgba(250,245,240, 0.1);
+  background: rgba(255,247,252, 0.2);
   border: 1px solid rgba(250,245,240, 0.16);
   display: inline-flex;
   align-items: center;
@@ -398,7 +398,7 @@
   line-height: 1.5;
 }
 .qr-note.is-error {
-  color: #9b2226;
+  color: #E18BB9;
   background: rgba(179,38,30, 0.1);
   border-radius: 10px;
   padding: 9px 12px;
@@ -465,7 +465,7 @@
   margin-top: 6px;
 }
 .qr-act-item.tone-ok .qr-act-dot {
-  background: #7a5568;
+  background: #986BC2;
 }
 .qr-act-item.tone-bad .qr-act-dot {
   background: var(--red);
@@ -775,17 +775,17 @@
 }
 .qr-alert.tone-ok {
   background: rgba(196,154,148, 0.2);
-  color: #4a2e3d;
+  color: #986BC2;
   border-color: rgba(196,154,148, 0.5);
 }
 .qr-alert.tone-warn {
   background: rgba(200,157,102, 0.26);
-  color: #6e5122;
+  color: #E7C68F;
   border-color: rgba(200,157,102, 0.6);
 }
 .qr-alert.tone-bad {
   background: rgba(179,38,30, 0.12);
-  color: #9b2226;
+  color: #E18BB9;
   border-color: rgba(179,38,30, 0.35);
 }
 .qr-alert.tone-muted {
@@ -839,7 +839,7 @@
   height: 56px;
   border-radius: 50%;
   background: rgba(196,154,148, 0.35);
-  color: #5a3a4b;
+  color: #986BC2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -932,7 +932,7 @@
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
-  background: #efe8e3;
+  background: #FFF7FC;
   color: var(--gray);
 }
 .qr-badge::before {
@@ -945,12 +945,12 @@
 .qr-badge.k-verified,
 .qr-badge.k-checked_in {
   background: rgba(196,154,148, 0.32);
-  color: #5a3a4b;
+  color: #986BC2;
 }
 .qr-badge.k-pending,
 .qr-badge.k-expected {
-  background: rgba(200,157,102, 0.32);
-  color: #6e5122;
+  background: rgba(231,198,143, 0.24);
+  color: #E7C68F;
 }
 .qr-badge.k-arrived {
   background: rgba(94,62,80, 0.13);
@@ -959,14 +959,14 @@
 .qr-badge.k-invalid,
 .qr-badge.k-expired,
 .qr-badge.k-cancelled {
-  background: rgba(179,38,30, 0.16);
-  color: #9b2226;
+  background: rgba(225,139,185, 0.2);
+  color: #E18BB9;
 }
 .qr-badge.k-no_show,
 .qr-badge.k-completed,
 .qr-badge.k-not_used,
 .qr-badge.k-no_record {
-  background: #ece4df;
+  background: #F4BED5;
   color: #756a6e;
 }
 .qr-method {
@@ -1045,7 +1045,7 @@ button.qr-result:hover {
 }
 .qr-result-why {
   font-size: 11.5px;
-  color: #9b2226;
+  color: #E18BB9;
   margin-top: 4px;
 }
 .qr-form-row {

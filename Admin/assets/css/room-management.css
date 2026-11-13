@@ -214,28 +214,28 @@
   white-space: nowrap;
 }
 .cb-ok {
-  background: rgba(196,154,148, 0.28);
-  color: #5a3a4b;
+  background: rgba(225,139,185, 0.18);
+  color: #986BC2;
 }
 .cb-low {
-  background: rgba(200,157,102, 0.3);
-  color: #6e5122;
+  background: rgba(231,198,143, 0.22);
+  color: #E7C68F;
 }
 .cb-high {
-  background: rgba(179,38,30, 0.16);
-  color: #9b2226;
+  background: rgba(225,139,185, 0.2);
+  color: #E18BB9;
 }
 .mb-scheduled {
-  background: #efe8e3;
+  background: #FFF7FC;
   color: var(--gray);
 }
 .mb-in_progress {
-  background: rgba(200,157,102, 0.3);
-  color: #6e5122;
+  background: rgba(231,198,143, 0.22);
+  color: #E7C68F;
 }
 .mb-completed {
-  background: rgba(196,154,148, 0.28);
-  color: #5a3a4b;
+  background: rgba(225,139,185, 0.18);
+  color: #986BC2;
 }
 .rc-details {
   display: grid;
@@ -269,7 +269,7 @@
   padding: 8px 12px;
   border-radius: 10px;
   background: rgba(179,38,30, 0.1);
-  color: #9b2226;
+  color: #E18BB9;
   font-size: 12px;
   font-weight: 500;
 }

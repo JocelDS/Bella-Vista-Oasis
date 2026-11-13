@@ -34,11 +34,11 @@
   flex: none;
 }
 .sc-dot.is-open {
-  background: #7a5568;
+  background: #986BC2;
   box-shadow: 0 0 0 3px rgba(122,85,104, 0.2);
 }
 .sc-dot.is-closed {
-  background: var(--red, #b3261e);
+  background: var(--red, #E18BB9);
 }
 
 /* Tabs */
@@ -123,8 +123,8 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-weight: 600;
-  background: rgba(196,154,148, 0.28);
-  color: #5a3a4b;
+  background: rgba(225,139,185, 0.18);
+  color: #986BC2;
   white-space: nowrap;
 }
 .sc-sub {
@@ -473,7 +473,7 @@
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
-  color: #9b2226;
+  color: #E18BB9;
 }
 .sc-link-btn {
   margin-top: 14px;
@@ -538,7 +538,7 @@
 .sc-room-rate.is-unset {
   font-family: inherit;
   font-size: 13px;
-  color: #9b2226;
+  color: #E18BB9;
   font-weight: 600;
 }
 .sc-room-foot {
@@ -600,7 +600,7 @@
 }
 .sc-shot:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 26px rgba(74,46,61, 0.18);
+  box-shadow: 0 10px 26px rgba(152,107,194, 0.18);
 }
 
 /* Action bar */
@@ -671,7 +671,7 @@
 .sc-ok {
   margin-top: 14px;
   font-size: 13px;
-  color: #5a3a4b;
+  color: #986BC2;
   font-weight: 600;
 }
 

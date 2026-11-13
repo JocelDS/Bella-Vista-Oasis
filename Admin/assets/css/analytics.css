@@ -123,7 +123,7 @@
 }
 
 .btn-soft {
-    background: rgba(74,46,61, 0.05);
+    background: rgba(91,77,102, 0.07);
     border-color: var(--border);
     color: var(--forest);
 }
@@ -178,7 +178,7 @@
     width: 32px;
     height: 32px;
     border-radius: 10px;
-    background: rgba(74,46,61, 0.04);
+    background: rgba(152,107,194, 0.08);
     color: var(--forest);
     font-weight: 700;
 }
@@ -197,8 +197,8 @@
     color: var(--gray);
 }
 
-.summary-meta.up { color: #5e3e50; }
-.summary-meta.down { color: #9b2226; }
+.summary-meta.up { color: #C5A0DD; }
+.summary-meta.down { color: #E18BB9; }
 
 .analytics-shell {
     display: grid;
@@ -235,7 +235,7 @@
 }
 
 .chip-total {
-    background: rgba(74,46,61, 0.05);
+    background: rgba(91,77,102, 0.07);
     color: var(--forest);
     border-radius: 999px;
     padding: 7px 10px;
@@ -327,7 +327,7 @@
 }
 
 .data-table thead th {
-    background: rgba(74,46,61, 0.04);
+    background: rgba(152,107,194, 0.08);
     color: var(--forest);
     font-family: var(--sans);
     font-size: 11px;

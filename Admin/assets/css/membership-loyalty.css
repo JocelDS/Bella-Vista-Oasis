@@ -2,11 +2,11 @@
 
 /* ---------- Button system (this page only; loads after dashboard.css) ---------- */
 :root {
-  --btn-primary: #4a2e3d;
-  --btn-primary-hover: #33202b;
-  --btn-outline: #7a5568;
-  --btn-tint: #f3e7e4;
-  --btn-tint-hover: #ebd6d2;
+  --btn-primary: #986BC2;
+  --btn-primary-hover: #986BC2;
+  --btn-outline: #986BC2;
+  --btn-tint: #FFF7FC;
+  --btn-tint-hover: #F4BED5;
   --btn-radius: 6px;
   --btn-font: "DM Sans", var(--sans);
 }
@@ -51,7 +51,7 @@
 .btn-primary:hover {
   background: var(--btn-primary-hover);
   border-color: var(--btn-primary-hover);
-  box-shadow: 0 2px 8px rgba(74,46,61, 0.22);
+  box-shadow: 0 2px 8px rgba(91,77,102, 0.22);
 }
 .btn-outline {
   background: #fff;
@@ -225,7 +225,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #eee6e1;
+  background: #FFF7FC;
   color: var(--forest);
   border: 1px solid var(--border);
   font-family: var(--serif);
@@ -293,40 +293,40 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  background: #efe8e3;
+  background: #FFF7FC;
   color: var(--gray);
 }
 .cm-badge.is-active {
-  background: rgba(196,154,148, 0.28);
-  color: #5a3a4b;
+  background: rgba(225,139,185, 0.18);
+  color: #986BC2;
 }
 .cm-badge.is-inactive {
-  background: rgba(179,38,30, 0.16);
-  color: #9b2226;
+  background: rgba(225,139,185, 0.2);
+  color: #E18BB9;
 }
 .cm-badge.is-tier {
-  background: rgba(200,157,102, 0.3);
-  color: #6e5122;
+  background: rgba(231,198,143, 0.22);
+  color: #E7C68F;
 }
 .cm-badge.is-paid {
-  background: rgba(196,154,148, 0.28);
-  color: #5a3a4b;
+  background: rgba(225,139,185, 0.18);
+  color: #986BC2;
 }
 .cm-badge.is-pending,
 .cm-badge.is-deposit,
 .cm-badge.is-confirmed {
-  background: rgba(200,157,102, 0.3);
-  color: #6e5122;
+  background: rgba(231,198,143, 0.22);
+  color: #E7C68F;
 }
 .cm-badge.is-cancelled,
 .cm-badge.is-no_show,
 .cm-badge.is-refunded {
-  background: rgba(179,38,30, 0.16);
-  color: #9b2226;
+  background: rgba(225,139,185, 0.2);
+  color: #E18BB9;
 }
 .cm-badge.is-completed {
   background: rgba(122,85,104, 0.2);
-  color: #4a2e3d;
+  color: #986BC2;
 }
 
 .cm-meta {
@@ -373,7 +373,7 @@
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(74,46,61, 0.12);
+  box-shadow: 0 10px 30px rgba(152,107,194, 0.12);
   padding: 6px;
 }
 .cm-menu button {
@@ -390,7 +390,7 @@
   background: var(--cream);
 }
 .cm-menu .is-danger {
-  color: #9b2226;
+  color: #E18BB9;
 }
 
 .cm-pager-row {
@@ -616,13 +616,13 @@
   color: var(--ink);
 }
 .cm-act-soft:hover {
-  background: #e8ddd6;
+  background: #F4BED5;
 }
 .cm-act:active {
   transform: translateY(1px);
 }
 .cm-act:focus-visible {
-  outline: 2px solid var(--btn-outline, #7a5568);
+  outline: 2px solid var(--btn-outline, #986BC2);
   outline-offset: 2px;
 }
 
@@ -699,7 +699,7 @@
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(74,46,61, 0.12);
+  box-shadow: 0 10px 30px rgba(152,107,194, 0.12);
   max-height: 220px;
   overflow-y: auto;
 }
