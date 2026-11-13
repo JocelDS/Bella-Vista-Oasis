@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/dashboard-data.php';
+require_once __DIR__ . '/booking-rules.php';
 
 const APPT_PER_PAGE_OPTIONS = [10, 25, 50];
 const ROOM_GAP_MINUTES = 30;
@@ -379,13 +380,13 @@ function appt_save(PDO $pdo, array $in, ?int $id, int $roomGap = ROOM_GAP_MINUTE
 
     $customerId  = (int)($in['customer_id'] ?? 0);
     $serviceId   = (int)($in['service_id'] ?? 0);
-    $therapistId = (int)($in['therapist_id'] ?? 0);
+    $therapistId = max(0, (int)($in['therapist_id'] ?? 0));
     $roomId      = (int)($in['room_id'] ?? 0);
     $payStatus   = (string)($in['payment_status'] ?? 'pending');
     $apptStatus  = (string)($in['appointment_status'] ?? 'pending');
 
-    if ($customerId < 1 || $serviceId < 1 || $therapistId < 1 || $roomId < 1) {
-        return $fail('Select a customer, service, therapist and room.');
+    if ($customerId < 1 || $serviceId < 1 || $roomId < 1) {
+        return $fail('Select a customer, service and room.');
     }
     $date = appt_parse_date((string)($in['appointment_date'] ?? ''));
     if ($date === null) {
@@ -402,9 +403,15 @@ function appt_save(PDO $pdo, array $in, ?int $id, int $roomGap = ROOM_GAP_MINUTE
         return $fail('Payment status must be Pending, Deposit or Paid.');
     }
 
+    $guestsRaw = trim((string)($in['guest_count'] ?? ''));
+    if ($guestsRaw !== '' && !ctype_digit($guestsRaw)) {
+        return $fail('Enter a valid number of guests.');
+    }
+    $guests = $guestsRaw === '' ? null : (int)$guestsRaw;
+
     $existing = null;
     if ($id !== null) {
-        $stmt = $pdo->prepare('SELECT appointment_date, start_time, appointment_status FROM appointments WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT service_id, room_id, guest_count, appointment_date, start_time, appointment_status FROM appointments WHERE id = ?');
         $stmt->execute([$id]);
         $existing = $stmt->fetch();
         if (!$existing) {
@@ -413,19 +420,16 @@ function appt_save(PDO $pdo, array $in, ?int $id, int $roomGap = ROOM_GAP_MINUTE
         if (!in_array($existing['appointment_status'], ['pending', 'confirmed'], true)) {
             return $fail('Only pending or confirmed appointments can be edited.');
         }
+        if ($guests === null) {
+            $guests = (int)$existing['guest_count'];
+        }
     }
 
-    $changed = $existing === null
+    $scheduleChanged = $existing === null
         || (string)$existing['appointment_date'] !== $date
-        || substr((string)$existing['start_time'], 0, 8) !== $start;
-    if ($changed) {
-        if ($date < date('Y-m-d')) {
-            return $fail('The appointment date cannot be in the past.');
-        }
-        if ($date === date('Y-m-d') && strtotime($date . ' ' . $start) <= time()) {
-            return $fail('The start time must be later than the current time.');
-        }
-    }
+        || substr((string)$existing['start_time'], 0, 8) !== $start
+        || (int)$existing['service_id'] !== $serviceId
+        || (int)$existing['room_id'] !== $roomId;
 
     try {
         $stmt = $pdo->prepare('SELECT id FROM customers WHERE id = ?');
@@ -434,105 +438,40 @@ function appt_save(PDO $pdo, array $in, ?int $id, int $roomGap = ROOM_GAP_MINUTE
             return $fail('The selected customer no longer exists.');
         }
 
-        $stmt = $pdo->prepare('SELECT duration, price FROM services WHERE id = ?');
-        $stmt->execute([$serviceId]);
-        $service = $stmt->fetch();
-        if (!$service) {
-            return $fail('The selected service no longer exists.');
-        }
-
-        $stmt = $pdo->prepare('SELECT availability_status FROM therapists WHERE id = ?');
-        $stmt->execute([$therapistId]);
-        $therapist = $stmt->fetch();
-        if (!$therapist) {
-            return $fail('The selected therapist no longer exists.');
-        }
-        if ($therapist['availability_status'] === 'on_leave') {
-            return $fail('The selected therapist is on leave.');
-        }
-
-        $stmt = $pdo->prepare('SELECT room_status FROM rooms WHERE id = ?');
-        $stmt->execute([$roomId]);
-        $room = $stmt->fetch();
-        if (!$room) {
-            return $fail('The selected room no longer exists.');
-        }
-        if ($room['room_status'] === 'maintenance') {
-            return $fail('The selected room is under maintenance.');
-        }
-    } catch (PDOException $e) {
-        return $fail('Unable to validate the appointment right now.');
-    }
-
-    $endIn = trim((string)($in['end_time'] ?? ''));
-    if ($endIn !== '') {
-        $end = appt_parse_time($endIn);
-        if ($end === null) {
-            return $fail('Enter a valid end time.');
-        }
-    } else {
-        $end = (new DateTime($date . ' ' . $start))->modify('+' . (int)$service['duration'] . ' minutes')->format('H:i:s');
-        if ($end <= $start) {
-            return $fail('The session must finish before midnight.');
-        }
-    }
-    if ($end <= $start) {
-        return $fail('The end time must be later than the start time.');
-    }
-
-    $amountIn = trim((string)($in['total_amount'] ?? ''));
-    if ($amountIn !== '') {
-        if (!is_numeric($amountIn) || (float)$amountIn < 0 || (float)$amountIn > 9999999.99) {
-            return $fail('Enter a valid total amount.');
-        }
-        $amount = round((float)$amountIn, 2);
-    } else {
-        $amount = (float)$service['price'];
-    }
-
-    try {
         $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare(
-            "SELECT room_id, therapist_id, start_time, end_time FROM appointments
-             WHERE appointment_date = ?
-               AND id <> ?
-               AND appointment_status NOT IN ('cancelled', 'no_show')
-               AND (room_id = ? OR therapist_id = ?)
-             FOR UPDATE"
-        );
-        $stmt->execute([$date, $id ?? 0, $roomId, $therapistId]);
-        $newS = appt_minutes($start);
-        $newE = appt_minutes($end);
-        foreach ($stmt->fetchAll() as $c) {
-            $s = appt_minutes((string)$c['start_time']);
-            $e = appt_minutes((string)$c['end_time']);
-            if ((int)$c['room_id'] === $roomId && $newS < $e + $roomGap && $s < $newE + $roomGap) {
-                $pdo->rollBack();
-                return $fail('The selected room is booked or still in its ' . $roomGap . '-minute cleaning gap at that time.');
-            }
-            if ((int)$c['therapist_id'] === $therapistId && $newS < $e && $s < $newE) {
-                $pdo->rollBack();
-                return $fail('The selected therapist is already booked during that time.');
-            }
+        $v = bk_validate($pdo, [
+            'service_id'   => $serviceId,
+            'room_id'      => $roomId,
+            'therapist_id' => $therapistId,
+            'date'         => $date,
+            'start'        => $start,
+            'guests'       => $guests,
+        ], $id ?? 0, true, $scheduleChanged);
+
+        if (!$v['ok']) {
+            $pdo->rollBack();
+            return $fail((string)$v['error']);
         }
+
+        $therapistValue = $v['therapist_id'] > 0 ? $v['therapist_id'] : null;
 
         if ($id === null) {
             $stmt = $pdo->prepare(
                 'INSERT INTO appointments
-                 (customer_id, service_id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status, payment_status, total_amount)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                 (customer_id, service_id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status, payment_status, total_amount, guest_count, extra_person_fee)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
-            $stmt->execute([$customerId, $serviceId, $roomId, $therapistId, $date, $start, $end, $apptStatus, $payStatus, $amount]);
+            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra']]);
             $savedId = (int)$pdo->lastInsertId();
         } else {
             $stmt = $pdo->prepare(
                 'UPDATE appointments
                  SET customer_id = ?, service_id = ?, room_id = ?, therapist_id = ?, appointment_date = ?, start_time = ?, end_time = ?,
-                     appointment_status = ?, payment_status = ?, total_amount = ?
+                     appointment_status = ?, payment_status = ?, total_amount = ?, guest_count = ?, extra_person_fee = ?
                  WHERE id = ?'
             );
-            $stmt->execute([$customerId, $serviceId, $roomId, $therapistId, $date, $start, $end, $apptStatus, $payStatus, $amount, $id]);
+            $stmt->execute([$customerId, $serviceId, $roomId, $therapistValue, $date, $v['start'], $v['end'], $apptStatus, $payStatus, $v['total'], $v['guests'], $v['extra'], $id]);
             $savedId = $id;
         }
 
@@ -541,7 +480,7 @@ function appt_save(PDO $pdo, array $in, ?int $id, int $roomGap = ROOM_GAP_MINUTE
             $stmt->execute([$savedId]);
             if ((int)$stmt->fetchColumn() === 0) {
                 $pdo->prepare("INSERT INTO payments (appointment_id, customer_id, amount, payment_method, payment_status, payment_date) VALUES (?, ?, ?, NULL, 'paid', ?)")
-                    ->execute([$savedId, $customerId, $amount, now()]);
+                    ->execute([$savedId, $customerId, $v['total'], now()]);
             }
         }
 
@@ -550,6 +489,7 @@ function appt_save(PDO $pdo, array $in, ?int $id, int $roomGap = ROOM_GAP_MINUTE
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
+        error_log('[BVO appt_save] ' . get_class($e) . ': ' . $e->getMessage());
         return $fail('Unable to save the appointment right now.');
     }
 

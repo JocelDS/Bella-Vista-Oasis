@@ -223,6 +223,9 @@ require __DIR__ . '/includes/header.php';
                             <option value="<?= (int)$s['id'] ?>"><?= e($s['service_name']) ?> · <?= (int)$s['duration'] ?> min · ₱<?= e(number_format((float)$s['price'], 2)) ?></option>
                         <?php endforeach; ?>
                     </select></div>
+                <div class="field"><label for="cwGuests">Guests</label>
+                    <select id="cwGuests" name="guest_count"><option value="">Service default</option>
+                        <?php for ($g = 1; $g <= 6; $g++): ?><option value="<?= $g ?>"><?= $g ?></option><?php endfor; ?></select></div>
                 <div class="field"><label for="cwDate">Appointment date *</label><input id="cwDate" name="appointment_date" type="date" required></div>
                 <div class="field"><label for="cwTime">Preferred time *</label><input id="cwTime" name="start_time" type="time" step="900" required></div>
                 <div class="field"><label for="cwTher">Therapist</label>

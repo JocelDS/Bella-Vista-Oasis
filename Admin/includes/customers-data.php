@@ -794,10 +794,16 @@ function cm_walkin(PDO $pdo, array $in): array
 
     $roomPick = (int)($in['room_id'] ?? 0);
     $therPick = (int)($in['therapist_id'] ?? 0);
-    $rooms = $pdo->query("SELECT id FROM rooms WHERE room_status <> 'maintenance' ORDER BY id")->fetchAll(PDO::FETCH_COLUMN);
+    $stmt = $pdo->prepare('SELECT room_code FROM services WHERE id = ?');
+    $stmt->execute([$serviceId]);
+    $roomCode = strtoupper((string)$stmt->fetchColumn());
+    if ($roomCode === '') { return $abort('The selected service no longer exists.'); }
+    $stmt = $pdo->prepare("SELECT id FROM rooms WHERE room_status <> 'maintenance' AND room_name LIKE ? ORDER BY id");
+    $stmt->execute([$roomCode . '-%']);
+    $rooms = $stmt->fetchAll(PDO::FETCH_COLUMN);
     $thers = $pdo->query("SELECT id FROM therapists WHERE availability_status <> 'on_leave' ORDER BY id")->fetchAll(PDO::FETCH_COLUMN);
     if ($roomPick > 0) { $rooms = [$roomPick]; }
-    if ($therPick > 0) { $thers = [$therPick]; }
+    if ($therPick > 0) { $thers = [$therPick]; } else { $thers[] = 0; }
 
     $info = ['customer_id' => $customerId, 'customer_created' => $created, 'customer_reused' => $reused];
     $lastErr = 'No suite is available for that time.';
@@ -808,6 +814,7 @@ function cm_walkin(PDO $pdo, array $in): array
             $res = appt_save($pdo, [
                 'customer_id' => $customerId, 'service_id' => $serviceId, 'room_id' => (int)$rid, 'therapist_id' => (int)$tid,
                 'appointment_date' => $date, 'start_time' => $time, 'appointment_status' => 'confirmed', 'payment_status' => 'pending',
+                'guest_count' => (string)($in['guest_count'] ?? ''),
             ], null);
             if (!empty($res['ok'])) {
                 if ($note !== '') {
@@ -823,5 +830,5 @@ function cm_walkin(PDO $pdo, array $in): array
         }
     }
     $auto = $roomPick === 0 && $therPick === 0;
-    return $abort($auto ? 'No suite and therapist combination is free at that time. Try another time.' : $lastErr);
+    return $abort($auto ? 'No suite is free at that time. Try another time.' : $lastErr);
 }

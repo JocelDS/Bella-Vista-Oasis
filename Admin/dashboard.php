@@ -314,8 +314,8 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field">
                     <label for="bk_therapist">Therapist</label>
-                    <select id="bk_therapist" name="therapist_id" required>
-                        <option value="">Select a therapist</option>
+                    <select id="bk_therapist" name="therapist_id">
+                        <option value="0">Assign later</option>
                         <?php foreach ($options['therapists'] as $o): ?>
                             <option value="<?= (int)$o['id'] ?>"><?= e((string)$o['full_name']) ?></option>
                         <?php endforeach; ?>
@@ -328,6 +328,18 @@ require __DIR__ . '/includes/header.php';
                         <?php foreach ($options['rooms'] as $o): ?>
                             <option value="<?= (int)$o['id'] ?>"><?= e($o['room_name'] . ' · ' . $o['room_type']) ?></option>
                         <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="bk_guests">Guests</label>
+                    <select id="bk_guests" name="guest_count">
+                        <option value="">Service default</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
                     </select>
                 </div>
                 <div class="field">

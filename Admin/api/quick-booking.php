@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/dashboard-data.php';
+require_once __DIR__ . '/../includes/booking-rules.php';
 
 api_guard();
 
@@ -26,9 +27,13 @@ $therapistId = (int)($_POST['therapist_id'] ?? 0);
 $roomId      = (int)($_POST['room_id'] ?? 0);
 $date        = trim((string)($_POST['appointment_date'] ?? ''));
 $time        = trim((string)($_POST['start_time'] ?? ''));
+$guestsRaw   = trim((string)($_POST['guest_count'] ?? ''));
 
-if ($customerId < 1 || $serviceId < 1 || $therapistId < 1 || $roomId < 1) {
-    booking_fail('Select a guest, treatment, therapist and suite.');
+if ($customerId < 1 || $serviceId < 1 || $roomId < 1) {
+    booking_fail('Select a guest, treatment and suite.');
+}
+if ($guestsRaw !== '' && !ctype_digit($guestsRaw)) {
+    booking_fail('Enter a valid number of guests.');
 }
 
 $d = DateTime::createFromFormat('Y-m-d', $date);
@@ -40,15 +45,10 @@ if (!preg_match('/^(\d{2}):(\d{2})(?::\d{2})?$/', $time, $tm) || (int)$tm[1] > 2
 }
 $time = $tm[1] . ':' . $tm[2] . ':00';
 
-$today = date('Y-m-d');
-if ($date < $today) {
-    booking_fail('The appointment date cannot be in the past.');
-}
-if ($date === $today && strtotime($date . ' ' . $time) <= time()) {
-    booking_fail('The start time must be later than the current time.');
-}
-
 $pdo = db();
+$newId = 0;
+$error = null;
+$total = 0.0;
 
 try {
     $stmt = $pdo->prepare('SELECT id FROM customers WHERE id = ?');
@@ -57,86 +57,39 @@ try {
         booking_fail('The selected guest no longer exists.');
     }
 
-    $stmt = $pdo->prepare('SELECT id, duration, price FROM services WHERE id = ?');
-    $stmt->execute([$serviceId]);
-    $service = $stmt->fetch();
-    if (!$service) {
-        booking_fail('The selected treatment no longer exists.');
-    }
-
-    $stmt = $pdo->prepare('SELECT availability_status FROM therapists WHERE id = ?');
-    $stmt->execute([$therapistId]);
-    $therapist = $stmt->fetch();
-    if (!$therapist) {
-        booking_fail('The selected therapist no longer exists.');
-    }
-    if ($therapist['availability_status'] === 'on_leave') {
-        booking_fail('The selected therapist is on leave.');
-    }
-
-    $stmt = $pdo->prepare('SELECT room_status FROM rooms WHERE id = ?');
-    $stmt->execute([$roomId]);
-    $room = $stmt->fetch();
-    if (!$room) {
-        booking_fail('The selected suite no longer exists.');
-    }
-    if ($room['room_status'] === 'maintenance') {
-        booking_fail('The selected suite is under maintenance.');
-    }
-} catch (PDOException $e) {
-    booking_fail('Unable to validate the booking right now.', 500);
-}
-
-$startDt = new DateTime($date . ' ' . $time);
-$endDt   = (clone $startDt)->modify('+' . (int)$service['duration'] . ' minutes');
-if ($endDt->format('Y-m-d') !== $date) {
-    booking_fail('The session must finish before midnight.');
-}
-$endTime = $endDt->format('H:i:s');
-
-$error = null;
-$newId = 0;
-
-try {
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare(
-        "SELECT room_id, therapist_id FROM appointments
-         WHERE appointment_date = ?
-           AND appointment_status NOT IN ('cancelled', 'no_show')
-           AND (room_id = ? OR therapist_id = ?)
-           AND start_time < ? AND end_time > ?
-         FOR UPDATE"
-    );
-    $stmt->execute([$date, $roomId, $therapistId, $endTime, $time]);
+    $v = bk_validate($pdo, [
+        'service_id'   => $serviceId,
+        'room_id'      => $roomId,
+        'therapist_id' => $therapistId,
+        'date'         => $date,
+        'start'        => $time,
+        'guests'       => $guestsRaw === '' ? null : (int)$guestsRaw,
+    ], 0, true, true);
 
-    foreach ($stmt->fetchAll() as $c) {
-        if ((int)$c['room_id'] === $roomId) {
-            $error = 'The selected suite is already booked during that time.';
-            break;
-        }
-        if ((int)$c['therapist_id'] === $therapistId) {
-            $error = 'The selected therapist is already booked during that time.';
-            break;
-        }
-    }
-
-    if ($error === null) {
+    if (!$v['ok']) {
+        $error = (string)$v['error'];
+        $pdo->rollBack();
+    } else {
         $stmt = $pdo->prepare(
             "INSERT INTO appointments
-             (customer_id, service_id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status, payment_status, total_amount)
-             VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 'pending', ?)"
+             (customer_id, service_id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status, payment_status, total_amount, guest_count, extra_person_fee)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 'pending', ?, ?, ?)"
         );
-        $stmt->execute([$customerId, $serviceId, $roomId, $therapistId, $date, $time, $endTime, $service['price']]);
+        $stmt->execute([
+            $customerId, $serviceId, $roomId, $v['therapist_id'] > 0 ? $v['therapist_id'] : null,
+            $date, $v['start'], $v['end'], $v['total'], $v['guests'], $v['extra'],
+        ]);
         $newId = (int)$pdo->lastInsertId();
+        $total = (float)$v['total'];
         $pdo->commit();
-    } else {
-        $pdo->rollBack();
     }
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
+    error_log('[BVO quick-booking] ' . get_class($e) . ': ' . $e->getMessage());
     booking_fail('Unable to save the booking right now.', 500);
 }
 
@@ -147,5 +100,5 @@ if ($error !== null) {
 echo json_encode([
     'ok'      => true,
     'id'      => $newId,
-    'message' => 'Booking created and marked as pending confirmation.',
+    'message' => 'Booking created (total ' . peso($total) . ') and marked as pending confirmation.',
 ]);

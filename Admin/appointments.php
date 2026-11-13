@@ -175,8 +175,8 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field">
                     <label for="ap_therapist">Therapist</label>
-                    <select id="ap_therapist" name="therapist_id" required>
-                        <option value="">Select a therapist</option>
+                    <select id="ap_therapist" name="therapist_id">
+                        <option value="0">Assign later</option>
                         <?php foreach ($options['therapists'] as $o): ?>
                             <option value="<?= (int)$o['id'] ?>"><?= e((string)$o['full_name']) ?></option>
                         <?php endforeach; ?>
@@ -196,8 +196,21 @@ require __DIR__ . '/includes/header.php';
                     <input type="date" id="ap_date" name="appointment_date" min="<?= e($today) ?>" value="<?= e($today) ?>" required>
                 </div>
                 <div class="field">
-                    <label for="ap_amount">Total Amount (₱)</label>
-                    <input type="number" id="ap_amount" name="total_amount" min="0" step="0.01" inputmode="decimal">
+                    <label for="ap_guests">Guests</label>
+                    <select id="ap_guests" name="guest_count">
+                        <option value="">Service default</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="ap_amount_note">Total Amount</label>
+                    <input type="text" id="ap_amount_note" value="Computed automatically" readonly tabindex="-1">
+                    <input type="hidden" id="ap_amount">
                 </div>
                 <div class="field">
                     <label for="ap_start">Start Time</label>

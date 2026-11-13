@@ -412,11 +412,11 @@ function cal_detail(PDO $pdo, int $id): ?array
     return $d;
 }
 
-function cal_prepare_move(PDO $pdo, int $id, array $in): array
+function cal_prepare_move(PDO $pdo, int $id, array $in, bool $lock = false): array
 {
     $fail = static fn(string $m): array => ['ok' => false, 'error' => $m];
 
-    $stmt = $pdo->prepare('SELECT id, room_id, therapist_id, appointment_date, start_time, end_time, appointment_status FROM appointments WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, service_id, room_id, therapist_id, guest_count, appointment_date, start_time, end_time, appointment_status FROM appointments WHERE id = ?');
     $stmt->execute([$id]);
     $cur = $stmt->fetch();
     if (!$cur) {
@@ -427,9 +427,9 @@ function cal_prepare_move(PDO $pdo, int $id, array $in): array
     }
 
     $roomId      = (int)($in['room_id'] ?? 0);
-    $therapistId = (int)($in['therapist_id'] ?? 0);
-    if ($roomId < 1 || $therapistId < 1) {
-        return $fail('Select a room and a therapist.');
+    $therapistId = max(0, (int)($in['therapist_id'] ?? 0));
+    if ($roomId < 1) {
+        return $fail('Select a room.');
     }
     $date = appt_parse_date((string)($in['appointment_date'] ?? ''));
     if ($date === null) {
@@ -438,22 +438,6 @@ function cal_prepare_move(PDO $pdo, int $id, array $in): array
     $start = appt_parse_time((string)($in['start_time'] ?? ''));
     if ($start === null) {
         return $fail('Enter a valid start time.');
-    }
-
-    $newS     = appt_minutes($start);
-    $duration = appt_minutes((string)$cur['end_time']) - appt_minutes((string)$cur['start_time']);
-    $newE     = $newS + $duration;
-    if ($duration < 1 || $newE >= 1440) {
-        return $fail('The session must finish before midnight.');
-    }
-    $sameSlot = (string)$cur['appointment_date'] === $date && substr((string)$cur['start_time'], 0, 5) === substr($start, 0, 5);
-    if (!$sameSlot) {
-        if ($date < date('Y-m-d')) {
-            return $fail('The new date cannot be in the past.');
-        }
-        if ($date === date('Y-m-d') && $newS <= cal_now_minutes()) {
-            return $fail('The new start time must be later than the current time.');
-        }
     }
 
     $stmt = $pdo->prepare('SELECT room_status FROM rooms WHERE id = ?');
@@ -466,74 +450,74 @@ function cal_prepare_move(PDO $pdo, int $id, array $in): array
         return $fail('That room is ' . $room['room_status'] . ' and cannot take bookings.');
     }
 
-    $stmt = $pdo->prepare('SELECT availability_status FROM therapists WHERE id = ?');
-    $stmt->execute([$therapistId]);
-    $th = $stmt->fetch();
-    if (!$th) {
-        return $fail('The selected therapist no longer exists.');
-    }
-    if ($th['availability_status'] === 'on_leave') {
-        return $fail('That therapist is on leave.');
+    $sameSlot = (string)$cur['appointment_date'] === $date
+        && substr((string)$cur['start_time'], 0, 5) === substr($start, 0, 5)
+        && (int)$cur['room_id'] === $roomId;
+
+    $v = bk_validate($pdo, [
+        'service_id'   => (int)$cur['service_id'],
+        'room_id'      => $roomId,
+        'therapist_id' => $therapistId,
+        'date'         => $date,
+        'start'        => $start,
+        'guests'       => (int)$cur['guest_count'],
+    ], $id, $lock, !$sameSlot);
+    if (!$v['ok']) {
+        return $fail((string)$v['error']);
     }
 
     return [
-        'ok'          => true,
-        'current'     => $cur,
-        'date'        => $date,
-        'start'       => $start,
-        'end'         => sprintf('%02d:%02d:00', intdiv($newE, 60), $newE % 60),
-        'start_min'   => $newS,
-        'end_min'     => $newE,
-        'room_id'     => $roomId,
+        'ok'           => true,
+        'current'      => $cur,
+        'date'         => $date,
+        'start'        => $v['start'],
+        'end'          => $v['end'],
+        'start_min'    => $v['start_min'],
+        'end_min'      => $v['end_min'],
+        'room_id'      => $roomId,
         'therapist_id' => $therapistId,
     ];
 }
 
 function cal_check(PDO $pdo, int $id, array $in): array
 {
-    $m = cal_prepare_move($pdo, $id, $in);
+    $m = cal_prepare_move($pdo, $id, $in, false);
     if (!$m['ok']) {
         return ['ok' => true, 'available' => false, 'message' => $m['error']];
     }
-    $rows = cal_day_rows($pdo, $m['date'], $m['room_id'], $m['therapist_id'], $id, false);
-    $msg  = cal_conflict_message($rows, $m['room_id'], $m['therapist_id'], $m['start_min'], $m['end_min'], ROOM_GAP_MINUTES);
     return [
         'ok'        => true,
-        'available' => $msg === null,
-        'message'   => $msg ?? 'Room and therapist are free. Session runs ' . cal_time_label($m['start_min']) . ' – ' . cal_time_label($m['end_min']) . '.',
+        'available' => true,
+        'message'   => ($m['therapist_id'] > 0 ? 'Room and therapist are free.' : 'Room is free.') . ' Session runs ' . cal_time_label($m['start_min']) . ' – ' . cal_time_label($m['end_min']) . '.',
     ];
 }
 
 function cal_reschedule(PDO $pdo, int $id, array $in): array
 {
-    $m = cal_prepare_move($pdo, $id, $in);
-    if (!$m['ok']) {
-        return $m;
-    }
-    $cur = $m['current'];
-    if ((string)$cur['appointment_date'] === $m['date']
-        && substr((string)$cur['start_time'], 0, 5) === substr($m['start'], 0, 5)
-        && (int)$cur['room_id'] === $m['room_id']
-        && (int)$cur['therapist_id'] === $m['therapist_id']) {
-        return ['ok' => false, 'error' => 'Nothing changed. Pick a different date, time, room or therapist.'];
-    }
-
     try {
         $pdo->beginTransaction();
-        $rows = cal_day_rows($pdo, $m['date'], $m['room_id'], $m['therapist_id'], $id, true);
-        $msg  = cal_conflict_message($rows, $m['room_id'], $m['therapist_id'], $m['start_min'], $m['end_min'], ROOM_GAP_MINUTES);
-        if ($msg !== null) {
+        $m = cal_prepare_move($pdo, $id, $in, true);
+        if (!$m['ok']) {
             $pdo->rollBack();
-            return ['ok' => false, 'error' => $msg];
+            return $m;
+        }
+        $cur = $m['current'];
+        if ((string)$cur['appointment_date'] === $m['date']
+            && substr((string)$cur['start_time'], 0, 5) === substr($m['start'], 0, 5)
+            && (int)$cur['room_id'] === $m['room_id']
+            && (int)$cur['therapist_id'] === $m['therapist_id']) {
+            $pdo->rollBack();
+            return ['ok' => false, 'error' => 'Nothing changed. Pick a different date, time, room or therapist.'];
         }
         $pdo->prepare(
             'UPDATE appointments SET room_id = ?, therapist_id = ?, appointment_date = ?, start_time = ?, end_time = ? WHERE id = ?'
-        )->execute([$m['room_id'], $m['therapist_id'], $m['date'], $m['start'], $m['end'], $id]);
+        )->execute([$m['room_id'], $m['therapist_id'] > 0 ? $m['therapist_id'] : null, $m['date'], $m['start'], $m['end'], $id]);
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
+        error_log('[BVO cal_reschedule] ' . get_class($e) . ': ' . $e->getMessage());
         return ['ok' => false, 'error' => 'Unable to reschedule the appointment right now.'];
     }
 

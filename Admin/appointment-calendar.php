@@ -188,8 +188,8 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field">
                     <label for="bk_therapist">Therapist</label>
-                    <select id="bk_therapist" name="therapist_id" required>
-                        <option value="">Select a therapist</option>
+                    <select id="bk_therapist" name="therapist_id">
+                        <option value="0">Assign later</option>
                         <?php foreach ($allTherapists as $o): $off = $o['availability_status'] === 'on_leave'; ?>
                             <option value="<?= (int)$o['id'] ?>" <?= $off ? 'disabled' : '' ?>><?= e((string)$o['full_name'] . ($off ? ' · On leave' : '')) ?></option>
                         <?php endforeach; ?>
@@ -209,8 +209,21 @@ require __DIR__ . '/includes/header.php';
                     <input type="date" id="bk_date" name="appointment_date" min="<?= e($today) ?>" value="<?= e($today) ?>" required>
                 </div>
                 <div class="field">
-                    <label for="bk_amount">Total Amount (₱)</label>
-                    <input type="number" id="bk_amount" name="total_amount" min="0" step="0.01" inputmode="decimal">
+                    <label for="bk_guests">Guests</label>
+                    <select id="bk_guests" name="guest_count">
+                        <option value="">Service default</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="bk_amount_note">Total Amount</label>
+                    <input type="text" id="bk_amount_note" value="Computed automatically" readonly tabindex="-1">
+                    <input type="hidden" id="bk_amount">
                 </div>
                 <div class="field">
                     <label for="bk_start">Start Time</label>
@@ -277,7 +290,8 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field">
                     <label for="rs_therapist">Therapist</label>
-                    <select id="rs_therapist" name="therapist_id" required>
+                    <select id="rs_therapist" name="therapist_id">
+                        <option value="0">Unassigned</option>
                         <?php foreach ($allTherapists as $o): $off = $o['availability_status'] === 'on_leave'; ?>
                             <option value="<?= (int)$o['id'] ?>" <?= $off ? 'disabled' : '' ?>><?= e((string)$o['full_name'] . ($off ? ' · On leave' : '')) ?></option>
                         <?php endforeach; ?>
