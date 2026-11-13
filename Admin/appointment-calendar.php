@@ -227,7 +227,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field">
                     <label for="bk_start">Start Time</label>
-                    <input type="time" id="bk_start" name="start_time" step="900" required>
+                    <select id="bk_start" name="start_time" required><option value="">Select a service and date first</option></select>
                 </div>
                 <div class="field">
                     <label for="bk_end">End Time</label>
@@ -278,7 +278,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field">
                     <label for="rs_start">New Start Time</label>
-                    <input type="time" id="rs_start" name="start_time" step="900" required>
+                    <select id="rs_start" name="start_time" required><option value="">Select a service and date first</option></select>
                 </div>
                 <div class="field">
                     <label for="rs_room">Room</label>

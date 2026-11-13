@@ -227,7 +227,7 @@ require __DIR__ . '/includes/header.php';
                     <select id="cwGuests" name="guest_count"><option value="">Service default</option>
                         <?php for ($g = 1; $g <= 6; $g++): ?><option value="<?= $g ?>"><?= $g ?></option><?php endfor; ?></select></div>
                 <div class="field"><label for="cwDate">Appointment date *</label><input id="cwDate" name="appointment_date" type="date" required></div>
-                <div class="field"><label for="cwTime">Preferred time *</label><input id="cwTime" name="start_time" type="time" step="900" required></div>
+                <div class="field"><label for="cwTime">Preferred time *</label><select id="cwTime" name="start_time" required><option value="">Select a service and date first</option></select></div>
                 <div class="field"><label for="cwTher">Therapist</label>
                     <select id="cwTher" name="therapist_id"><option value="0">Auto-assign</option>
                         <?php foreach ($therapists as $t): ?><option value="<?= (int)$t['id'] ?>"><?= e($t['full_name']) ?></option><?php endforeach; ?></select></div>

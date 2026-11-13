@@ -348,7 +348,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field">
                     <label for="bk_time">Start Time</label>
-                    <input type="time" id="bk_time" name="start_time" step="900" required>
+                    <select id="bk_time" name="start_time" required><option value="">Select a service and date first</option></select>
                 </div>
             </div>
             <footer class="modal-foot">

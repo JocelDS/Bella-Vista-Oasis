@@ -214,7 +214,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field">
                     <label for="ap_start">Start Time</label>
-                    <input type="time" id="ap_start" name="start_time" step="900" required>
+                    <select id="ap_start" name="start_time" required><option value="">Select a service and date first</option></select>
                 </div>
                 <div class="field">
                     <label for="ap_end">End Time</label>
