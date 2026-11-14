@@ -1,0 +1,118 @@
+@media (max-width: 1180px) {
+  .cu-nav-in {
+    gap: 14px;
+    padding: 12px 20px;
+  }
+  .cu-nav-links a {
+    padding: 9px 9px;
+    font-size: 11.5px;
+  }
+  .cu-nav-links a.cu-nav-cta {
+    margin-left: 4px;
+    padding: 10px 16px;
+  }
+}
+@media (max-width: 1040px) {
+  .cu-nav-toggle {
+    display: block;
+  }
+  .cu-nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    margin: 0;
+    padding: 10px 20px 18px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 18px 30px rgba(152, 107, 194, 0.14);
+  }
+  .cu-nav-links.open {
+    display: flex;
+  }
+  .cu-nav-links a {
+    padding: 13px 14px;
+    font-size: 13px;
+  }
+  .cu-nav-links a.cu-nav-cta {
+    margin: 8px 0 0;
+    text-align: center;
+  }
+  .cu-footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 860px) {
+  .cu-main {
+    grid-template-columns: 1fr;
+    padding: 24px 16px 36px;
+  }
+  .cu-dash-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .cu-topbar-in > span:first-child {
+    display: none;
+  }
+  .cu-topbar-in {
+    justify-content: center;
+    padding: 6px 16px;
+  }
+  .cu-topbar-contact {
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+@media (max-width: 560px) {
+  .cu-card {
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+  .cu-privilege {
+    padding: 22px 18px;
+  }
+  .cu-card h1 {
+    font-size: 29px;
+  }
+  .cu-switch {
+    width: 100%;
+  }
+  .cu-switch button,
+  .cu-switch a {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 8px;
+    font-size: 10px;
+  }
+  .cu-magic-row {
+    flex-direction: column;
+  }
+  .cu-btn {
+    width: 100%;
+  }
+  .cu-enroll {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .cu-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .cu-footer-bar {
+    flex-direction: column;
+  }
+  .cu-row-between {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .cu-brand strong {
+    font-size: 21px;
+  }
+}

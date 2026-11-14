@@ -1,0 +1,63 @@
+.cu-dash {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 36px 24px 48px;
+  display: grid;
+  gap: 20px;
+}
+.cu-dash-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.cu-dash-hero h1 {
+  margin: 0 0 4px;
+}
+.cu-dash-hero .cu-sub {
+  margin: 0;
+}
+.cu-dash-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.cu-points {
+  margin: 2px 0 14px;
+  font-family: var(--serif);
+  font-size: 54px;
+  line-height: 1;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.cu-ledger {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cu-ledger li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.cu-ledger small {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-2);
+}
+.cu-ledger b {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cu-ledger .pos {
+  color: var(--purple);
+}
+.cu-ledger .neg {
+  color: #c2467f;
+}

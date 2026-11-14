@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 13, 2026 at 01:57 PM
+-- Generation Time: Nov 14, 2026 at 02:17 AM
 -- Server version: 10.11.16-MariaDB
 -- PHP Version: 8.5.12
 
@@ -264,24 +264,57 @@ CREATE TABLE `customers` (
   `notes` text DEFAULT NULL,
   `preferences` text DEFAULT NULL,
   `special_requests` text DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL
+  `updated_at` datetime DEFAULT NULL,
+  `password_hash` varchar(255) DEFAULT NULL,
+  `membership_code` varchar(20) DEFAULT NULL,
+  `last_login_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `customers`
 --
 
-INSERT INTO `customers` (`id`, `full_name`, `first_name`, `middle_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `address`, `profile_photo`, `customer_status`, `registered_at`, `notes`, `preferences`, `special_requests`, `updated_at`) VALUES
-(1, 'Sophia Laurent', NULL, NULL, NULL, 'sophia.laurent@example.com', '0917 555 0101', NULL, NULL, NULL, NULL, 'active', '2026-10-26 00:00:00', NULL, NULL, NULL, NULL),
-(2, 'Marcus Vance', NULL, NULL, NULL, 'marcus.vance@example.com', '0917 555 0102', NULL, NULL, NULL, NULL, 'active', '2026-10-29 00:00:00', NULL, NULL, NULL, NULL),
-(3, 'Elena & Rodrigo Sen', NULL, NULL, NULL, 'sen.couple@example.com', '0917 555 0103', NULL, NULL, NULL, NULL, 'active', '2026-10-23 00:00:00', NULL, NULL, NULL, NULL),
-(4, 'Camille Dupont', NULL, NULL, NULL, 'camille.dupont@example.com', '0917 555 0104', NULL, NULL, NULL, NULL, 'active', '2026-10-31 00:00:00', NULL, NULL, NULL, NULL),
-(5, 'Isabelle Cruz', NULL, NULL, NULL, 'isabelle.cruz@example.com', '0917 555 0105', NULL, NULL, NULL, NULL, 'active', '2026-11-02 00:00:00', NULL, NULL, NULL, NULL),
-(6, 'Thomas Reid', NULL, NULL, NULL, 'thomas.reid@example.com', '0917 555 0106', NULL, NULL, NULL, NULL, 'active', '2026-11-03 00:00:00', NULL, NULL, NULL, NULL),
-(7, 'Hana Kobayashi', NULL, NULL, NULL, 'hana.k@example.com', '0917 555 0107', NULL, NULL, NULL, NULL, 'active', '2026-10-18 00:00:00', NULL, NULL, NULL, NULL),
-(8, 'Diego Alvarez', NULL, NULL, NULL, 'diego.alvarez@example.com', '0917 555 0108', NULL, NULL, NULL, NULL, 'active', '2026-11-06 00:00:00', NULL, NULL, NULL, NULL),
-(9, 'Priya Nair', NULL, NULL, NULL, 'priya.nair@example.com', '0917 555 0109', NULL, NULL, NULL, NULL, 'active', '2026-11-05 00:00:00', NULL, NULL, NULL, NULL),
-(10, 'Olivia Bennett', NULL, NULL, NULL, 'olivia.bennett@example.com', '0917 555 0110', NULL, NULL, NULL, NULL, 'active', '2026-11-04 00:00:00', NULL, NULL, NULL, NULL);
+INSERT INTO `customers` (`id`, `full_name`, `first_name`, `middle_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `address`, `profile_photo`, `customer_status`, `registered_at`, `notes`, `preferences`, `special_requests`, `updated_at`, `password_hash`, `membership_code`, `last_login_at`) VALUES
+(1, 'Sophia Laurent', NULL, NULL, NULL, 'sophia.laurent@example.com', '0917 555 0101', NULL, NULL, NULL, NULL, 'active', '2026-10-26 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000001', NULL),
+(2, 'Marcus Vance', NULL, NULL, NULL, 'marcus.vance@example.com', '0917 555 0102', NULL, NULL, NULL, NULL, 'active', '2026-10-29 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000002', NULL),
+(3, 'Elena & Rodrigo Sen', NULL, NULL, NULL, 'sen.couple@example.com', '0917 555 0103', NULL, NULL, NULL, NULL, 'active', '2026-10-23 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000003', NULL),
+(4, 'Camille Dupont', NULL, NULL, NULL, 'camille.dupont@example.com', '0917 555 0104', NULL, NULL, NULL, NULL, 'active', '2026-10-31 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000004', NULL),
+(5, 'Isabelle Cruz', NULL, NULL, NULL, 'isabelle.cruz@example.com', '0917 555 0105', NULL, NULL, NULL, NULL, 'active', '2026-11-02 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000005', NULL),
+(6, 'Thomas Reid', NULL, NULL, NULL, 'thomas.reid@example.com', '0917 555 0106', NULL, NULL, NULL, NULL, 'active', '2026-11-03 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000006', NULL),
+(7, 'Hana Kobayashi', NULL, NULL, NULL, 'hana.k@example.com', '0917 555 0107', NULL, NULL, NULL, NULL, 'active', '2026-10-18 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000007', NULL),
+(8, 'Diego Alvarez', NULL, NULL, NULL, 'diego.alvarez@example.com', '0917 555 0108', NULL, NULL, NULL, NULL, 'active', '2026-11-06 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000008', NULL),
+(9, 'Priya Nair', NULL, NULL, NULL, 'priya.nair@example.com', '0917 555 0109', NULL, NULL, NULL, NULL, 'active', '2026-11-05 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000009', NULL),
+(10, 'Olivia Bennett', NULL, NULL, NULL, 'olivia.bennett@example.com', '0917 555 0110', NULL, NULL, NULL, NULL, 'active', '2026-11-04 00:00:00', NULL, NULL, NULL, NULL, NULL, 'BV-000010', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_rate_limits`
+--
+
+CREATE TABLE `customer_rate_limits` (
+  `id` int(11) NOT NULL,
+  `action` varchar(20) NOT NULL,
+  `bucket` char(64) NOT NULL,
+  `created_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_tokens`
+--
+
+CREATE TABLE `customer_tokens` (
+  `id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `purpose` varchar(12) NOT NULL,
+  `selector` varchar(24) NOT NULL,
+  `token_hash` char(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -450,6 +483,18 @@ INSERT INTO `membership_tiers` (`id`, `tier_name`, `description`, `minimum_spend
 (2, 'Silver', 'For guests who visit regularly.', 5000.00, 0, 5.00, 1.25, '#A3AA91', 'Treatment discount\n1.25x loyalty points\nBirthday add-on', 'Priority booking', 2, 'active', '2026-11-09 00:10:22', '2026-11-09 00:10:22'),
 (3, 'Gold', 'For loyal guests with frequent treatments.', 15000.00, 0, 10.00, 1.50, '#C4B58D', 'Treatment discount\n1.5x loyalty points\nBirthday treatment upgrade\nExclusive promotions', 'Priority booking\nComplimentary welcome drink', 3, 'active', '2026-11-09 00:10:22', '2026-11-09 00:10:22'),
 (4, 'Platinum', 'Top tier for our most valued guests.', 30000.00, 0, 15.00, 2.00, '#173D30', 'Treatment discount\n2x loyalty points\nBirthday treatment\nExclusive promotions\nWellness upgrade', 'Priority booking\nPrivate suite preference\nDedicated concierge', 4, 'active', '2026-11-09 00:10:22', '2026-11-09 00:10:22');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `newsletter_subscribers`
+--
+
+CREATE TABLE `newsletter_subscribers` (
+  `id` int(11) NOT NULL,
+  `email` varchar(190) NOT NULL,
+  `created_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -815,7 +860,13 @@ INSERT INTO `spa_configuration` (`id`, `setting_key`, `setting_value`, `updated_
 (10, 'arrival_minutes_before', '15', '2026-11-12 08:00:00'),
 (11, 'extra_person_fee', '750', '2026-11-12 08:00:00'),
 (12, 'family_base_pax', '4', '2026-11-12 08:00:00'),
-(13, 'family_max_pax', '6', '2026-11-12 08:00:00');
+(13, 'family_max_pax', '6', '2026-11-12 08:00:00'),
+(14, 'contact_phone', '+63 (02) 8920-SPAS', '2026-11-14 09:01:22'),
+(15, 'contact_email', 'concierge@bellavista-oasis.com', '2026-11-14 09:01:22'),
+(16, 'address_line1', 'Oasis Promenade, Level 4', '2026-11-14 09:01:22'),
+(17, 'address_line2', 'Grand Atrium Gardens, Sanctuary Wing', '2026-11-14 09:01:22'),
+(18, 'address_line3', 'Metro Manila, Philippines', '2026-11-14 09:01:22'),
+(19, 'parking_note', 'Complimentary underground valet parking at Garden Portico Entrance B.', '2026-11-14 09:01:22');
 
 -- --------------------------------------------------------
 
@@ -1026,8 +1077,24 @@ ALTER TABLE `configuration_logs`
 --
 ALTER TABLE `customers`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_customers_membership_code` (`membership_code`),
   ADD KEY `idx_customers_email` (`email`),
   ADD KEY `idx_customers_status` (`customer_status`);
+
+--
+-- Indexes for table `customer_rate_limits`
+--
+ALTER TABLE `customer_rate_limits`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_customer_rate_limits` (`action`,`bucket`,`created_at`);
+
+--
+-- Indexes for table `customer_tokens`
+--
+ALTER TABLE `customer_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_customer_tokens_selector` (`selector`),
+  ADD KEY `idx_customer_tokens_customer` (`customer_id`,`purpose`);
 
 --
 -- Indexes for table `gift_certificates`
@@ -1080,6 +1147,13 @@ ALTER TABLE `membership_history`
 ALTER TABLE `membership_tiers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_tier_name` (`tier_name`);
+
+--
+-- Indexes for table `newsletter_subscribers`
+--
+ALTER TABLE `newsletter_subscribers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_newsletter_email` (`email`);
 
 --
 -- Indexes for table `notifications`
@@ -1285,6 +1359,18 @@ ALTER TABLE `customers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
+-- AUTO_INCREMENT for table `customer_rate_limits`
+--
+ALTER TABLE `customer_rate_limits`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `customer_tokens`
+--
+ALTER TABLE `customer_tokens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `gift_certificates`
 --
 ALTER TABLE `gift_certificates`
@@ -1319,6 +1405,12 @@ ALTER TABLE `membership_history`
 --
 ALTER TABLE `membership_tiers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `newsletter_subscribers`
+--
+ALTER TABLE `newsletter_subscribers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `notifications`
@@ -1396,7 +1488,7 @@ ALTER TABLE `services`
 -- AUTO_INCREMENT for table `spa_configuration`
 --
 ALTER TABLE `spa_configuration`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `spa_operating_hours`
