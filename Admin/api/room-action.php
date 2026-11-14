@@ -42,6 +42,8 @@ try {
             rm_out(rm_update_room($pdo, $id, $_POST));
         case 'set_status':
             rm_out(rm_set_status($pdo, $id, (string)($_POST['room_status'] ?? '')));
+        case 'delete_room':
+            rm_out(rm_delete_room($pdo, $id));
         case 'save_climate':
             rm_out(rm_save_climate($pdo, $_POST, $adminId));
         case 'save_settings':

@@ -326,6 +326,42 @@ require __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<div class="modal" id="payModal" role="dialog" aria-modal="true" aria-labelledby="payTitle" hidden>
+    <div class="modal-card">
+        <header class="modal-head">
+            <div>
+                <p class="label-small" id="payKicker">Session Settlement</p>
+                <h2 id="payTitle" class="card-title">Record Payment</h2>
+            </div>
+            <button type="button" class="icon-btn" data-close aria-label="Close"><?= icon('close') ?></button>
+        </header>
+        <form id="payForm" novalidate>
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="record_payment">
+            <input type="hidden" name="id" id="pay_id" value="">
+            <div class="form-error" id="payError" role="alert" hidden></div>
+            <dl class="pay-sum" id="paySummary"></dl>
+            <div class="pay-due">
+                <span>Balance to collect</span>
+                <strong id="payDue">₱0.00</strong>
+            </div>
+            <div class="field">
+                <label for="pay_method">Payment Method</label>
+                <select id="pay_method" name="payment_method" required>
+                    <option value="">Select payment method</option>
+                    <?php foreach (appt_pay_methods() as $m): ?>
+                        <option value="<?= e($m) ?>"><?= e($m) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <footer class="modal-foot modal-foot-end">
+                <button type="button" class="btn btn-outline" data-close>Not Now</button>
+                <button type="submit" class="btn btn-primary" id="paySubmit"><span>Confirm Payment</span></button>
+            </footer>
+        </form>
+    </div>
+</div>
+
 <div class="modal" id="intakeModal" role="dialog" aria-modal="true" aria-labelledby="intakeTitle" hidden>
     <div class="modal-card">
         <header class="modal-head">

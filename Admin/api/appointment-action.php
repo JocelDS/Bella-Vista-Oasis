@@ -41,6 +41,12 @@ if ($action === 'cancel_preview') {
     }
     action_out(appt_cancel_preview($pdo, $id));
 }
+if ($action === 'delete') {
+    if ($id < 1) {
+        action_out(['ok' => false, 'error' => 'Invalid appointment.']);
+    }
+    action_out(appt_delete($pdo, $id));
+}
 if (isset(appt_transitions()[$action])) {
     if ($id < 1) {
         action_out(['ok' => false, 'error' => 'Invalid appointment.']);

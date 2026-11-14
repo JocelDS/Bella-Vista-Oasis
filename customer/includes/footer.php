@@ -1,24 +1,5 @@
 <?php
-$hoursRows = [];
-try {
-    $hoursRows = db()->query('SELECT day_of_week, opening_time, closing_time, is_open FROM spa_operating_hours ORDER BY day_of_week')->fetchAll();
-} catch (Throwable $e) {
-    $hoursRows = [];
-}
-$hoursText = '';
-if ($hoursRows) {
-    $open = array_values(array_filter($hoursRows, fn($r) => (int)$r['is_open'] === 1));
-    $sig = array_unique(array_map(fn($r) => $r['opening_time'] . '-' . $r['closing_time'], $open));
-    $fmt = fn(string $t) => date('g:i A', strtotime($t));
-    if (count($open) === 7 && count($sig) === 1) {
-        $hoursText = $fmt($open[0]['opening_time']) . ' – ' . $fmt($open[0]['closing_time']) . ' Daily';
-    } elseif ($open) {
-        $days = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
-        $parts = [];
-        foreach ($open as $r) $parts[] = $days[(int)$r['day_of_week']] . ' ' . $fmt($r['opening_time']) . '–' . $fmt($r['closing_time']);
-        $hoursText = implode(' · ', $parts);
-    }
-}
+$hoursText = cu_hours_text();
 $arrive = (int)cu_setting('arrival_minutes_before', '15');
 $svcNames = [];
 try {

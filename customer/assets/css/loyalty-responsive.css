@@ -1,0 +1,89 @@
+@media (max-width: 1040px) {
+  .lr-rewards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .lr-top-grid {
+    gap: 18px;
+  }
+}
+@media (max-width: 860px) {
+  .lr-intro-grid,
+  .lr-top-grid {
+    grid-template-columns: 1fr;
+  }
+  .lr-indicator {
+    justify-self: start;
+  }
+  .lr-intro {
+    padding-top: 32px;
+  }
+}
+@media (max-width: 760px) {
+  .lr-table thead {
+    display: none;
+  }
+  .lr-table,
+  .lr-table tbody,
+  .lr-table tr,
+  .lr-table td {
+    display: block;
+    width: 100%;
+  }
+  .lr-table tr {
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .lr-table tr:last-child {
+    border-bottom: 0;
+  }
+  .lr-table td {
+    padding: 4px 8px;
+    border: 0;
+    text-align: left !important;
+  }
+  .lr-table td[data-label]::before {
+    content: attr(data-label) ": ";
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--purple);
+  }
+  .lr-table td[data-label="Transaction"]::before,
+  .lr-table td[data-label="Description"]::before {
+    content: "";
+  }
+}
+@media (max-width: 560px) {
+  .lr-rewards {
+    grid-template-columns: 1fr;
+  }
+  .lr-card {
+    padding: 24px 20px;
+    min-height: 280px;
+  }
+  .lr-card-title {
+    font-size: 25px;
+  }
+  .lr-card-meta {
+    grid-template-columns: 1fr 1fr;
+  }
+  .lr-points {
+    padding: 24px 20px;
+  }
+  .lr-balance span {
+    font-size: 50px;
+  }
+  .lr-stats {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .lr-actions .lp-btn {
+    flex-basis: 100%;
+  }
+  .lr-modal-actions {
+    flex-direction: column-reverse;
+  }
+  .lr-modal-actions .lp-btn {
+    width: 100%;
+  }
+}

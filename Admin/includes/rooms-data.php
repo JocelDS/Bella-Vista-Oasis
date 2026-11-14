@@ -109,8 +109,9 @@ function rm_load(PDO $pdo): array
     $now   = cal_now_minutes();
     $gap   = spa_cleaning_gap($pdo);
 
+    $imgCol = room_images_ready($pdo) ? ', d.image_path' : ', NULL AS image_path';
     $rooms = $pdo->query(
-        'SELECT r.id, r.room_name, r.room_type, r.room_status, r.description, d.amenities, d.maximum_capacity
+        'SELECT r.id, r.room_name, r.room_type, r.room_status, r.description, d.amenities, d.maximum_capacity' . $imgCol . '
          FROM rooms r LEFT JOIN room_details d ON d.room_id = r.id ORDER BY r.id ASC'
     )->fetchAll();
 
@@ -212,6 +213,7 @@ function rm_load(PDO $pdo): array
             'amenities'        => (string)($r['amenities'] ?? ''),
             'amenity_list'     => $amen,
             'capacity'         => $r['maximum_capacity'] !== null ? (int)$r['maximum_capacity'] : null,
+            'image'            => (!empty($r['image_path']) && is_file(ROOM_UPLOAD_DIR . '/' . basename((string)$r['image_path']))) ? room_image_url((string)$r['image_path']) : null,
             'climate'          => $cl,
             'maintenance'      => $maint[$id] ?? null,
             'open_maintenance' => $open[$id] ?? 0,
@@ -382,6 +384,66 @@ function rm_room_input(PDO $pdo, array $in, ?int $id): array
     return ['ok' => true, 'v' => ['name' => $name, 'type' => $type, 'desc' => $desc, 'status' => $stat, 'amen' => $amen, 'cap' => $capacity]];
 }
 
+/** Validates an uploaded room image. Returns ['ok'=>true,'file'=>null] when nothing was uploaded. */
+function rm_image_check(): array
+{
+    $f = $_FILES['room_image'] ?? null;
+    if (!$f || (int)($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return ['ok' => true, 'file' => null];
+    }
+    $err = (int)$f['error'];
+    if ($err === UPLOAD_ERR_INI_SIZE || $err === UPLOAD_ERR_FORM_SIZE) {
+        return rm_fail('That image is too large. Use a photo up to 2 MB.');
+    }
+    if ($err !== UPLOAD_ERR_OK || !is_uploaded_file((string)$f['tmp_name'])) {
+        return rm_fail('The image could not be uploaded. Please try again.');
+    }
+    if ((int)$f['size'] > ROOM_IMAGE_MAX_BYTES) {
+        return rm_fail('That image is too large. Use a photo up to 2 MB.');
+    }
+    $info = @getimagesize((string)$f['tmp_name']);
+    $types = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp'];
+    if (!$info || !isset($types[$info[2]])) {
+        return rm_fail('Upload a JPG, PNG or WebP image.');
+    }
+    if ($info[0] < 200 || $info[1] < 150) {
+        return rm_fail('The image is too small. Use at least 200 x 150 pixels.');
+    }
+    return ['ok' => true, 'file' => ['tmp' => (string)$f['tmp_name'], 'ext' => $types[$info[2]]]];
+}
+
+/** Moves a validated upload into uploads/rooms and returns the stored file name (or null on failure). */
+function rm_image_store(array $file): ?string
+{
+    if (!is_dir(ROOM_UPLOAD_DIR) && !@mkdir(ROOM_UPLOAD_DIR, 0755, true)) {
+        return null;
+    }
+    $name = 'room_' . bin2hex(random_bytes(8)) . '.' . $file['ext'];
+    return @move_uploaded_file($file['tmp'], ROOM_UPLOAD_DIR . '/' . $name) ? $name : null;
+}
+
+function rm_image_delete(?string $name): void
+{
+    $name = basename((string)$name);
+    if ($name !== '' && is_file(ROOM_UPLOAD_DIR . '/' . $name)) {
+        @unlink(ROOM_UPLOAD_DIR . '/' . $name);
+    }
+}
+
+function rm_image_current(PDO $pdo, int $roomId): ?string
+{
+    if (!room_images_ready($pdo)) return null;
+    $st = $pdo->prepare('SELECT image_path FROM room_details WHERE room_id = ?');
+    $st->execute([$roomId]);
+    $v = $st->fetchColumn();
+    return $v ? (string)$v : null;
+}
+
+function rm_image_save(PDO $pdo, int $roomId, ?string $name): void
+{
+    $pdo->prepare('UPDATE room_details SET image_path = ? WHERE room_id = ?')->execute([$name, $roomId]);
+}
+
 function rm_save_details(PDO $pdo, int $roomId, string $amen, ?int $cap): void
 {
     $stmt = $pdo->prepare('SELECT id FROM room_details WHERE room_id = ?');
@@ -407,17 +469,33 @@ function rm_create_room(PDO $pdo, array $in): array
         return $c;
     }
     $v = $c['v'];
+    room_images_ready($pdo);
+    $img = rm_image_check();
+    if (empty($img['ok'])) {
+        return $img;
+    }
+    $newImage = null;
+    if ($img['file']) {
+        $newImage = rm_image_store($img['file']);
+        if ($newImage === null) {
+            return rm_fail('The image could not be saved. Check that the uploads/rooms folder is writable.');
+        }
+    }
     try {
         $pdo->beginTransaction();
         $pdo->prepare('INSERT INTO rooms (room_name, room_type, room_status, description) VALUES (?, ?, ?, ?)')
             ->execute([$v['name'], $v['type'], $v['status'], $v['desc'] !== '' ? $v['desc'] : null]);
         $id = (int)$pdo->lastInsertId();
         rm_save_details($pdo, $id, $v['amen'], $v['cap']);
+        if ($newImage !== null) {
+            rm_image_save($pdo, $id, $newImage);
+        }
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
+        rm_image_delete($newImage);
         error_log('[BVO rooms] ' . $e->getMessage());
         return rm_fail('Unable to save the suite right now.');
     }
@@ -438,18 +516,38 @@ function rm_update_room(PDO $pdo, int $id, array $in): array
     if ($v['status'] === 'available' && $room['room_status'] !== 'available' && rm_open_in_progress($pdo, $id) > 0) {
         return rm_fail('This suite has maintenance in progress. Complete the maintenance record first.');
     }
+    $img = rm_image_check();
+    if (empty($img['ok'])) {
+        return $img;
+    }
+    $oldImage = rm_image_current($pdo, $id);
+    $newImage = null;
+    if ($img['file']) {
+        $newImage = rm_image_store($img['file']);
+        if ($newImage === null) {
+            return rm_fail('The image could not be saved. Check that the uploads/rooms folder is writable.');
+        }
+    }
+    $removeOld = $newImage !== null || !empty($in['remove_image']);
     try {
         $pdo->beginTransaction();
         $pdo->prepare('UPDATE rooms SET room_name = ?, room_type = ?, room_status = ?, description = ? WHERE id = ?')
             ->execute([$v['name'], $v['type'], $v['status'], $v['desc'] !== '' ? $v['desc'] : null, $id]);
         rm_save_details($pdo, $id, $v['amen'], $v['cap']);
+        if ($removeOld) {
+            rm_image_save($pdo, $id, $newImage);
+        }
         $pdo->commit();
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
+        rm_image_delete($newImage);
         error_log('[BVO rooms] ' . $e->getMessage());
         return rm_fail('Unable to save the suite right now.');
+    }
+    if ($removeOld) {
+        rm_image_delete($oldImage);
     }
     return ['ok' => true, 'id' => $id, 'message' => $v['name'] . ' was updated.'];
 }
@@ -468,6 +566,37 @@ function rm_set_status(PDO $pdo, int $id, string $status): array
     }
     $pdo->prepare('UPDATE rooms SET room_status = ? WHERE id = ?')->execute([$status, $id]);
     return ['ok' => true, 'message' => $room['room_name'] . ' is now ' . $status . '.'];
+}
+
+function rm_delete_room(PDO $pdo, int $id): array
+{
+    $room = rm_room_exists($pdo, $id);
+    if (!$room) {
+        return rm_fail('That suite no longer exists.');
+    }
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM appointments WHERE room_id = ?');
+    $stmt->execute([$id]);
+    $count = (int)$stmt->fetchColumn();
+    if ($count > 0) {
+        return rm_fail($room['room_name'] . ' has ' . $count . ' booking' . ($count === 1 ? '' : 's') . ' on record, so it cannot be deleted. Set it to Maintenance instead to stop new bookings.');
+    }
+    $oldImage = rm_image_current($pdo, $id);
+    try {
+        $pdo->beginTransaction();
+        foreach (['room_details', 'room_climate_logs', 'room_maintenance_logs', 'room_pricing'] as $table) {
+            $pdo->prepare('DELETE FROM ' . $table . ' WHERE room_id = ?')->execute([$id]);
+        }
+        $pdo->prepare('DELETE FROM rooms WHERE id = ?')->execute([$id]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('[BVO room delete] ' . $e->getMessage());
+        return rm_fail('Unable to delete the suite right now.');
+    }
+    rm_image_delete($oldImage);
+    return ['ok' => true, 'message' => $room['room_name'] . ' was deleted permanently.'];
 }
 
 function rm_save_climate(PDO $pdo, array $in, int $adminId): array

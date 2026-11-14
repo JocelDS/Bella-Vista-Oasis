@@ -1,0 +1,437 @@
+.sv-intro {
+  padding: 54px 0 10px;
+}
+.sv-intro-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+.sv-intro h1 {
+  margin: 0 0 14px;
+  font-size: clamp(36px, 4.6vw, 56px);
+  line-height: 1.06;
+  color: var(--text);
+}
+.sv-intro .lp-lead {
+  max-width: 560px;
+  margin-bottom: 14px;
+}
+.sv-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+  max-width: 560px;
+  padding-left: 14px;
+  border-left: 3px solid var(--pink);
+}
+.sv-indicators {
+  list-style: none;
+  margin: 0;
+  padding: 22px;
+  display: grid;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: 0 14px 36px rgba(152, 107, 194, 0.13);
+}
+.sv-indicators li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.sv-indicators strong {
+  display: block;
+  font-size: 13px;
+}
+.sv-indicators small {
+  color: var(--text-2);
+  font-size: 11px;
+}
+
+.sv-treatments {
+  padding-top: 56px;
+}
+.sv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.sv-card .lp-card-img {
+  aspect-ratio: 16 / 11;
+}
+.sv-cat {
+  align-self: flex-start;
+  margin-bottom: 8px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.sv-cat.purple {
+  background: #f3e8fa;
+  color: var(--purple);
+}
+.sv-cat.pink {
+  background: #fde6f0;
+  color: #c2467f;
+}
+.sv-desc {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.sv-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border);
+}
+.sv-features {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.sv-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12px;
+  color: var(--text);
+}
+.sv-features svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--purple);
+}
+.sv-features li:nth-child(even) svg {
+  color: #d0629f;
+}
+.sv-info {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fbf1f8;
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+.sv-book {
+  margin-top: auto;
+  width: 100%;
+}
+.sv-book.loading,
+.lp-btn.loading {
+  pointer-events: none;
+  opacity: 0.75;
+}
+.sv-card.picked {
+  border-color: var(--purple);
+  box-shadow: 0 22px 44px rgba(152, 107, 194, 0.28);
+}
+
+.sv-addons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.sv-addon {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 6px 16px rgba(152, 107, 194, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sv-addon h3 {
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+.sv-addon p {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-2);
+  flex: 1;
+}
+.sv-addon-foot {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 6px;
+}
+.sv-addon-foot b {
+  color: #b98a3e;
+  font-size: 15px;
+}
+.sv-addon-foot small {
+  color: var(--text-2);
+  font-size: 10.5px;
+}
+.sv-addon-empty {
+  margin: 18px auto 0;
+  max-width: 620px;
+  padding: 16px 20px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-2);
+  border: 1.5px dashed var(--lavender);
+  border-radius: 16px;
+  background: #fdf7fc;
+}
+
+.sv-policies {
+  margin-top: 76px;
+  padding: 62px 0;
+  background: linear-gradient(120deg, #6e3fa0 0%, #986bc2 45%, #d0629f 100%);
+  color: #fff;
+}
+.sv-pol-head {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.sv-pol-head h2 {
+  margin: 0;
+  font-size: clamp(28px, 3.4vw, 40px);
+  color: #fff;
+}
+.sv-pol-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.sv-pol-grid article {
+  padding: 24px 22px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+}
+.sv-pol-grid .i {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #fff !important;
+}
+.sv-pol-grid h3 {
+  margin: 12px 0 8px;
+  font-size: 15px;
+}
+.sv-pol-grid ul {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.sv-pol-grid li {
+  margin-bottom: 4px;
+}
+.sv-pol-grid article:nth-child(even) {
+  background: rgba(255, 230, 242, 0.2);
+}
+
+.sv-table-wrap {
+  background: linear-gradient(180deg, #fff7fc, #fdeaf3);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 8px 22px 14px;
+  box-shadow: 0 14px 36px rgba(152, 107, 194, 0.12);
+}
+.sv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.sv-table th {
+  text-align: left;
+  padding: 16px 12px;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--purple);
+  border-bottom: 2px solid var(--blush);
+}
+.sv-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text);
+}
+.sv-table tr:last-child td {
+  border-bottom: 0;
+}
+.sv-table tbody tr {
+  transition: background 0.2s;
+}
+.sv-table tbody tr:hover,
+.sv-table tbody tr.hl {
+  background: rgba(244, 190, 213, 0.25);
+}
+.sv-table td strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 18px;
+}
+.sv-table td small {
+  color: #c2467f;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sv-t-price {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: #b98a3e;
+  white-space: nowrap;
+}
+
+.sv-book-page {
+  padding-top: 54px;
+}
+.sv-book-wrap {
+  max-width: 760px;
+}
+.sv-book-wrap h1 {
+  margin: 0 0 20px;
+  font-size: 38px;
+}
+.sv-selected,
+.sv-choose .lp-card {
+  text-decoration: none;
+  color: inherit;
+}
+.sv-choose {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.sv-choose .lp-card h3 {
+  margin-bottom: 6px;
+}
+.sv-choose .sv-price-row {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.sv-book-note {
+  margin: 20px 0;
+}
+
+/* Rooms & Suites (all rooms from the database) */
+.sv-rooms {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.sv-room {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(152, 107, 194, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+.sv-room img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+.sv-room-body {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.sv-room-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.sv-room-top h3 {
+  margin: 0;
+  font-size: 20px;
+}
+.sv-room-type {
+  color: var(--purple);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sv-room-status {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.sv-room-status.on {
+  background: #efe6f8;
+  color: var(--purple);
+}
+.sv-room-status.off {
+  background: #f3e3e3;
+  color: #a05252;
+}
+.sv-room p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.sv-room-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sv-room-tags span {
+  font-size: 10.5px;
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-2);
+}
+.sv-room-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.sv-room-foot span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sv-room-foot svg {
+  width: 15px;
+  height: 15px;
+}
+.sv-room-foot b {
+  color: #b98a3e;
+  font-size: 15px;
+}
+@media (max-width: 980px) {
+  .sv-rooms {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 620px) {
+  .sv-rooms {
+    grid-template-columns: 1fr;
+  }
+}

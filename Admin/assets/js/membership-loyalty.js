@@ -209,7 +209,7 @@
         data.tiers.forEach(function (t) {
             var c = el('article', 'tier-card' + (t.status === 'active' ? '' : ' is-off'));
             var top = el('div', 'tier-top');
-            top.style.background = t.color;
+            top.style.setProperty('--tier', t.color);
             top.appendChild(el('span', 'tier-badge', t.name.charAt(0).toUpperCase()));
             var heads = el('div', 'tier-heads');
             heads.appendChild(el('h3', 'tier-name', t.name));

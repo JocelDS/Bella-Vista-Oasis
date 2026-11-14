@@ -153,3 +153,49 @@ const ICON_MAIL = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="curr
 const ICON_LOCK = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 const ICON_EYE  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
 const ICON_ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
+
+/* ---------- Room images (uploaded in Room Management, shown to customers) ---------- */
+define('ROOM_UPLOAD_DIR', dirname(__DIR__, 2) . '/uploads/rooms');
+define('ROOM_UPLOAD_URL', BASE_URL . '/uploads/rooms');
+define('ROOM_IMAGE_MAX_BYTES', 2 * 1024 * 1024);
+
+/** Adds room_details.image_path if the database was imported without it. Runs once per request. */
+function room_images_ready(PDO $pdo): bool
+{
+    static $ok = null;
+    if ($ok !== null) return $ok;
+    try {
+        $has = $pdo->query("SHOW COLUMNS FROM room_details LIKE 'image_path'")->fetch();
+        if (!$has) {
+            $pdo->exec('ALTER TABLE room_details ADD COLUMN image_path VARCHAR(255) NULL DEFAULT NULL');
+        }
+        $ok = true;
+    } catch (Throwable $e) {
+        error_log('[BVO room images] ' . $e->getMessage());
+        $ok = false;
+    }
+    return $ok;
+}
+
+function room_image_url(?string $file): ?string
+{
+    $file = basename((string)$file);
+    return $file !== '' ? ROOM_UPLOAD_URL . '/' . rawurlencode($file) : null;
+}
+
+/** First uploaded image per room code (SR, CS, FL ...), as ['SR' => 'file.jpg']. */
+function room_images_by_code(PDO $pdo): array
+{
+    $map = [];
+    if (!room_images_ready($pdo)) return $map;
+    try {
+        foreach ($pdo->query("SELECT r.room_name, d.image_path FROM rooms r JOIN room_details d ON d.room_id = r.id WHERE d.image_path IS NOT NULL AND d.image_path <> '' ORDER BY r.id")->fetchAll() as $row) {
+            $code = strtoupper(explode('-', (string)$row['room_name'])[0]);
+            if (!isset($map[$code]) && is_file(ROOM_UPLOAD_DIR . '/' . basename((string)$row['image_path']))) {
+                $map[$code] = (string)$row['image_path'];
+            }
+        }
+    } catch (Throwable $e) {
+    }
+    return $map;
+}

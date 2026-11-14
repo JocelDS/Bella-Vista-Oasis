@@ -56,7 +56,10 @@ $sidebarName = (string)($_SESSION['admin_name'] ?? 'Administrator');
                <?= is_file(__DIR__ . '/../settings.php') ? '' : 'data-soon="Account Settings"' ?>>
                 <?= icon('gear') ?><span>Account Settings</span>
             </a>
-            <form method="post" action="<?= e(url('/logout.php')) ?>">
+            <a class="dd-item" href="<?= e(BASE_URL . '/customer/landing.php') ?>" target="_blank" rel="noopener">
+                <?= icon('users') ?><span>Customer Site</span>
+            </a>
+            <form method="post" action="<?= e(url('/auth/logout.php')) ?>">
                 <?= csrf_field() ?>
                 <button type="submit" class="dd-item dd-danger"><?= icon('logout') ?><span>Log Out</span></button>
             </form>

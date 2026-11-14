@@ -60,4 +60,4 @@ $st->execute([$id]);
 cu_clear_old();
 cu_start_session($st->fetch());
 cu_flash('success', 'Welcome to Bella Vista Oasis. ' . CUSTOMER_WELCOME_POINTS . ' welcome points have been added to your ledger.');
-cu_redirect('/dashboard.php');
+cu_login_redirect();

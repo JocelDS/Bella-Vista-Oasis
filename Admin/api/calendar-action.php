@@ -37,4 +37,12 @@ if ($action === 'reschedule') {
     cal_out(cal_reschedule($pdo, $id, $_POST));
 }
 
+if ($action === 'record_payment') {
+    $id = (int)($_POST['id'] ?? 0);
+    if ($id < 1) {
+        cal_out(['ok' => false, 'error' => 'Invalid appointment.']);
+    }
+    cal_out(appt_record_payment($pdo, $id, $_POST));
+}
+
 cal_out(['ok' => false, 'error' => 'Unknown action.']);

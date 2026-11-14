@@ -268,6 +268,7 @@
 }
 .mx-track {
   position: relative;
+  align-self: stretch;
   background-image: linear-gradient(
     to right,
     var(--border) 1px,
@@ -320,14 +321,34 @@
 }
 .mx-gap {
   position: absolute;
-  border: 1px dashed rgba(200,157,102, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px dashed rgba(184,134,60, 0.7);
   border-radius: 8px;
   background: repeating-linear-gradient(
     135deg,
-    rgba(200,157,102, 0.55) 0 3px,
-    rgba(200,157,102, 0.12) 3px 7px
+    rgba(231,198,143, 0.4) 0 3px,
+    rgba(231,198,143, 0.1) 3px 7px
   );
   pointer-events: none;
+}
+.mx-gap span {
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255, 0.85);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8A5F1C;
+  white-space: nowrap;
+}
+.mx-foot {
+  height: 30px;
+  border-top: 1px solid var(--border);
+  background: #fdfaf7;
 }
 
 .mx-card {
@@ -408,41 +429,89 @@
 }
 
 .is-session {
-  background: var(--forest);
-  border-color: var(--forest);
-  color: var(--cream);
+  background: var(--purple);
+  border-color: var(--purple);
+  color: #ffffff;
 }
 .is-confirmed {
-  background: #ebd3ce;
-  border-color: var(--sage);
-  color: var(--emerald);
+  background: #ECE0F7;
+  border-color: var(--lavender);
+  color: #4B2A73;
+}
+.is-overdue {
+  background: #FFE6F0;
+  border: 1px solid var(--pink);
+  color: #8E2A5C;
 }
 .is-pending {
-  background: #f6ead7;
-  border-color: var(--gold);
-  color: #E7C68F;
+  background: #FFF1D6;
+  border-color: var(--champagne);
+  color: #7A4F0C;
 }
 .is-completed {
   background: #FFF7FC;
-  border-color: #ddd2cb;
-  color: #756a6e;
+  border-color: #D9CCE3;
+  color: #5E5370;
 }
 .is-cancelled {
-  background: rgba(179,38,30, 0.1);
-  border: 1px dashed var(--red);
-  color: #E18BB9;
-  opacity: 0.85;
+  background: rgba(225,139,185, 0.12);
+  border: 1px dashed var(--pink);
+  color: #9B3566;
 }
 .is-no_show {
   background: #FFF7FC;
-  border: 1px dashed var(--gray);
-  color: #756a6e;
-  opacity: 0.85;
+  border: 1px dashed #9A8BAA;
+  color: #5E5370;
 }
 .is-other {
   background: #FFF7FC;
   border-color: var(--border);
   color: var(--gray);
+}
+.mx-card.is-cancelled,
+.mx-card.is-no_show {
+  opacity: 0.8;
+}
+.mx-tag,
+.mx-time {
+  opacity: 0.9;
+}
+
+.cal-app .st-confirmed {
+  background: #ECE0F7;
+  color: #4B2A73;
+}
+.cal-app .st-overdue {
+  background: #FFE6F0;
+  color: #8E2A5C;
+}
+.cal-app .st-pending,
+.cal-app .pay-deposit,
+.cal-app .badge.rs-cleaning {
+  background: #FFF1D6;
+  color: #7A4F0C;
+}
+.cal-app .st-completed {
+  background: #E8E1EF;
+  color: #4B2A73;
+}
+.cal-app .st-cancelled,
+.cal-app .pay-refunded,
+.cal-app .badge.rs-maintenance {
+  background: #FFE0EC;
+  color: #9B3566;
+}
+.cal-app .st-no_show {
+  background: #EEE8F3;
+  color: #5E5370;
+}
+.cal-app .pay-pending {
+  background: #F1EAF6;
+  color: #5E5370;
+}
+.cal-app .pay-paid {
+  background: var(--purple);
+  color: #ffffff;
 }
 
 .mx-now {
@@ -464,12 +533,13 @@
 }
 .mx-now-tag {
   position: absolute;
-  top: 6px;
+  top: auto;
+  bottom: 5px;
   left: 0;
   transform: translateX(-50%);
   padding: 3px 8px;
   border-radius: 999px;
-  background: var(--red);
+  background: #B83280;
   color: var(--white);
   font-size: 10px;
   font-weight: 700;
@@ -1000,4 +1070,65 @@
 }
 .folio .ins-grid {
   margin: 0;
+}
+.pay-sum {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+  margin: 0 0 18px;
+}
+.pay-sum dt {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pay-sum dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--forest);
+}
+.pay-sum dd .sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.pay-due {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--pearl);
+}
+.pay-due span {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.pay-due strong {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--forest);
+}
+
+.mx-now.is-end .mx-now-tag {
+  transform: translateX(-100%);
+}
+.mx-now.is-start .mx-now-tag {
+  transform: none;
+}
+.mx-now.is-end .mx-now-line {
+  margin-left: -3px;
+}
+.mx-now.is-start .mx-now-line {
+  margin-left: 1px;
 }

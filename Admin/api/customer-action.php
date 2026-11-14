@@ -39,6 +39,9 @@ try {
         case 'status':
             if ($id < 1) { cm_out(['ok' => false, 'error' => 'Select a guest.']); }
             cm_out(cm_set_status($pdo, $id, (string)($_POST['status'] ?? '')));
+        case 'delete':
+            if ($id < 1) { cm_out(['ok' => false, 'error' => 'Select a guest.']); }
+            cm_out(cm_delete($pdo, $id));
         case 'walkin':
             cm_out(cm_walkin($pdo, $_POST));
         default:

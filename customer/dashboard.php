@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/includes/customer-auth-check.php';
+require_once __DIR__ . '/includes/booking-bridge.php';
 
 $pdo = db();
 $cid = (int)$currentCustomer['id'];
@@ -17,13 +18,13 @@ $st = $pdo->prepare("SELECT membership_type, expiry_date FROM memberships WHERE 
 $st->execute([$cid]);
 $membership = $st->fetch();
 
-$st = $pdo->prepare("SELECT a.appointment_date, a.start_time, a.end_time, a.appointment_status, s.service_name FROM appointments a JOIN services s ON s.id = a.service_id WHERE a.customer_id = ? AND a.appointment_date >= CURDATE() AND a.appointment_status IN ('pending', 'confirmed') ORDER BY a.appointment_date, a.start_time LIMIT 5");
-$st->execute([$cid]);
-$upcoming = $st->fetchAll();
+$upcoming = cu_my_bookings($pdo, $cid, true);
+$history = cu_my_bookings($pdo, $cid, false);
 
 $pageTitle = 'My Sanctuary';
 $activeNav = 'loyalty';
 $pageScripts = [];
+$pageStyles = ['customer-booking.css'];
 require __DIR__ . '/includes/header.php';
 ?>
 <main class="cu-dash">
@@ -56,13 +57,34 @@ require __DIR__ . '/includes/header.php';
         <section class="cu-card">
             <p class="cu-eyebrow">Upcoming Bookings</p>
             <?php if ($upcoming): ?>
-            <ul class="cu-ledger">
+            <ul class="bk-list">
                 <?php foreach ($upcoming as $a): ?>
-                <li><span><?= e($a['service_name']) ?><small><?= e(date('D, M j', strtotime((string)$a['appointment_date']))) ?> &middot; <?= e(date('g:i A', strtotime((string)$a['start_time']))) ?> &ndash; <?= e(date('g:i A', strtotime((string)$a['end_time']))) ?></small></span><b class="pos"><?= e(ucfirst((string)$a['appointment_status'])) ?></b></li>
+                <li>
+                    <span><?= e($a['service_name']) ?><?= $a['room_name'] ? ' &middot; ' . e($a['room_name']) : '' ?><small><?= e(date('D, M j', strtotime((string)$a['appointment_date']))) ?> &middot; <?= e(date('g:i A', strtotime((string)$a['start_time']))) ?> &ndash; <?= e(date('g:i A', strtotime((string)$a['end_time']))) ?> &middot; <?= e(cu_peso((float)$a['total_amount'])) ?></small></span>
+                    <span class="bk-actions">
+                        <span class="bk-state <?= e((string)$a['appointment_status']) ?>"><?= e(str_replace('_', ' ', (string)$a['appointment_status'])) ?></span>
+                        <form method="post" action="<?= e(cu_url('/auth/cancel-booking.php')) ?>" onsubmit="return confirm('Cancel this booking? Late cancellations forfeit any downpayment.');">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="appointment_id" value="<?= (int)$a['id'] ?>">
+                            <button type="submit" class="bk-cancel">Cancel</button>
+                        </form>
+                    </span>
+                </li>
                 <?php endforeach; ?>
             </ul>
             <?php else: ?><p class="cu-note">You have no upcoming bookings.</p><?php endif; ?>
+            <p><a class="cu-btn cu-btn-primary" href="<?= e(cu_url('/book-appointment.php')) ?>"><span class="btn-label">Book Appointment</span></a> <a class="cu-btn cu-btn-soft" href="<?= e(cu_url('/qr-checkin.php')) ?>"><span class="btn-label">QR Check-In</span></a></p>
         </section>
+        <?php if ($history): ?>
+        <section class="cu-card">
+            <p class="cu-eyebrow">Booking History</p>
+            <ul class="bk-list">
+                <?php foreach ($history as $a): ?>
+                <li><span><?= e($a['service_name']) ?><small><?= e(date('D, M j, Y', strtotime((string)$a['appointment_date']))) ?> &middot; <?= e(date('g:i A', strtotime((string)$a['start_time']))) ?></small></span><span class="bk-state <?= e((string)$a['appointment_status']) ?>"><?= e(str_replace('_', ' ', (string)$a['appointment_status'])) ?></span></li>
+                <?php endforeach; ?>
+            </ul>
+        </section>
+        <?php endif; ?>
     </div>
 </main>
 <?php require __DIR__ . '/includes/footer.php';

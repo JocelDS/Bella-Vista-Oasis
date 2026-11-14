@@ -159,3 +159,43 @@ function cu_absolute(string $path): string
 }
 
 function cu_normalize_phone(string $p): string { return trim(preg_replace('/\s+/', ' ', $p)); }
+
+function cu_hours_text(): string
+{
+    try {
+        $rows = db()->query('SELECT day_of_week, opening_time, closing_time, is_open FROM spa_operating_hours ORDER BY day_of_week')->fetchAll();
+    } catch (Throwable $e) {
+        return '';
+    }
+    $open = array_values(array_filter($rows, fn($r) => (int)$r['is_open'] === 1));
+    if (!$open) return '';
+    $fmt = fn(string $t) => date('g:i A', strtotime($t));
+    $sig = array_unique(array_map(fn($r) => $r['opening_time'] . '-' . $r['closing_time'], $open));
+    if (count($open) === 7 && count($sig) === 1) {
+        return $fmt($open[0]['opening_time']) . ' – ' . $fmt($open[0]['closing_time']) . ' Daily';
+    }
+    $days = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
+    $parts = [];
+    foreach ($open as $r) $parts[] = $days[(int)$r['day_of_week']] . ' ' . $fmt($r['opening_time']) . '–' . $fmt($r['closing_time']);
+    return implode(' · ', $parts);
+}
+
+function cu_duration_label(int $minutes): string
+{
+    if ($minutes % 60 === 0) return ($minutes / 60) . ($minutes === 60 ? ' hour' : ' hours');
+    if ($minutes > 60) return rtrim(rtrim(number_format($minutes / 60, 1), '0'), '.') . ' hours';
+    return $minutes . ' min';
+}
+
+function cu_peso(float $amount): string
+{
+    return '&#8369;' . (floor($amount) == $amount ? number_format($amount) : number_format($amount, 2));
+}
+
+function cu_login_redirect(): never
+{
+    $r = (string)($_SESSION['cu_return'] ?? '');
+    unset($_SESSION['cu_return']);
+    if (preg_match('#^/(book-appointment\.php(\?service_id=\d{1,6})?|loyalty-rewards\.php)$#', $r)) cu_redirect($r);
+    cu_redirect('/dashboard.php');
+}

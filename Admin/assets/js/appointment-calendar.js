@@ -17,7 +17,7 @@
         return n;
     }
 
-    var STATE_LABEL = { session: 'In Session', confirmed: 'Confirmed', pending: 'Pending', completed: 'Completed', cancelled: 'Cancelled', no_show: 'No Show' };
+    var STATE_LABEL = { session: 'In Session', confirmed: 'Confirmed', pending: 'Pending', completed: 'Completed', overdue: 'Session Ended', cancelled: 'Cancelled', no_show: 'No Show' };
     var CARD_H = 76;
     var LANE_GAP = 6;
 
@@ -191,7 +191,7 @@
 
         var s = data.summary;
         var parts = [s.total + (s.total === 1 ? ' appointment' : ' appointments')];
-        ['session', 'confirmed', 'pending', 'completed', 'cancelled', 'no_show'].forEach(function (k) {
+        ['session', 'overdue', 'confirmed', 'pending', 'completed', 'cancelled', 'no_show'].forEach(function (k) {
             if (s[k]) { parts.push(s[k] + ' ' + STATE_LABEL[k].toLowerCase()); }
         });
         $('#calSummary').textContent = parts.join(' · ');
@@ -263,7 +263,7 @@
             track.setAttribute('data-room', String(room.id));
             var items = data.appointments.filter(function (a) { return a.room_id === room.id && a.date === data.date; });
             var laid = assignLanes(items);
-            track.style.height = (14 + laid.count * (CARD_H + LANE_GAP)) + 'px';
+            track.style.minHeight = (14 + laid.count * (CARD_H + LANE_GAP)) + 'px';
 
             room.windows.forEach(function (w) {
                 var o = el('div', 'mx-open' + (w.is_now ? ' is-now' : ''));
@@ -285,6 +285,7 @@
                 g.style.width = 'calc(' + (pct(gapEnd, axis) - pct(p.item.end, axis)) + '% - 4px)';
                 g.style.top = (7 + p.lane * (CARD_H + LANE_GAP)) + 'px';
                 g.style.height = CARD_H + 'px';
+                g.appendChild(el('span', null, 'Cleaning'));
                 track.appendChild(g);
             });
 
@@ -317,6 +318,8 @@
             row.appendChild(track);
             mx.appendChild(row);
         });
+
+        mx.appendChild(el('div', 'mx-foot'));
 
         var nowWrap = el('div', 'mx-now');
         nowWrap.id = 'mxNow';
@@ -355,7 +358,7 @@
         clearInterval(nowTimer);
         nowTimer = null;
         updateNow();
-        if (data.now_min !== null && state.view !== 'week') { nowTimer = setInterval(updateNow, 30000); }
+        if (data.now_min !== null && state.view === 'multi') { nowTimer = setInterval(updateNow, 30000); }
     }
 
     function updateNow() {
@@ -363,12 +366,16 @@
         var nm = nowMinute();
         if (!wrap || nm === null) { return; }
         var axis = data.axis;
-        if (nm < axis.start || nm > axis.end) { wrap.hidden = true; return; }
+        var tag = wrap.lastChild;
+        var edge = nm < axis.start ? 'start' : (nm > axis.end ? 'end' : '');
+        var at = edge === 'start' ? axis.start : (edge === 'end' ? axis.end : nm);
         wrap.hidden = false;
-        var left = pct(nm, axis) + '%';
+        wrap.classList.toggle('is-start', edge === 'start');
+        wrap.classList.toggle('is-end', edge === 'end');
+        var left = pct(at, axis) + '%';
         wrap.firstChild.style.left = left;
-        wrap.lastChild.style.left = left;
-        wrap.lastChild.textContent = fmtTime(nm) + ' · LIVE';
+        tag.style.left = left;
+        tag.textContent = fmtTime(nm) + (edge === 'end' ? ' · CLOSED' : (edge === 'start' ? ' · NOT YET OPEN' : ' · LIVE'));
     }
 
     function roomName(id) {
@@ -576,7 +583,7 @@
         box.appendChild(top);
 
         var badges = el('div', 'ins-badges');
-        badges.appendChild(el('span', 'badge st-' + a.status, a.state === 'session' ? 'In Session' : a.status_label));
+        badges.appendChild(el('span', 'badge st-' + (a.state === 'overdue' ? 'overdue' : a.status), a.state === 'session' ? 'In Session' : (a.state === 'overdue' ? 'Session Ended' : a.status_label)));
         badges.appendChild(el('span', 'badge pay-' + a.payment_status, 'Payment: ' + a.payment_label));
         if (a.membership) { badges.appendChild(el('span', 'badge rs-available', a.membership + ' Member' + (a.membership_until ? ' · until ' + a.membership_until : ''))); }
         if (a.is_pregnant) { badges.appendChild(el('span', 'badge rs-cleaning', 'Pregnant')); }
@@ -654,6 +661,7 @@
 
     function runPrimary(a) {
         var action = a.primary.action;
+        if (action === 'pay') { openPayment(a); return; }
         var text = action === 'confirm'
             ? 'Confirm ' + a.customer_name + "'s appointment on " + a.date_label + ' at ' + a.start_label + '?'
             : 'Mark ' + a.customer_name + "'s session as completed? This cannot be undone from the calendar.";
@@ -662,9 +670,59 @@
                 if (!d.ok) { toast(d.error || 'Action failed.'); return; }
                 toast(d.message || 'Appointment updated.');
                 load();
+                if (action === 'complete') { offerPayment(a.id); }
             }).catch(function () { toast('Network error. Please try again.'); });
         });
     }
+
+    var payModal = $('#payModal');
+    var payForm = $('#payForm');
+    var payError = $('#payError');
+
+    function openPayment(a) {
+        payForm.reset();
+        payError.hidden = true;
+        $('#pay_id').value = String(a.id);
+        $('#payKicker').textContent = 'Session Settlement · #' + a.code;
+        $('#payTitle').textContent = 'Record Payment';
+        var sum = $('#paySummary');
+        sum.innerHTML = '';
+        dlItem(sum, 'Guest', a.customer_name);
+        dlItem(sum, 'Ritual', a.service_name, a.date_label + ' · ' + a.start_label + ' – ' + a.end_label);
+        dlItem(sum, 'Total Amount', a.total_label);
+        dlItem(sum, 'Already Received', a.paid_label);
+        $('#payDue').textContent = a.balance_label;
+        openModal(payModal);
+        $('#pay_method').focus();
+    }
+
+    function offerPayment(id) {
+        api('/calendar-detail.php?id=' + encodeURIComponent(id)).then(function (d) {
+            if (d.ok && d.appointment && d.appointment.can_pay) { openPayment(d.appointment); }
+        }).catch(function () {});
+    }
+
+    payForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        payError.hidden = true;
+        if (!$('#pay_method').value) {
+            payError.textContent = 'Select how the guest paid.';
+            payError.hidden = false;
+            return;
+        }
+        var btn = $('#paySubmit');
+        btn.disabled = true;
+        api('/calendar-action.php', { method: 'POST', body: new FormData(payForm) }).then(function (d) {
+            if (!d.ok) { payError.textContent = d.error || 'Unable to record the payment.'; payError.hidden = false; return; }
+            closeModal(payModal);
+            toast(d.message || 'Payment recorded.');
+            if (d.id) { selectedId = d.id; }
+            load();
+        }).catch(function () {
+            payError.textContent = 'Network error. Please try again.';
+            payError.hidden = false;
+        }).then(function () { btn.disabled = false; });
+    });
 
     function folioSection(title) {
         var s = el('section', 'folio-sec');

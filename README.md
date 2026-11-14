@@ -2,15 +2,15 @@
 
 Admin portal for Bella Vista Oasis Spa (school final project). PHP 8, PDO, MySQL, vanilla JavaScript. Runs on localhost with XAMPP.
 
-The spa is open daily, Monday to Sunday, 1:00 PM to 9:00 PM. Only the Admin side is built; `customer/` is a placeholder page.
+The spa is open daily, Monday to Sunday, 1:00 PM to 9:00 PM. The Admin portal and the customer portal (`customer/`) share one database and one booking engine.
 
 ## Setup (XAMPP)
 
 1. Install XAMPP with PHP 8 or newer and start **Apache** and **MySQL**.
 2. Copy the project folder into `C:\xampp\htdocs\` and name it exactly `bella-vista-oasis` (lowercase, the URLs below depend on it).
 3. Open http://localhost/phpmyadmin, create a database named `bella_vista_oasis` (collation `utf8mb4_unicode_ci`).
-4. Select that database, open **Import**, choose `bella_vista_oasis.sql` and click **Import**.
-5. Database settings are in `Admin/config/database.php` (default: host `localhost`, user `root`, empty password). Change them only if your MySQL differs.
+4. Select that database, open **Import**, choose `database/bella_vista_oasis.sql` and click **Import**.
+5. Database settings are in `admin/config/database.php` (default: host `localhost`, user `root`, empty password). Change them only if your MySQL differs.
 6. Open http://localhost/bella-vista-oasis/admin/
 
 ## Admin login
@@ -61,3 +61,16 @@ After 5 failed logins an account is locked for 15 minutes; the second statement 
 - Therapist Assignment for bookings without a therapist, limited to therapists who are on shift, not on leave and not double-booked, with an assignment log.
 - Daily Report: bookings for the day, active therapist schedules, and total revenue (paid payments plus downpayments).
 - Customer management, room management, memberships and rewards, analytics and settings.
+
+## Customer portal and Admin connection
+
+- Customer site: http://localhost/bella-vista-oasis/customer/ (register, sign in, services, book, loyalty, dashboard).
+- Both sides use the same database (`admin/config/database.php`) and separate sessions (`BVO_CUSTOMER_SESSION` and `BVO_ADMIN_SESSION`).
+- Customer booking (`customer/book-appointment.php`) uses the Admin rules engine (`admin/includes/booking-rules.php` and `availability-data.php`): operating hours, blocked dates, start-time grid, room capacity, cleaning gap, maintenance rooms and server-computed totals.
+- A room is assigned automatically. The booking is saved as `pending` and shows in Admin Appointments, Calendar, Therapist Assignment (no therapist yet) and Dashboard, with an admin notification.
+- Admin confirm, cancel and reschedule actions show on the customer dashboard. Customers can cancel upcoming bookings using the same cancellation policy.
+- Customers registered online appear in Admin Customer Management with their loyalty welcome bonus.
+- QR Check-In (`customer/qr-checkin.php`): the customer generates the arrival pass for a confirmed booking using the Admin QR engine (`admin/includes/qr-checkin-data.php`). The front desk scans it in Admin QR Check-in, and the customer page then shows the booking as checked in.
+- Services, rates, hours, contact details, cleaning gap, arrival and cancellation notices, rooms, membership tiers and rewards on the customer pages are all read from the Admin database, so any change in Admin Settings, Room Management or Memberships shows on the customer site.
+- Admin delete: Appointment Management has a "Delete Appointment" action (removes the booking, its payments and check-in history). Customer Management has "Delete guest" under More Actions (removes the guest with their appointments, payments, membership and loyalty records). Both ask for confirmation and cannot be undone.
+- Room Management has a Delete button on each suite. A room with any booking on record cannot be deleted (use Maintenance instead); otherwise its details, climate and maintenance records are removed too.

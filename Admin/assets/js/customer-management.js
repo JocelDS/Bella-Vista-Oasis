@@ -204,6 +204,7 @@
             });
             var next = g.status === 'active' ? 'inactive' : 'active';
             item('Mark as ' + next, function () { changeStatus(g, next); }, next === 'inactive' ? 'is-danger' : '');
+            item('Delete guest', function () { deleteGuest(g); }, 'is-danger');
             more.appendChild(menu);
         });
 
@@ -398,6 +399,20 @@
                 fd.set('action', 'status'); fd.set('id', String(g.id)); fd.set('status', next);
                 post(fd).then(function (res) {
                     toast(res.ok ? res.message : (res.error || 'Unable to update the guest.'));
+                    if (res.ok) { refreshAll(); }
+                });
+            });
+    }
+
+    function deleteGuest(g) {
+        ask('Delete guest permanently?',
+            g.name + ' (' + g.code + ') and all related appointments, payments, membership and loyalty records will be removed. This cannot be undone.',
+            'Delete permanently',
+            function () {
+                var fd = new FormData();
+                fd.set('action', 'delete'); fd.set('id', String(g.id));
+                post(fd).then(function (res) {
+                    toast(res.ok ? res.message : (res.error || 'Unable to delete the guest.'));
                     if (res.ok) { refreshAll(); }
                 });
             });

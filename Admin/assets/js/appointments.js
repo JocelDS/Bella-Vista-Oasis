@@ -226,9 +226,10 @@
         confirm:  { label: 'Confirm Appointment', title: 'Confirm appointment', text: 'Confirm this appointment? The guest will be marked as confirmed.', button: 'Confirm' },
         complete: { label: 'Mark as Completed', title: 'Mark as completed', text: 'Mark this appointment as completed? This cannot be undone from this list.', button: 'Mark Completed' },
         no_show:  { label: 'Mark as No Show', title: 'Mark as no show', text: 'Mark this guest as a no show? This cannot be undone from this list.', button: 'Mark No Show', danger: true },
-        cancel:   { label: 'Cancel Appointment', title: 'Cancel appointment', text: 'Cancel this appointment? This cannot be undone from this list.', button: 'Cancel Appointment', danger: true }
+        cancel:   { label: 'Cancel Appointment', title: 'Cancel appointment', text: 'Cancel this appointment? This cannot be undone from this list.', button: 'Cancel Appointment', danger: true },
+        'delete': { label: 'Delete Appointment', title: 'Delete appointment', text: 'Permanently delete this appointment together with its payment records and check-in history? This cannot be undone.', button: 'Delete Permanently', danger: true }
     };
-    var ORDER = ['view', 'edit', 'confirm', 'complete', 'no_show', 'cancel'];
+    var ORDER = ['view', 'edit', 'confirm', 'complete', 'no_show', 'cancel', 'delete'];
 
     var menu = $('#rowMenuPop');
     var menuBtn = null;
@@ -274,7 +275,7 @@
         menu.innerHTML = '';
         ORDER.forEach(function (key) {
             if (key !== 'view' && allowed.indexOf(key) === -1) { return; }
-            if (key === 'cancel' || key === 'no_show') {
+            if (key === 'cancel' || key === 'no_show' || key === 'delete') {
                 if (!menu.querySelector('.dd-sep')) { menu.appendChild(el('div', 'dd-sep')); }
             }
             var item = el('button', 'dd-item' + (ACTIONS[key].danger ? ' dd-danger' : ''), ACTIONS[key].label);
@@ -373,7 +374,7 @@
             foot.innerHTML = '';
             a.actions.forEach(function (key) {
                 if (!ACTIONS[key]) { return; }
-                var kind = key === 'edit' || key === 'confirm' || key === 'complete' ? 'btn-primary' : (key === 'cancel' ? 'btn-outline btn-danger-soft' : 'btn-outline');
+                var kind = key === 'edit' || key === 'confirm' || key === 'complete' ? 'btn-primary' : (key === 'cancel' || key === 'delete' ? 'btn-outline btn-danger-soft' : 'btn-outline');
                 var b = el('button', 'btn ' + kind, ACTIONS[key].label);
                 b.type = 'button';
                 b.addEventListener('click', function () { closeModal(detailModal); handleAction(key, a.id); });

@@ -521,7 +521,7 @@ function qr_generatable(PDO $pdo, array $s, DateTimeImmutable $now): array
     return $out;
 }
 
-function qr_generate(PDO $pdo, int $apptId, int $adminId): array
+function qr_generate(PDO $pdo, int $apptId, ?int $adminId): array
 {
     $s   = qr_settings($pdo);
     $now = qr_now();

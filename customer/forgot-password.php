@@ -19,7 +19,7 @@ require __DIR__ . '/includes/header.php';
         <?php if ($flash): ?><div class="cu-alert cu-alert-<?= e($flash['type']) ?>" role="alert"><?= e($flash['message']) ?></div><?php endif; ?>
         <?php if ($devLink): ?><div class="cu-alert cu-alert-info" role="status">Local development: email is not configured, so here is your link. <a href="<?= e($devLink) ?>">Open reset link</a></div><?php endif; ?>
 
-        <form id="forgotForm" method="post" action="<?= e(cu_url('/auth/forgot-password.php')) ?>" novalidate>
+        <form id="forgotForm" method="post" action="<?= e(cu_url('/auth/forgot-password-process.php')) ?>" novalidate>
             <?= csrf_field() ?>
             <div class="cu-field">
                 <label for="email">Email Address</label>

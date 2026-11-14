@@ -181,6 +181,15 @@
         }
         list.forEach(function (r) {
             var c = el('article', 'room-card rc-' + r.status);
+            if (r.image) {
+                var ph = el('div', 'rc-photo');
+                var pi = document.createElement('img');
+                pi.src = r.image;
+                pi.alt = r.name;
+                pi.loading = 'lazy';
+                ph.appendChild(pi);
+                c.appendChild(ph);
+            }
             var head = el('div', 'rc-head');
             var tt = el('div', 'rc-title');
             tt.appendChild(el('h3', 'rc-name', r.name));
@@ -241,6 +250,7 @@
             acts.appendChild(actionBtn('Update Status', 'btn btn-outline btn-sm', function () { openStatus(r); }));
             acts.appendChild(actionBtn('Maintenance', 'btn btn-outline btn-sm', function () { openMaint(r.id, null); }));
             acts.appendChild(actionBtn('View Schedule', 'btn btn-outline btn-sm', function () { openSchedule(r.id); }));
+            acts.appendChild(actionBtn('Delete', 'btn btn-outline btn-sm', function () { deleteRoom(r); }));
             c.appendChild(acts);
             grid.appendChild(c);
         });
@@ -377,6 +387,38 @@
 
     var suiteModal = $('#suiteModal');
     var suiteForm = $('#suiteForm');
+    var suImgInput = $('#su_img');
+    var suImgPreview = $('#suImgPreview');
+    function setSuitePreview(src) {
+        suImgPreview.innerHTML = '';
+        if (src) {
+            var im = document.createElement('img');
+            im.src = src;
+            im.alt = 'Room photo';
+            suImgPreview.appendChild(im);
+        } else {
+            var sp = document.createElement('span');
+            sp.textContent = 'No photo';
+            suImgPreview.appendChild(sp);
+        }
+    }
+    suImgInput.addEventListener('change', function () {
+        var f = suImgInput.files && suImgInput.files[0];
+        if (!f) { return; }
+        if (f.size > 2 * 1024 * 1024) {
+            suImgInput.value = '';
+            var er = $('#suiteError');
+            er.textContent = 'That image is too large. Use a photo up to 2 MB.';
+            er.hidden = false;
+            return;
+        }
+        $('#suiteError').hidden = true;
+        $('#su_img_remove').checked = false;
+        setSuitePreview(URL.createObjectURL(f));
+    });
+    $('#su_img_remove').addEventListener('change', function () {
+        if (this.checked) { suImgInput.value = ''; setSuitePreview(null); }
+    });
     function openSuite(r) {
         suiteForm.reset();
         $('#suiteError').hidden = true;
@@ -384,6 +426,8 @@
         $('#su_id').value = r ? String(r.id) : '';
         $('#suiteKicker').textContent = r ? 'Edit Room' : 'Sanctuary Suite';
         $('#suiteTitle').textContent = r ? r.name : 'New Sanctuary Suite';
+        setSuitePreview(r && r.image ? r.image : null);
+        $('#suImgRemoveWrap').hidden = !(r && r.image);
         if (r) {
             $('#su_name').value = r.name;
             $('#su_type').value = r.type;
@@ -698,6 +742,19 @@
             box.innerHTML = '';
             box.appendChild(el('p', 'empty', 'Unable to load the schedule.'));
         });
+    }
+
+    function deleteRoom(r) {
+        if (!window.confirm('Delete ' + r.name + ' permanently? Its details, climate readings and maintenance records will be removed. This cannot be undone.')) { return; }
+        var tokenEl = document.querySelector('input[name="csrf"]');
+        var fd = new FormData();
+        fd.set('action', 'delete_room');
+        fd.set('id', String(r.id));
+        fd.set('csrf', tokenEl ? tokenEl.value : '');
+        api('/room-action.php', { method: 'POST', body: fd }).then(function (d) {
+            toast(d.ok ? d.message : (d.error || 'Unable to delete the suite.'));
+            if (d.ok) { load(); }
+        }).catch(function () { toast('Network error. Please try again.'); });
     }
 
     function refreshOpen() {

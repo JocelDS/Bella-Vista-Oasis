@@ -82,7 +82,7 @@ $latestNotif = $notifList ? (int)$notifList[0]['id'] : 0;
                         <a class="dd-item <?= $hasSettings ? '' : 'is-soon' ?>" href="<?= $hasSettings ? e(url('/settings.php')) : '#' ?>" <?= $hasSettings ? '' : 'data-soon="Account Settings"' ?>>
                             <?= icon('gear') ?><span>Account Settings</span>
                         </a>
-                        <form method="post" action="<?= e(url('/logout.php')) ?>">
+                        <form method="post" action="<?= e(url('/auth/logout.php')) ?>">
                             <?= csrf_field() ?>
                             <button type="submit" class="dd-item dd-danger"><?= icon('logout') ?><span>Log Out</span></button>
                         </form>

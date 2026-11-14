@@ -161,6 +161,17 @@ require __DIR__ . '/includes/header.php';
                     <select id="su_status" name="room_status"><option value="available">Available</option><option value="cleaning">Cleaning</option><option value="maintenance">Maintenance</option></select></div>
                 <div class="field field-full"><label for="su_desc">Room Description</label><textarea id="su_desc" name="description" rows="2" maxlength="1000"></textarea></div>
                 <div class="field"><label for="su_amen">Amenities</label><input type="text" id="su_amen" name="amenities" maxlength="500" placeholder="Separate with commas"></div>
+                <div class="field field-full">
+                    <label for="su_img">Room Photo</label>
+                    <div class="img-upload">
+                        <div class="img-upload-preview" id="suImgPreview"><span>No photo</span></div>
+                        <div class="img-upload-ctl">
+                            <input type="file" id="su_img" name="room_image" accept="image/jpeg,image/png,image/webp">
+                            <small>JPG, PNG or WebP, up to 2 MB. Shown to guests on the customer site.</small>
+                            <label class="img-remove" id="suImgRemoveWrap" hidden><input type="checkbox" name="remove_image" value="1" id="su_img_remove"> Remove current photo</label>
+                        </div>
+                    </div>
+                </div>
                 <div class="field"><label for="su_cap">Maximum Capacity</label><input type="number" id="su_cap" name="maximum_capacity" min="1" max="20" step="1"></div>
             </div>
             <datalist id="typeList"></datalist>

@@ -731,6 +731,40 @@ function cm_set_status(PDO $pdo, int $id, string $status): array
     return ['ok' => true, 'id' => $id, 'message' => $name . ' is now ' . $status . '.'];
 }
 
+function cm_delete(PDO $pdo, int $id): array
+{
+    $photo = null;
+    $name = '';
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('SELECT full_name, profile_photo FROM customers WHERE id = ? FOR UPDATE');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            $pdo->rollBack();
+            return ['ok' => false, 'error' => 'That guest no longer exists.'];
+        }
+        $name = (string)$row['full_name'];
+        $photo = $row['profile_photo'] ?? null;
+
+        $pdo->prepare('DELETE FROM payments WHERE customer_id = ? OR appointment_id IN (SELECT id FROM appointments WHERE customer_id = ?)')->execute([$id, $id]);
+        $pdo->prepare('DELETE FROM appointments WHERE customer_id = ?')->execute([$id]);
+        foreach (['reward_redemptions', 'loyalty_transactions', 'membership_history', 'memberships', 'customer_tokens'] as $table) {
+            $pdo->prepare('DELETE FROM ' . $table . ' WHERE customer_id = ?')->execute([$id]);
+        }
+        $pdo->prepare('DELETE FROM customers WHERE id = ?')->execute([$id]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('[BVO customer delete] ' . $e->getMessage());
+        return ['ok' => false, 'error' => 'Unable to delete the guest right now.'];
+    }
+    cm_drop_photo(is_string($photo) ? $photo : null);
+    return ['ok' => true, 'id' => $id, 'message' => $name . ' and all related records were deleted permanently.'];
+}
+
 /* ---------- Walk-in ---------- */
 
 function cm_walkin(PDO $pdo, array $in): array

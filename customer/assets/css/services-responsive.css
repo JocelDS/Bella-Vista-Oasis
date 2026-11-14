@@ -1,0 +1,74 @@
+@media (max-width: 1040px) {
+  .sv-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sv-addons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sv-pol-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sv-intro-grid {
+    gap: 28px;
+  }
+}
+@media (max-width: 860px) {
+  .sv-intro-grid {
+    grid-template-columns: 1fr;
+  }
+  .sv-intro {
+    padding-top: 32px;
+  }
+}
+@media (max-width: 700px) {
+  .sv-table thead {
+    display: none;
+  }
+  .sv-table,
+  .sv-table tbody,
+  .sv-table tr,
+  .sv-table td {
+    display: block;
+    width: 100%;
+  }
+  .sv-table tr {
+    padding: 14px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sv-table tr:last-child {
+    border-bottom: 0;
+  }
+  .sv-table td {
+    padding: 5px 8px;
+    border: 0;
+  }
+  .sv-table
+    td[data-label]:not([data-label=""]):not([data-label="Treatment"])::before {
+    content: attr(data-label) ": ";
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--purple);
+  }
+  .sv-table .lp-btn {
+    width: 100%;
+    margin-top: 6px;
+  }
+  .sv-table-wrap {
+    padding: 4px 12px 10px;
+  }
+}
+@media (max-width: 620px) {
+  .sv-grid,
+  .sv-addons,
+  .sv-pol-grid {
+    grid-template-columns: 1fr;
+  }
+  .sv-policies {
+    padding: 48px 0;
+  }
+  .sv-book-wrap h1 {
+    font-size: 30px;
+  }
+}

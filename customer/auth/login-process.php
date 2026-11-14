@@ -60,4 +60,4 @@ if (password_needs_rehash($customer['password_hash'], PASSWORD_DEFAULT)) {
 cu_clear_old();
 cu_start_session($customer);
 if ($remember) cu_set_remember_cookie((int)$customer['id']); else cu_clear_remember_cookie();
-cu_redirect('/dashboard.php');
+cu_login_redirect();

@@ -21,7 +21,7 @@ require __DIR__ . '/includes/header.php';
 
         <?php if ($flash): ?><div class="cu-alert cu-alert-<?= e($flash['type']) ?>" role="alert"><?= e($flash['message']) ?></div><?php endif; ?>
 
-        <form id="resetForm" method="post" action="<?= e(cu_url('/auth/reset-password.php')) ?>" novalidate>
+        <form id="resetForm" method="post" action="<?= e(cu_url('/auth/reset-password-process.php')) ?>" novalidate>
             <?= csrf_field() ?>
             <input type="hidden" name="s" value="<?= e($selector) ?>">
             <input type="hidden" name="t" value="<?= e($token) ?>">

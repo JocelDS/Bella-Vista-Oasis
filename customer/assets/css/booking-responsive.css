@@ -1,0 +1,60 @@
+@media (max-width: 1020px) {
+  .bk-layout {
+    grid-template-columns: 1fr;
+  }
+  .bk-side {
+    position: static;
+  }
+  .bk-intro {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .bk-sanit {
+    width: auto;
+  }
+  .bk-done-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .bk {
+    padding: 24px 14px 48px;
+  }
+  .bk-steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 4px;
+  }
+  .bk-steps button {
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 4px;
+    text-align: center;
+  }
+  .bk-step-txt small {
+    display: none;
+  }
+  .bk-step-txt b {
+    font-size: 10.5px;
+    line-height: 1.2;
+  }
+  .bk-card {
+    padding: 20px 18px;
+  }
+  .bk-h2 {
+    font-size: 24px;
+  }
+  .bk-grid2,
+  .bk-promos {
+    grid-template-columns: 1fr;
+  }
+  .bk-actions {
+    flex-direction: column-reverse;
+  }
+  .bk-actions .bk-btn {
+    width: 100%;
+  }
+  .bk-total b {
+    font-size: 32px;
+  }
+}

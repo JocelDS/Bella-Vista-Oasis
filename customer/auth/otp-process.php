@@ -46,4 +46,4 @@ if (!$customer) {
 }
 cu_token_burn((int)$row['id']);
 cu_start_session($customer);
-cu_redirect('/dashboard.php');
+cu_login_redirect();

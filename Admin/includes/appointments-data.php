@@ -215,7 +215,31 @@ function appt_actions_for(string $status): array
             $out[] = $key;
         }
     }
+    $out[] = 'delete';
     return $out;
+}
+
+function appt_delete(PDO $pdo, int $id): array
+{
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('SELECT id FROM appointments WHERE id = ? FOR UPDATE');
+        $stmt->execute([$id]);
+        if (!$stmt->fetchColumn()) {
+            $pdo->rollBack();
+            return ['ok' => false, 'error' => 'That appointment no longer exists.'];
+        }
+        $pdo->prepare('DELETE FROM payments WHERE appointment_id = ?')->execute([$id]);
+        $pdo->prepare('DELETE FROM appointments WHERE id = ?')->execute([$id]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('[BVO appointment delete] ' . $e->getMessage());
+        return ['ok' => false, 'error' => 'Unable to delete the appointment right now.'];
+    }
+    return ['ok' => true, 'message' => 'Appointment ' . appt_code($id) . ' deleted permanently.'];
 }
 
 function appt_render_rows(array $rows, bool $filtered): string
@@ -356,6 +380,19 @@ function appt_detail(PDO $pdo, int $id): ?array
         $balance = $total;
     }
 
+    $stmt = $pdo->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE appointment_id = ? AND payment_status IN ('paid', 'deposit')");
+    $stmt->execute([$id]);
+    $rows = (float)$stmt->fetchColumn();
+    if ($ps === 'paid') {
+        $received = max($rows, $total);
+    } elseif ($ps === 'deposit') {
+        $received = max($rows, $down);
+    } elseif ($ps === 'refunded') {
+        $received = 0.0;
+    } else {
+        $received = $rows;
+    }
+
     return [
         'id'              => (int)$a['id'],
         'code'            => appt_code((int)$a['id']),
@@ -382,7 +419,9 @@ function appt_detail(PDO $pdo, int $id): ?array
         'payment_label'   => $pmap[$ps] ?? ucfirst($ps),
         'total'           => number_format((float)$a['total_amount'], 2, '.', ''),
         'total_label'     => peso($a['total_amount']),
-        'paid_label'      => peso($a['paid_amount']),
+        'paid_label'      => peso($received),
+        'received'        => number_format($received, 2, '.', ''),
+        'balance'         => number_format($balance, 2, '.', ''),
         'downpayment'     => number_format($down, 2, '.', ''),
         'downpayment_label' => peso($down),
         'balance_label'   => peso($balance),
@@ -553,6 +592,68 @@ function appt_save(PDO $pdo, array $in, ?int $id): array
             ? 'Appointment ' . appt_code($savedId) . ' created.'
             : 'Appointment ' . appt_code($savedId) . ' updated.' . ($lateResched['forfeit'] ? ' The downpayment is forfeited because of the late reschedule.' : ''),
     ];
+}
+
+function appt_pay_methods(): array
+{
+    return ['Cash', 'GCash', 'Maya', 'Card', 'Bank Transfer'];
+}
+
+function appt_record_payment(PDO $pdo, int $id, array $in): array
+{
+    $method = trim((string)($in['payment_method'] ?? ''));
+    if (!in_array($method, appt_pay_methods(), true)) {
+        return ['ok' => false, 'error' => 'Select how the guest paid.'];
+    }
+
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare('SELECT customer_id, appointment_status, payment_status, total_amount, downpayment_amount FROM appointments WHERE id = ? FOR UPDATE');
+        $stmt->execute([$id]);
+        $a = $stmt->fetch();
+        if (!$a) {
+            $pdo->rollBack();
+            return ['ok' => false, 'error' => 'That appointment no longer exists.'];
+        }
+        if ($a['appointment_status'] !== 'completed') {
+            $pdo->rollBack();
+            return ['ok' => false, 'error' => 'Payment can be recorded once the session is completed.'];
+        }
+        if (in_array($a['payment_status'], ['paid', 'refunded'], true)) {
+            $pdo->rollBack();
+            return ['ok' => false, 'error' => 'This appointment is already settled.'];
+        }
+
+        $total   = round((float)$a['total_amount'], 2);
+        $down    = $a['payment_status'] === 'deposit' ? round((float)$a['downpayment_amount'], 2) : 0.0;
+        $balance = round(max(0.0, $total - $down), 2);
+        if ($balance <= 0) {
+            $pdo->rollBack();
+            return ['ok' => false, 'error' => 'There is no balance to collect.'];
+        }
+
+        $stmt = $pdo->prepare("SELECT COALESCE(SUM(amount), 0) FROM payments WHERE appointment_id = ? AND payment_status IN ('paid', 'deposit')");
+        $stmt->execute([$id]);
+        $rows = round((float)$stmt->fetchColumn(), 2);
+
+        $pdo->prepare("UPDATE payments SET payment_status = 'paid' WHERE appointment_id = ? AND payment_status = 'deposit'")->execute([$id]);
+        if ($down > $rows) {
+            $pdo->prepare("INSERT INTO payments (appointment_id, customer_id, amount, payment_method, payment_status, payment_date) VALUES (?, ?, ?, NULL, 'paid', ?)")
+                ->execute([$id, (int)$a['customer_id'], round($down - $rows, 2), now()]);
+        }
+        $pdo->prepare("INSERT INTO payments (appointment_id, customer_id, amount, payment_method, payment_status, payment_date) VALUES (?, ?, ?, ?, 'paid', ?)")
+            ->execute([$id, (int)$a['customer_id'], $balance, $method, now()]);
+        $pdo->prepare("UPDATE appointments SET payment_status = 'paid' WHERE id = ?")->execute([$id]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('[BVO appt_record_payment] ' . get_class($e) . ': ' . $e->getMessage());
+        return ['ok' => false, 'error' => 'Unable to record the payment right now.'];
+    }
+
+    return ['ok' => true, 'id' => $id, 'message' => 'Payment of ' . peso($balance) . ' received via ' . $method . ' for ' . appt_code($id) . '. Appointment is now fully paid.'];
 }
 
 function appt_transition(PDO $pdo, int $id, string $action): array

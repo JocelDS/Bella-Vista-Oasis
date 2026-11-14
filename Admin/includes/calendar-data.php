@@ -81,8 +81,13 @@ function cal_label(string $view, string $date): string
 
 function cal_state(string $status, string $date, int $start, int $end, string $today, int $nowMin): string
 {
-    if ($status === 'confirmed' && $date === $today && $nowMin >= $start && $nowMin < $end) {
-        return 'session';
+    if ($status === 'confirmed') {
+        if ($date === $today && $nowMin >= $start && $nowMin < $end) {
+            return 'session';
+        }
+        if ($date < $today || ($date === $today && $nowMin >= $end)) {
+            return 'overdue';
+        }
     }
     return $status;
 }
@@ -397,8 +402,11 @@ function cal_primary(array $d, string $today): array
             'action'   => 'complete',
             'label'    => 'Mark Session Completed',
             'disabled' => $later,
-            'hint'     => $later ? 'Available on the day of the session.' : '',
+            'hint'     => $later ? 'Available on the day of the session.' : ($d['state'] === 'overdue' ? 'The session time has passed. Mark it completed to collect payment.' : ''),
         ];
+    }
+    if ($d['status'] === 'completed' && (float)$d['balance'] > 0) {
+        return ['action' => 'pay', 'label' => 'Record Payment · ' . $d['balance_label'], 'disabled' => false, 'hint' => 'Session finished. Collect the remaining balance.'];
     }
     return ['action' => '', 'label' => 'No Further Updates', 'disabled' => true, 'hint' => 'This appointment is already ' . strtolower((string)$d['status_label']) . '.'];
 }
@@ -433,6 +441,7 @@ function cal_detail(PDO $pdo, int $id): ?array
     $d['state']          = cal_state((string)$d['status'], (string)$d['date'], appt_minutes((string)$d['start']), appt_minutes((string)$d['end']), $today, $nowMin);
     $d['primary']        = cal_primary($d, $today);
     $d['can_reschedule'] = in_array($d['status'], ['pending', 'confirmed'], true);
+    $d['can_pay']        = $d['status'] === 'completed' && (float)$d['balance'] > 0;
     return $d;
 }
 
