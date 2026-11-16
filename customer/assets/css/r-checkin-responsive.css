@@ -1,0 +1,59 @@
+@media (max-width: 1020px) {
+  .qp-layout {
+    grid-template-columns: 1fr;
+  }
+  .qp-intro {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .qp-chips {
+    justify-content: flex-start;
+  }
+  .qp-strip {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .qp {
+    padding: 24px 14px 48px;
+  }
+  .qp-card,
+  .qp-pass {
+    padding: 18px 16px;
+  }
+  .qp-pass-body {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+  .qp-qr {
+    width: min(260px, 100%);
+  }
+  .qp-facts {
+    justify-content: center;
+  }
+  .qp-trio {
+    grid-template-columns: 1fr;
+  }
+  .qp-actions {
+    flex-direction: column;
+  }
+  .qp-actions .qp-btn {
+    width: 100%;
+  }
+  .qp-banner {
+    grid-template-columns: 1fr;
+  }
+  .qp-banner img {
+    height: 160px;
+  }
+  .qp-dl div,
+  .qp-loc div {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .qp-dl dd,
+  .qp-loc dd {
+    text-align: left;
+  }
+}

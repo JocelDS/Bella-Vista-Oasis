@@ -230,6 +230,10 @@ function appt_delete(PDO $pdo, int $id): array
             return ['ok' => false, 'error' => 'That appointment no longer exists.'];
         }
         $pdo->prepare('DELETE FROM payments WHERE appointment_id = ?')->execute([$id]);
+        try {
+            $pdo->prepare('DELETE FROM appointment_charges WHERE appointment_id = ?')->execute([$id]);
+        } catch (Throwable $e) {
+        }
         $pdo->prepare('DELETE FROM appointments WHERE id = ?')->execute([$id]);
         $pdo->commit();
     } catch (Throwable $e) {
@@ -391,6 +395,9 @@ function appt_detail(PDO $pdo, int $id): ?array
         $received = 0.0;
     } else {
         $received = $rows;
+    }
+    if ($ps === 'deposit' && !in_array($st, ['cancelled', 'no_show'], true)) {
+        $balance = max(0.0, $total - $received);
     }
 
     return [
@@ -606,6 +613,10 @@ function appt_record_payment(PDO $pdo, int $id, array $in): array
         return ['ok' => false, 'error' => 'Select how the guest paid.'];
     }
 
+    if (bill_ready($pdo)) {
+        return bill_settle($pdo, (int)($_SESSION['admin_id'] ?? 0), ['appointment_id' => $id, 'payment_method' => $method, 'quick' => 1]);
+    }
+
     try {
         $pdo->beginTransaction();
         $stmt = $pdo->prepare('SELECT customer_id, appointment_status, payment_status, total_amount, downpayment_amount FROM appointments WHERE id = ? FOR UPDATE');
@@ -721,3 +732,5 @@ function appt_cancel_preview(PDO $pdo, int $id): array
     $pol = bk_cancel_policy($pdo, $row);
     return ['ok' => true, 'late' => $pol['late'], 'message' => $pol['message']];
 }
+
+require_once __DIR__ . '/billing-data.php';

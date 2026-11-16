@@ -1,0 +1,88 @@
+@media (max-width: 1480px) {
+  .pay-grid {
+    grid-template-columns: minmax(0, 1fr) 296px;
+    gap: 18px;
+  }
+  .pay-stat-val {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .pay-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pay-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pay-side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .pay-hero-actions {
+    align-items: flex-start;
+  }
+  .pay-hero-top,
+  .pay-hero-btns {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .pay-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pay-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pay-tabs {
+    width: auto;
+    margin-left: 16px;
+    margin-right: 16px;
+    max-width: calc(100% - 32px);
+  }
+  .pay-card-head,
+  .pay-filters {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .pay-filters .ctl,
+  .pay-search {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  .pay-custom {
+    width: 100%;
+  }
+  .pay-custom .ctl {
+    flex: 1;
+  }
+  .pay-promo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pay-d-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pay-hero-btns .btn,
+  .pay-hero-top .btn {
+    flex: 1 1 auto;
+  }
+  .table-foot {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pay-d-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pay-disc {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pay-stat-val {
+    font-size: 30px;
+  }
+}

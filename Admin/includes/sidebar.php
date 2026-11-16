@@ -5,6 +5,7 @@ $navItems = [
     ['Dashboard Overview',      'dashboard.php',            'grid'],
     ['Appointment Management',  'appointments.php',         'clipboard'],
     ['Appointment Calendar',    'appointment-calendar.php', 'calendar'],
+    ['Payment Management',      'payments.php',             'wallet'],
     ['Room Management',         'room-management.php',      'door'],
     ['Therapist Assignment',    'therapist-assignment.php', 'user'],
     ['Customer Management',     'customers.php',            'users'],

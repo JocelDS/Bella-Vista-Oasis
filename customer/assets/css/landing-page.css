@@ -354,7 +354,6 @@
   color: var(--text-2);
   display: -webkit-box;
   -webkit-line-clamp: 3;
-  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -822,19 +821,125 @@ html {
   }
 }
 
-/* Most-booked rank pill on featured treatment cards */
-.lp-card-img {
-  position: relative;
+/* ===== Landing page design fixes ===== */
+
+/* Hero: calmer proportions, image no longer towers over the copy */
+.lp-hero {
+  padding: 44px 0 56px;
 }
-.lp-rank {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--purple);
-  font: 700 11px var(--sans);
-  letter-spacing: 0.03em;
-  box-shadow: 0 4px 12px rgba(80, 40, 120, 0.18);
+.lp-hero-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 64px;
+  align-items: center;
+}
+.lp-hero-media {
+  width: 100%;
+  max-width: 470px;
+  justify-self: end;
+}
+.lp-hero-media > img {
+  aspect-ratio: 4 / 4.3;
+  max-height: 540px;
+  object-position: center 30%;
+  background: linear-gradient(135deg, #f3e8fa, #fde6f0);
+}
+.lp-float {
+  left: -38px;
+  bottom: 26px;
+  width: 300px;
+  max-width: calc(100% - 20px);
+  align-items: flex-start;
+}
+.lp-float p {
+  line-height: 1.5;
+}
+.lp-float strong {
+  margin-bottom: 2px;
+}
+
+/* Cards and gallery: tidy image placeholders and stronger caption contrast */
+.lp-card-img,
+.lp-g {
+  background: linear-gradient(135deg, #f3e8fa, #fde6f0);
+}
+.lp-g::after {
+  background: linear-gradient(
+    180deg,
+    rgba(73, 54, 79, 0) 25%,
+    rgba(73, 54, 79, 0.88)
+  );
+}
+.lp-g.pink::after {
+  background: linear-gradient(
+    180deg,
+    rgba(150, 62, 110, 0) 25%,
+    rgba(150, 62, 110, 0.88)
+  );
+}
+.lp-g.purple::after {
+  background: linear-gradient(
+    180deg,
+    rgba(86, 52, 120, 0) 25%,
+    rgba(86, 52, 120, 0.88)
+  );
+}
+.lp-g {
+  min-height: 300px;
+}
+.lp-g:nth-child(n + 3) {
+  min-height: 240px;
+}
+.lp-g figcaption {
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* Membership card: even 2-column tier chips instead of ragged wrapping */
+.lp-tiers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+}
+.lp-tiers li {
+  padding: 10px 14px;
+}
+
+/* Opening hours text reads as a compact line */
+.lp-promo-hours {
+  align-items: flex-start;
+  line-height: 1.5;
+}
+.cu-footer-strong {
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .lp-hero-grid {
+    gap: 36px;
+  }
+  .lp-hero-media {
+    max-width: 500px;
+    margin: 0 auto;
+    justify-self: center;
+  }
+  .lp-hero-media > img {
+    max-height: 460px;
+  }
+}
+@media (max-width: 560px) {
+  .lp-float {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    width: auto;
+    margin: -30px 12px 0;
+  }
+  .lp-tiers {
+    max-width: none;
+  }
+  .lp-g,
+  .lp-g:nth-child(n + 3) {
+    min-height: 230px;
+  }
 }

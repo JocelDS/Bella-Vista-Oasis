@@ -39,11 +39,12 @@ $contactPhone = cu_setting('contact_phone');
             <a href="<?= e(cu_url('/landing.php')) ?>" class="<?= $activeNav === 'home' ? 'active' : '' ?>">Home</a>
             <a href="<?= e(cu_url('/services.php')) ?>" class="<?= $activeNav === 'services' ? 'active' : '' ?>">Services &amp; Rates</a>
             <a href="<?= e(cu_url('/book-appointment.php')) ?>" class="<?= $activeNav === 'book' ? 'active' : '' ?>">Book Appointment</a>
-            <a href="<?= e(cu_url('/qr-checkin.php')) ?>" class="<?= $activeNav === 'qr' ? 'active' : '' ?>">QR Check-In</a>
+            <a href="#" data-soon="QR passes are issued by the concierge for confirmed bookings.">QR Check-In</a>
             <a href="<?= e(cu_url('/loyalty-rewards.php')) ?>" class="<?= $activeNav === 'loyalty' ? 'active' : '' ?>">Loyalty &amp; Rewards</a>
-            <?php if ($contactEmail !== ''): ?><a href="mailto:<?= e($contactEmail) ?>">Help / Support</a><?php endif; ?>
+            <a href="<?= e(ADMIN_URL . '/auth/login.php') ?>">Admin Portal</a>
+            <a href="<?= e(cu_url('/help-support.php')) ?>" class="<?= $activeNav === 'help' ? 'active' : '' ?>">Help / Support</a>
             <?php if (!empty($_SESSION['customer_id'])): ?>
-                <a class="cu-nav-cta" href="<?= e(cu_url('/dashboard.php')) ?>">My Sanctuary</a>
+                <a class="cu-nav-cta<?= $activeNav === 'sanctuary' ? ' is-active' : '' ?>" href="<?= e(cu_url('/dashboard.php')) ?>">My Sanctuary</a>
             <?php else: ?>
                 <a class="cu-nav-cta" href="<?= e(cu_url('/register.php')) ?>">Enroll Guest</a>
             <?php endif; ?>

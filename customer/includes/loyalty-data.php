@@ -42,7 +42,7 @@ function cl_totals(PDO $pdo, int $cid): array
 function cl_tiers(PDO $pdo): array
 {
     $out = [];
-    foreach ($pdo->query("SELECT id, tier_name, sort_order, discount_percentage, points_multiplier, tier_color, benefits, privileges FROM membership_tiers WHERE status = 'active' ORDER BY sort_order, id") as $t) {
+    foreach ($pdo->query("SELECT id, tier_name, sort_order, minimum_points, minimum_spending, discount_percentage, points_multiplier, tier_color, benefits, privileges FROM membership_tiers WHERE status = 'active' ORDER BY sort_order, id") as $t) {
         $out[(int)$t['id']] = $t;
     }
     return $out;

@@ -149,8 +149,8 @@ require __DIR__ . '/includes/header.php';
     <section class="lp-section lp-wellness" id="wellness">
         <div class="lp-wrap lp-split">
             <div class="lp-collage">
-                <img class="c1" src="<?= e(cu_url('/assets/images/wellness-collage-1.jpg')) ?>" alt="Guest relaxing during a facial massage" loading="lazy">
-                <img class="c2" src="<?= e(cu_url('/assets/images/wellness-collage-2.jpg')) ?>" alt="Candles, frangipani and herbal compress" loading="lazy">
+                <img class="c1" src="<?= e(cu_url('/assets/images/wellness-collage-1.png')) ?>" alt="Guest relaxing during a facial massage" loading="lazy">
+                <img class="c2" src="<?= e(cu_url('/assets/images/wellness-collage-2.png')) ?>" alt="Candles, frangipani and herbal compress" loading="lazy">
                 <div class="c3"><span class="i purple"><?= lp_icon('lotus') ?></span><p>Slow down. Breathe in. Let the sanctuary do the rest.</p></div>
             </div>
             <div class="lp-wellness-copy">
