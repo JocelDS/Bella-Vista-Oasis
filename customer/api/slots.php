@@ -14,8 +14,10 @@ try {
         cu_json(['ok' => false, 'error' => 'Choose a treatment first.'], 422);
     }
 
+    $guests = isset($_GET['guests']) && ctype_digit((string)$_GET['guests']) ? min(50, (int)$_GET['guests']) : 0;
+
     if (($_GET['mode'] ?? '') === 'dates') {
-        $res = av_unavailable($pdo, date('Y-m-d'), CU_BOOKING_WINDOW_DAYS, $serviceId);
+        $res = av_unavailable($pdo, date('Y-m-d'), CU_BOOKING_WINDOW_DAYS, $serviceId, $guests);
         cu_json(['ok' => true, 'today' => $res['today'], 'days' => CU_BOOKING_WINDOW_DAYS, 'dates' => $res['dates']]);
     }
 
@@ -23,7 +25,7 @@ try {
     if (!av_valid_date($date)) {
         cu_json(['ok' => false, 'error' => 'Choose a valid date.'], 422);
     }
-    cu_json(['ok' => true] + cu_merged_slots($pdo, $date, $serviceId));
+    cu_json(['ok' => true] + cu_merged_slots($pdo, $date, $serviceId, $guests));
 } catch (InvalidArgumentException $e) {
     cu_json(['ok' => false, 'error' => $e->getMessage()], 422);
 } catch (Throwable $e) {

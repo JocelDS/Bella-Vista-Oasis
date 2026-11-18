@@ -435,3 +435,25 @@
     grid-template-columns: 1fr;
   }
 }
+
+.sv-grid {
+  gap: 28px;
+}
+.sv-card .lp-card-body {
+  padding: 22px 24px 24px;
+}
+.sv-cat {
+  margin-bottom: 12px;
+}
+.sv-desc {
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+.sv-price-row {
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+}
+.sv-features {
+  gap: 10px;
+  margin: 0 0 22px;
+}

@@ -24,6 +24,9 @@ $history = cd_history($pdo, $cid);
 $historyViews = array_map('cd_view', $history);
 $featured = cd_featured_service($pdo, $cid);
 $phone = cu_setting('contact_phone');
+$photoFile = basename((string)($currentCustomer['profile_photo'] ?? ''));
+$photoUrl = $photoFile !== '' && is_file(__DIR__ . '/../Admin/assets/uploads/customers/' . $photoFile)
+    ? ADMIN_URL . '/assets/uploads/customers/' . rawurlencode($photoFile) : '';
 
 $images = ['SR' => 'treatment-single-room.jpg', 'CS' => 'treatment-couples-suite.jpg', 'FL' => 'treatment-family-lounge.jpg'];
 $wide = ['SR' => 'facility-single-rooms.jpg', 'CS' => 'facility-couples-suites.jpg', 'FL' => 'facility-family-lounge.jpg'];
@@ -42,7 +45,7 @@ require __DIR__ . '/includes/header.php';
         <div class="lp-wrap cd-top-grid">
             <article class="cd-card cd-welcome">
                 <div class="cd-who">
-                    <span class="cd-avatar" aria-hidden="true"><?= e(cd_initials((string)$currentCustomer['full_name'])) ?></span>
+                    <span class="cd-avatar" aria-hidden="true"><?php if ($photoUrl !== ''): ?><img src="<?= e($photoUrl) ?>" alt=""><?php else: ?><?= e(cd_initials((string)$currentCustomer['full_name'])) ?><?php endif; ?></span>
                     <div>
                         <p class="lp-eyebrow pink">Your Sanctuary</p>
                         <h1 class="serif">Welcome back to Serenity, <em><?= e($first) ?></em></h1>
@@ -61,8 +64,8 @@ require __DIR__ . '/includes/header.php';
                 <div class="cd-actions">
                     <a class="lp-btn lp-btn-purple" href="<?= e(cu_url('/loyalty-rewards.php')) ?>">Explore Membership</a>
                     <a class="lp-btn lp-btn-line" href="<?= e(cu_url('/services.php')) ?>">Book Another Treatment</a>
-                    <a class="lp-btn lp-btn-line" href="#" data-soon="Profile editing is not available online yet. Please contact the concierge<?= $phone !== '' ? ' at ' . e($phone) : '' ?>.">Update Profile</a>
-                    <a class="lp-btn lp-btn-line" href="#" data-soon="Digital passes are issued by the concierge for confirmed bookings.">View Digital Pass</a>
+                    <button type="button" class="lp-btn lp-btn-line" data-profile>Update Profile</button>
+                    <a class="lp-btn lp-btn-line" href="<?= e(cu_url('/qr-checkin.php')) ?>">View Digital Pass</a>
                 </div>
             </article>
 
@@ -80,7 +83,7 @@ require __DIR__ . '/includes/header.php';
                     </dl>
                     <div class="cd-actions tight">
                         <button type="button" class="lp-btn lp-btn-pink" data-view="<?= (int)$next['id'] ?>">View Reservation</button>
-                        <a class="lp-btn lp-btn-line" href="#" data-soon="QR passes are issued by the concierge for confirmed bookings.">View QR Pass</a>
+                        <a class="lp-btn lp-btn-line" href="<?= e(cu_url('/qr-checkin.php?id=' . (int)$next['id'])) ?>">View QR Pass</a>
                     </div>
                 <?php else: ?>
                     <h2 class="serif">No upcoming reservation</h2>
@@ -108,7 +111,7 @@ require __DIR__ . '/includes/header.php';
                     <?php if ($more > 0): ?><p class="cd-more"><?= $more ?> more upcoming reservation<?= $more > 1 ? 's' : '' ?> after this one.</p><?php endif; ?>
                     <div class="cd-actions tight">
                         <button type="button" class="lp-btn lp-btn-purple" data-view="<?= (int)$next['id'] ?>">View Reservation Details</button>
-                        <a class="lp-btn lp-btn-line" href="#" data-soon="QR passes are issued by the concierge for confirmed bookings.">View QR Check-in Pass</a>
+                        <a class="lp-btn lp-btn-line" href="<?= e(cu_url('/qr-checkin.php?id=' . (int)$next['id'])) ?>">View QR Check-in Pass</a>
                         <?php if ($nextView['canManage']): ?>
                         <button type="button" class="lp-btn lp-btn-line" data-reschedule="<?= (int)$next['id'] ?>">Reschedule Appointment</button>
                         <button type="button" class="lp-btn lp-btn-danger" data-cancel="<?= (int)$next['id'] ?>">Cancel Reservation</button>
@@ -188,5 +191,12 @@ require __DIR__ . '/includes/header.php';
     'cancelMsg' => $cancelPol['message'] ?? '', 'reschedMsg' => $reschedPol['message'] ?? '',
     'csrf' => csrf_token(), 'action' => cu_url('/auth/appointment-process.php'), 'slots' => cu_url('/auth/slots.php'),
     'today' => date('Y-m-d'),
+    'profileAction' => cu_url('/auth/profile-process.php'),
+    'profile' => [
+        'full_name' => (string)$currentCustomer['full_name'], 'email' => (string)$currentCustomer['email'],
+        'phone' => (string)$currentCustomer['phone'], 'date_of_birth' => (string)($currentCustomer['date_of_birth'] ?? ''),
+        'gender' => (string)($currentCustomer['gender'] ?? ''), 'address' => (string)($currentCustomer['address'] ?? ''),
+        'photo' => $photoUrl, 'initials' => cd_initials((string)$currentCustomer['full_name']),
+    ],
 ], $jsonFlags) ?></script>
 <?php require __DIR__ . '/includes/footer.php';

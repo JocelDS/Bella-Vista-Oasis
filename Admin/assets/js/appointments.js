@@ -346,6 +346,7 @@
             var contact = [a.customer_email, a.customer_phone].filter(Boolean);
             dtItem(dl, 'Customer', a.customer_name, contact.join(' · '));
             dtItem(dl, 'Service', a.service_name, a.duration + ' min');
+            dtItem(dl, 'Guests', String(a.guests));
             dtItem(dl, 'Date', a.date_label);
             dtItem(dl, 'Time', a.start_label + ' – ' + a.end_label);
             dtItem(dl, 'Therapist', a.therapist_name);
@@ -450,6 +451,7 @@
             $('#ap_health').value = a.health_conditions || '';
             $('#ap_injuries').value = a.health_injuries || '';
             $('#ap_preg').value = (a.health_conditions || a.health_injuries) ? String(a.is_pregnant) : '';
+            $('#ap_guests').value = String(a.guests);
             $('#ap_therapist').value = String(a.therapist_id);
             $('#ap_room').value = String(a.room_id);
             fDate2.min = a.date < fDate2.getAttribute('data-today') ? a.date : fDate2.getAttribute('data-today');

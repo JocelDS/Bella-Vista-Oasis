@@ -224,7 +224,7 @@
             if (r.amenity_list.length) { r.amenity_list.forEach(function (a) { dd.appendChild(el('span', 'chip', a)); }); }
             else { dd.textContent = 'Not recorded'; dd.className = 'muted'; }
             d1.appendChild(dd); det.appendChild(d1);
-            var d2 = el('div'); d2.appendChild(el('dt', null, 'Max Capacity'));
+            var d2 = el('div'); d2.appendChild(el('dt', null, 'Number of Guests'));
             d2.appendChild(el('dd', r.capacity ? '' : 'muted', r.capacity ? r.capacity + (r.capacity === 1 ? ' guest' : ' guests') : 'Not recorded'));
             det.appendChild(d2);
             var d3 = el('div'); d3.appendChild(el('dt', null, 'Current Booking'));
@@ -662,7 +662,7 @@
             a.appendChild(top);
             var dl = el('dl', 'ins-grid');
             kv(dl, 'Room Type', r.type || '—');
-            kv(dl, 'Max Capacity', r.capacity ? String(r.capacity) : 'Not recorded', !r.capacity);
+            kv(dl, 'Number of Guests', r.capacity ? String(r.capacity) : 'Not recorded', !r.capacity);
             kv(dl, 'Amenities', r.amenities || 'Not recorded', !r.amenities);
             kv(dl, 'Availability', r.availability);
             kv(dl, 'Bookings Today', String(r.today_count));

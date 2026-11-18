@@ -20,7 +20,7 @@ try {
 
 $pageTitle     = 'Room Management';
 $crumb         = 'Room Management';
-$footerScripts = $ready ? [url('/assets/js/room-management.js') . '?v=' . (string)@filemtime(__DIR__ . '/assets/js/room-management.js'), url('/assets/js/room-addons.js') . '?v=' . (string)@filemtime(__DIR__ . '/assets/js/room-addons.js')] : [];
+$footerScripts = $ready ? [url('/assets/js/room-management.js')] : [];
 $cssFile       = __DIR__ . '/assets/css/room-management.css';
 $cssVer        = is_file($cssFile) ? (string)filemtime($cssFile) : '1';
 require __DIR__ . '/includes/header.php';
@@ -92,37 +92,6 @@ require __DIR__ . '/includes/header.php';
 
 <section class="room-grid" id="roomGrid" aria-live="polite"></section>
 
-<section class="card card-wide addons-panel" id="spaAddonsSection" data-api="<?= e(url('/api')) ?>">
-    <div class="addons-head">
-        <div class="addons-heading">
-            <span class="addons-icon" aria-hidden="true">✦</span>
-            <div>
-                <p class="label-small">Enhancements · Guest Experience</p>
-                <h2 class="card-title">Spa Ritual Add-ons</h2>
-                <p class="addons-intro">Manage the optional wellness enhancements shown on the customer Services page and available when processing payments.</p>
-            </div>
-        </div>
-        <button type="button" class="btn btn-primary" id="addonAddBtn"><span>＋</span><span>Add New Add-on</span></button>
-    </div>
-    <div class="addons-summary" aria-live="polite">
-        <div><span class="addons-summary-value" id="addonTotal">—</span><span class="addons-summary-label">Total add-ons</span></div>
-        <div><span class="addons-summary-value" id="addonActive">—</span><span class="addons-summary-label">Active on customer site</span></div>
-        <div><span class="addons-summary-value" id="addonInactive">—</span><span class="addons-summary-label">Inactive</span></div>
-    </div>
-    <div class="addons-toolbar">
-        <label class="addons-search-wrap" for="addonSearch"><span aria-hidden="true">⌕</span><input type="search" id="addonSearch" placeholder="Search add-on name or description"></label>
-        <select class="ctl" id="addonStatusFilter" aria-label="Filter add-ons">
-            <option value="all">All add-ons</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-        </select>
-    </div>
-    <div class="addons-grid" id="addonGrid" aria-live="polite">
-        <p class="addons-loading">Loading Spa Ritual Add-ons…</p>
-    </div>
-    <p class="addons-footnote">Active add-ons appear on the customer Services page and in the Admin payment add-on selector. Deactivating an add-on hides it from new purchases without removing historical payment records.</p>
-</section>
-
 <section class="card" id="climateSection">
     <div class="card-head">
         <div>
@@ -186,7 +155,7 @@ require __DIR__ . '/includes/header.php';
             </header>
             <p class="form-error" id="suiteError" role="alert" hidden></p>
             <div class="form-grid">
-                <div class="field field-full"><label for="su_name">Room Name</label><input type="text" id="su_name" name="room_name" maxlength="150" required></div>
+                <div class="field field-full"><label for="su_name">Room Name / Room Code</label><input type="text" id="su_name" name="room_name" maxlength="150" placeholder="SR-4" required><span class="cell-sub">The letters before the dash are the room code (SR-4 is code SR). A service uses rooms with its same code.</span></div>
                 <div class="field"><label for="su_type">Room Type</label><input type="text" id="su_type" name="room_type" maxlength="100" list="typeList" required></div>
                 <div class="field"><label for="su_status">Room Status</label>
                     <select id="su_status" name="room_status"><option value="available">Available</option><option value="cleaning">Cleaning</option><option value="maintenance">Maintenance</option></select></div>
@@ -203,7 +172,7 @@ require __DIR__ . '/includes/header.php';
                         </div>
                     </div>
                 </div>
-                <div class="field"><label for="su_cap">Maximum Capacity</label><input type="number" id="su_cap" name="maximum_capacity" min="1" max="20" step="1"></div>
+                <div class="field"><label for="su_cap">Physical Capacity (guests)</label><input type="number" id="su_cap" name="maximum_capacity" min="1" max="20" step="1" required placeholder="Maximum guests for this room"></div>
             </div>
             <datalist id="typeList"></datalist>
             <footer class="modal-foot">
@@ -343,35 +312,6 @@ require __DIR__ . '/includes/header.php';
             <button type="button" class="icon-btn" data-close aria-label="Close"><?= icon('close') ?></button>
         </header>
         <div id="scheduleBody"></div>
-    </div>
-</div>
-
-<div class="modal" id="addonModal" role="dialog" aria-modal="true" aria-labelledby="addonModalTitle" hidden>
-    <div class="modal-card addon-modal-card">
-        <form id="addonForm" novalidate>
-            <?= csrf_field() ?>
-            <input type="hidden" name="action" id="addonAction" value="create">
-            <input type="hidden" name="id" id="addonId" value="">
-            <header class="modal-head">
-                <div><p class="label-small">Enhancement Catalog</p><h2 class="card-title" id="addonModalTitle">New Spa Ritual Add-on</h2></div>
-                <button type="button" class="icon-btn" data-addon-close aria-label="Close"><?= icon('close') ?></button>
-            </header>
-            <p class="form-error" id="addonError" role="alert" hidden></p>
-            <div class="form-grid">
-                <div class="field field-full"><label for="addonName">Add-on Name</label><input type="text" id="addonName" name="addon_name" maxlength="120" placeholder="e.g. Aromatherapy Oil" required></div>
-                <div class="field field-full"><label for="addonDescription">Description</label><textarea id="addonDescription" name="description" rows="3" maxlength="500" placeholder="Describe the wellness enhancement for guests"></textarea></div>
-                <div class="field"><label for="addonPrice">Price (₱)</label><input type="number" id="addonPrice" name="price" min="0" max="999999" step="0.01" placeholder="0.00" required></div>
-                <div class="field"><label for="addonSort">Display Order</label><input type="number" id="addonSort" name="sort_order" min="0" max="9999" step="1" value="0"></div>
-                <div class="field field-full addon-checkboxes">
-                    <label class="addon-check"><input type="checkbox" id="addonCommissionable" name="commissionable" value="1"><span><strong>Commissionable</strong><small>Include this add-on in therapist commission calculations when applicable.</small></span></label>
-                    <label class="addon-check"><input type="checkbox" id="addonIsActive" name="is_active" value="1" checked><span><strong>Active</strong><small>Show this add-on on the customer Services page and Admin payment selector.</small></span></label>
-                </div>
-            </div>
-            <footer class="modal-foot">
-                <button type="button" class="btn btn-outline" data-addon-close>Cancel</button>
-                <button type="submit" class="btn btn-primary" id="addonSaveBtn">Save Add-on</button>
-            </footer>
-        </form>
     </div>
 </div>
 

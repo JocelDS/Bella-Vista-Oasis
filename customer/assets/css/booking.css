@@ -925,3 +925,19 @@
   gap: 10px;
   margin-top: 22px;
 }
+.bk-lead {
+  max-width: 520px;
+  line-height: 1.7;
+}
+.bk-card {
+  padding: 30px 32px;
+}
+.bk-h2 {
+  margin-bottom: 20px;
+}
+.bk-note {
+  margin: 18px 0 0;
+}
+.bk-actions {
+  margin-top: 26px;
+}

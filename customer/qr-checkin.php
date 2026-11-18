@@ -18,7 +18,7 @@ if ($wanted > 0 && !$a) {
 
 $pageTitle = 'QR Check-In';
 $activeNav = 'qr';
-$pageStyles = ['qr-checkin.css', 'qr-checkin-responsive.css'];
+$pageStyles = ['qr-checkin.css', 'r-checkin-responsive.css'];
 $pageScripts = ['qr-checkin.js'];
 
 $phone = cu_setting('contact_phone', '');

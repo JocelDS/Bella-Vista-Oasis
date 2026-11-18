@@ -21,7 +21,7 @@ function av_dates(string $start, int $days): array
     return $out;
 }
 
-function av_load(PDO $pdo, string $start, string $end, ?int $serviceId = null, int $excludeId = 0): array
+function av_load(PDO $pdo, string $start, string $end, ?int $serviceId = null, int $excludeId = 0, int $guests = 0): array
 {
     $services = [];
     $byCode = [];
@@ -42,12 +42,13 @@ function av_load(PDO $pdo, string $start, string $end, ?int $serviceId = null, i
     }
 
     $rooms = [];
-    foreach ($pdo->query('SELECT id, room_name, room_status FROM rooms ORDER BY id')->fetchAll() as $r) {
+    foreach ($pdo->query('SELECT r.id, r.room_name, r.room_status, d.maximum_capacity FROM rooms r LEFT JOIN room_details d ON d.room_id = r.id ORDER BY r.id')->fetchAll() as $r) {
         $rooms[] = [
-            'id'     => (int)$r['id'],
-            'name'   => (string)$r['room_name'],
-            'status' => (string)$r['room_status'],
-            'code'   => bk_room_code((string)$r['room_name']),
+            'id'       => (int)$r['id'],
+            'name'     => (string)$r['room_name'],
+            'status'   => (string)$r['room_status'],
+            'code'     => bk_room_code((string)$r['room_name']),
+            'capacity' => ($r['maximum_capacity'] !== null && (int)$r['maximum_capacity'] > 0) ? (int)$r['maximum_capacity'] : null,
         ];
     }
 
@@ -94,6 +95,7 @@ function av_load(PDO $pdo, string $start, string $end, ?int $serviceId = null, i
         'services' => $services,
         'by_code'  => $byCode,
         'service'  => $service,
+        'guests'   => max(0, $guests),
         'rooms'    => $rooms,
         'hours'    => $hours,
         'blocked'  => $blocked,
@@ -118,10 +120,15 @@ function av_room_service(array $ctx, array $room): ?array
 function av_scope_rooms(array $ctx): array
 {
     $out = [];
+    $guests = (int)($ctx['guests'] ?? 0);
     foreach ($ctx['rooms'] as $room) {
-        if (av_room_service($ctx, $room) !== null) {
-            $out[] = $room;
+        if (av_room_service($ctx, $room) === null) {
+            continue;
         }
+        if ($guests > 0 && $room['capacity'] !== null && $room['capacity'] < $guests) {
+            continue;
+        }
+        $out[] = $room;
     }
     return $out;
 }
@@ -223,12 +230,12 @@ function av_date_status(array $ctx, string $date): ?array
     return ['code' => 'fully_booked', 'message' => 'fully booked'];
 }
 
-function av_unavailable(PDO $pdo, string $start, int $days, ?int $serviceId = null): array
+function av_unavailable(PDO $pdo, string $start, int $days, ?int $serviceId = null, int $guests = 0): array
 {
     $days = max(1, min(AV_MAX_DAYS, $days));
     $dates = av_dates($start, $days);
     $end = $dates[count($dates) - 1];
-    $ctx = av_load($pdo, $start, $end, $serviceId);
+    $ctx = av_load($pdo, $start, $end, $serviceId, 0, $guests);
 
     $out = [];
     foreach ($dates as $date) {
@@ -292,12 +299,12 @@ function av_slot_row(int $start, int $end, string $state, bool $own): array
     ];
 }
 
-function av_slots(PDO $pdo, string $date, int $serviceId, int $roomId = 0, int $excludeId = 0): array
+function av_slots(PDO $pdo, string $date, int $serviceId, int $roomId = 0, int $excludeId = 0, int $guests = 0): array
 {
     if ($serviceId < 1) {
         throw new InvalidArgumentException('Select a service first.');
     }
-    $ctx = av_load($pdo, $date, $date, $serviceId, $excludeId);
+    $ctx = av_load($pdo, $date, $date, $serviceId, $excludeId, $guests);
     $service = $ctx['service'];
     if ($service === null) {
         throw new InvalidArgumentException('Select a service first.');

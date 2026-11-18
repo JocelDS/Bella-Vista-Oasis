@@ -227,7 +227,7 @@ function bk_validate(PDO $pdo, array $in, int $excludeId, bool $lock, bool $chec
         return $fail('The selected service no longer exists.');
     }
 
-    $stmt = $pdo->prepare('SELECT id, room_name, room_status FROM rooms WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT r.id, r.room_name, r.room_status, d.maximum_capacity FROM rooms r LEFT JOIN room_details d ON d.room_id = r.id WHERE r.id = ?');
     $stmt->execute([$roomId]);
     $room = $stmt->fetch();
     if (!$room) {
@@ -242,18 +242,22 @@ function bk_validate(PDO $pdo, array $in, int $excludeId, bool $lock, bool $chec
         return $fail($room['room_name'] . ' is not a room for ' . $service['service_name'] . '. Choose a ' . $code . ' room.');
     }
 
-    $cfg  = bk_config($pdo);
-    $maxG = (int)$service['max_capacity'];
-    if ($code === BK_FAMILY_CODE) {
-        $maxG = min($maxG, $cfg['max_pax']);
+    $cfg   = bk_config($pdo);
+    $baseG = max(1, (int)$service['base_capacity']);
+    $maxG  = max($baseG, (int)$service['max_capacity']);
+    $roomCap = ($room['maximum_capacity'] !== null && (int)$room['maximum_capacity'] > 0) ? (int)$room['maximum_capacity'] : null;
+    if ($guestsIn !== null && $guestsIn !== '' && !ctype_digit((string)$guestsIn)) {
+        return $fail('Enter a valid number of guests.');
     }
-    $baseG = $code === BK_FAMILY_CODE ? $cfg['base_pax'] : (int)$service['base_capacity'];
     $guests = ($guestsIn === null || $guestsIn === '') ? $baseG : (int)$guestsIn;
     if ($guests < 1) {
         return $fail('At least 1 guest is required.');
     }
     if ($guests > $maxG) {
         return $fail($service['service_name'] . ' allows a maximum of ' . $maxG . ' guest' . ($maxG === 1 ? '' : 's') . '.');
+    }
+    if ($roomCap !== null && $guests > $roomCap) {
+        return $fail($room['room_name'] . ' fits up to ' . $roomCap . ' guest' . ($roomCap === 1 ? '' : 's') . '. Choose a larger room or fewer guests.');
     }
 
     $duration = (int)$service['duration'];
@@ -326,8 +330,8 @@ function bk_validate(PDO $pdo, array $in, int $excludeId, bool $lock, bool $chec
 
     $base  = round((float)$service['price'], 2);
     $extra = 0.0;
-    if ($code === BK_FAMILY_CODE && $guests > $cfg['base_pax']) {
-        $extra = round(($guests - $cfg['base_pax']) * $cfg['extra_fee'], 2);
+    if ($maxG > $baseG && $guests > $baseG) {
+        $extra = round(($guests - $baseG) * $cfg['extra_fee'], 2);
     }
 
     return [

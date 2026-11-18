@@ -34,26 +34,37 @@ function cu_service_options(PDO $pdo): array
 {
     $cfg = bk_config($pdo);
     $out = [];
-    foreach ($pdo->query('SELECT id, service_name, room_code, description, duration, price, base_capacity, max_capacity FROM services ORDER BY id')->fetchAll() as $s) {
-        $isFamily = strtoupper((string)$s['room_code']) === BK_FAMILY_CODE;
+    $caps = [];
+    foreach ($pdo->query("SELECT r.room_name, r.room_status, d.maximum_capacity FROM rooms r LEFT JOIN room_details d ON d.room_id = r.id")->fetchAll() as $r) {
+        if (strtolower((string)$r['room_status']) !== 'available') continue;
+        $c = bk_room_code((string)$r['room_name']);
+        $cap = ($r['maximum_capacity'] !== null && (int)$r['maximum_capacity'] > 0) ? (int)$r['maximum_capacity'] : 99;
+        $caps[$c] = max($caps[$c] ?? 0, $cap);
+    }
+    foreach ($pdo->query("SELECT s.id, s.service_name, s.room_code, s.description, s.duration, s.price, s.base_capacity, s.max_capacity FROM services s WHERE EXISTS (SELECT 1 FROM rooms r WHERE r.room_name LIKE CONCAT(s.room_code, '-%')) ORDER BY s.id")->fetchAll() as $s) {
+        $code = strtoupper((string)$s['room_code']);
+        $base = max(1, (int)$s['base_capacity']);
+        $max  = max($base, (int)$s['max_capacity']);
+        $roomCap = $caps[$code] ?? 0;
         $s['id'] = (int)$s['id'];
         $s['duration'] = (int)$s['duration'];
         $s['price'] = (float)$s['price'];
-        $s['min_guests'] = $isFamily ? $cfg['base_pax'] : (int)$s['base_capacity'];
-        $s['max_guests'] = $isFamily ? min((int)$s['max_capacity'], $cfg['max_pax']) : (int)$s['max_capacity'];
-        $s['extra_fee'] = $isFamily ? $cfg['extra_fee'] : 0.0;
-        $s['base_guests'] = $isFamily ? $cfg['base_pax'] : (int)$s['base_capacity'];
+        $s['min_guests'] = $base;
+        $s['max_guests'] = $roomCap > 0 ? max($base, min($max, $roomCap)) : $max;
+        $s['room_cap'] = $roomCap > 0 && $roomCap < 99 ? $roomCap : 0;
+        $s['extra_fee'] = $max > $base ? $cfg['extra_fee'] : 0.0;
+        $s['base_guests'] = $base;
         $out[$s['id']] = $s;
     }
     return $out;
 }
 
-function cu_merged_slots(PDO $pdo, string $date, int $serviceId): array
+function cu_merged_slots(PDO $pdo, string $date, int $serviceId, int $guests = 0): array
 {
-    $res = av_slots($pdo, $date, $serviceId);
+    $res = av_slots($pdo, $date, $serviceId, 0, 0, $guests);
     $merged = [];
     foreach ($res['rooms'] as $room) {
-        if (!$room['usable']) continue;
+        if (!$room['usable'] || strtolower((string)$room['status']) !== 'available') continue;
         foreach ($room['slots'] as $slot) {
             $k = $slot['start'];
             if (!isset($merged[$k])) {
@@ -144,17 +155,26 @@ function cu_booking_member(PDO $pdo, int $customerId): ?array
 function cu_pick_room_and_book(PDO $pdo, int $customerId, array $in, array $health, array $opts = []): array
 {
     $serviceId = (int)$in['service_id'];
-    $st = $pdo->prepare('SELECT room_code FROM services WHERE id = ?');
+    $st = $pdo->prepare('SELECT room_code, base_capacity, max_capacity FROM services WHERE id = ?');
     $st->execute([$serviceId]);
-    $code = strtoupper((string)$st->fetchColumn());
+    $svc = $st->fetch();
+    $code = $svc ? strtoupper((string)$svc['room_code']) : '';
     if ($code === '') {
         return ['ok' => false, 'error' => 'The selected treatment is no longer available.'];
     }
+    $wanted = ($in['guests'] === null || $in['guests'] === '') ? max(1, (int)$svc['base_capacity']) : (int)$in['guests'];
+    if ($wanted < 1 || $wanted > max((int)$svc['base_capacity'], (int)$svc['max_capacity'])) {
+        return ['ok' => false, 'error' => 'This treatment allows ' . max(1, (int)$svc['base_capacity']) . ' to ' . max((int)$svc['base_capacity'], (int)$svc['max_capacity']) . ' guests.'];
+    }
 
-    $rooms = $pdo->query("SELECT id, room_name FROM rooms WHERE room_status <> 'maintenance' ORDER BY id")->fetchAll();
+    $rooms = $pdo->query("SELECT r.id, r.room_name, d.maximum_capacity FROM rooms r LEFT JOIN room_details d ON d.room_id = r.id WHERE r.room_status = 'available' ORDER BY r.id")->fetchAll();
     $candidates = array_values(array_filter($rooms, static fn(array $r): bool => bk_room_code((string)$r['room_name']) === $code));
     if (!$candidates) {
         return ['ok' => false, 'error' => 'No room is available for this treatment right now.'];
+    }
+    $candidates = array_values(array_filter($candidates, static fn(array $r): bool => $r['maximum_capacity'] === null || (int)$r['maximum_capacity'] < 1 || (int)$r['maximum_capacity'] >= $wanted));
+    if (!$candidates) {
+        return ['ok' => false, 'error' => 'No available room can fit ' . $wanted . ' guest' . ($wanted === 1 ? '' : 's') . ' for this treatment. Please choose fewer guests.'];
     }
     $prefer = (int)($opts['room_id'] ?? 0);
     if ($prefer > 0) {

@@ -1,0 +1,99 @@
+.sv-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sv-alert {
+  margin-bottom: 18px;
+  border-left: 4px solid var(--pink);
+}
+
+.sv-alert-warn {
+  background: linear-gradient(180deg, #fff 0%, var(--pearl) 100%);
+}
+
+.sv-text {
+  margin: 6px 0 0;
+  color: var(--gray);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.sv-text a,
+.sv-foot a {
+  color: var(--purple);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sv-table td {
+  vertical-align: top;
+}
+
+.sv-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sv-desc {
+  max-width: 340px;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.sv-code {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--pearl);
+  border: 1px solid var(--border);
+  color: var(--purple);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.sv-actions {
+  display: inline-flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.sv-empty {
+  margin: 0;
+  padding: 36px 24px;
+  text-align: center;
+  color: var(--gray);
+  border-top: 1px solid var(--border);
+}
+
+.sv-foot {
+  margin: 0;
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border);
+  color: var(--gray);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+#svModal input[readonly] {
+  background: var(--pearl);
+  cursor: not-allowed;
+}
+
+#svModal #sv_code {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+@media (max-width: 900px) {
+  .sv-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .sv-stats {
+    grid-template-columns: 1fr;
+  }
+}

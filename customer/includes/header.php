@@ -1,4 +1,3 @@
-
 <?php
 $pageTitle = $pageTitle ?? 'Bella Vista Oasis';
 $activeNav = $activeNav ?? '';
@@ -114,8 +113,8 @@ $contactPhone = cu_setting('contact_phone');
                 Book Appointment
             </a>
 
-            <a href="#"
-               data-soon="QR passes are issued by the concierge for confirmed bookings.">
+            <a href="<?= e(cu_url('/qr-checkin.php')) ?>"
+               class="<?= $activeNav === 'qr' ? 'active' : '' ?>">
                 QR Check-In
             </a>
 

@@ -110,9 +110,87 @@
     f.addEventListener('submit', function (e) { if (!date.value || !sel.value) { e.preventDefault(); return; } ok.disabled = true; });
   }
 
+  function field(label, name, type, value, attrs) {
+    var w = el('div', 'cd-field');
+    var l = el('label', null, label); l.setAttribute('for', 'pf_' + name); w.appendChild(l);
+    var i;
+    if (type === 'select') {
+      i = document.createElement('select');
+      ['', 'Female', 'Male', 'Non-binary', 'Prefer not to say'].forEach(function (g) {
+        var o = document.createElement('option'); o.value = g; o.textContent = g || 'Prefer not to answer';
+        if (g === value) o.selected = true; i.appendChild(o);
+      });
+    } else {
+      i = document.createElement('input'); i.type = type; i.value = value || '';
+    }
+    i.id = 'pf_' + name; i.name = name;
+    Object.keys(attrs || {}).forEach(function (k) { i.setAttribute(k, attrs[k]); });
+    w.appendChild(i);
+    return w;
+  }
+
+  function showProfile() {
+    var p = data.profile || {};
+    open('Update Profile');
+    var f = document.createElement('form');
+    f.method = 'post'; f.action = data.profileAction; f.noValidate = true; f.enctype = 'multipart/form-data';
+    hidden(f, 'csrf', data.csrf);
+    var pw = el('div', 'cd-photo');
+    var prev = el('span', 'cd-photo-prev');
+    function showPrev(src) {
+      prev.innerHTML = '';
+      if (src) { var im = document.createElement('img'); im.src = src; im.alt = ''; prev.appendChild(im); }
+      else prev.textContent = p.initials || '';
+    }
+    showPrev(p.photo);
+    var pf = field('Profile picture (JPG, PNG or WebP, up to 2 MB)', 'profile_photo', 'file', '', { accept: 'image/jpeg,image/png,image/webp' });
+    pw.appendChild(prev); pw.appendChild(pf);
+    f.appendChild(pw);
+    var removeBox = null;
+    if (p.photo) {
+      var rl = el('label', 'cd-check');
+      removeBox = document.createElement('input'); removeBox.type = 'checkbox'; removeBox.name = 'remove_photo'; removeBox.value = '1';
+      rl.appendChild(removeBox); rl.appendChild(document.createTextNode(' Remove my current picture'));
+      f.appendChild(rl);
+    }
+    var photoInput = pf.querySelector('input');
+    photoInput.addEventListener('change', function () {
+      var file = photoInput.files && photoInput.files[0];
+      if (!file) { showPrev(p.photo); return; }
+      if (removeBox) removeBox.checked = false;
+      var r = new FileReader(); r.onload = function () { showPrev(r.result); }; r.readAsDataURL(file);
+    });
+    f.appendChild(field('Full name', 'full_name', 'text', p.full_name, { required: 'required', maxlength: '150', autocomplete: 'name' }));
+    f.appendChild(field('Email address', 'email', 'email', p.email, { required: 'required', maxlength: '150', autocomplete: 'email' }));
+    f.appendChild(field('Contact telephone', 'phone', 'tel', p.phone, { required: 'required', maxlength: '30', autocomplete: 'tel' }));
+    f.appendChild(field('Date of birth', 'date_of_birth', 'date', p.date_of_birth, { max: data.today }));
+    f.appendChild(field('Gender', 'gender', 'select', p.gender));
+    f.appendChild(field('Address', 'address', 'text', p.address, { maxlength: '255', autocomplete: 'street-address' }));
+    var msg = el('p', 'cd-slot-msg'); f.appendChild(msg);
+    var cancel = btn('lp-btn-line', 'Close'); cancel.addEventListener('click', close);
+    var save = btn('lp-btn-purple', 'Save Changes', 'submit');
+    buttons(f, [cancel, save]);
+    body.appendChild(f);
+    f.addEventListener('submit', function (e) {
+      var v = window.CuValidate, err = '';
+      if (f.full_name.value.trim().length < 2) err = 'Enter your full name.';
+      else if (v && !v.email(f.email.value.trim())) err = 'Enter a valid email address.';
+      else if (v && !v.phone(f.phone.value.trim())) err = 'Enter a valid phone number.';
+      else if (f.date_of_birth.value && f.date_of_birth.value > data.today) err = 'Date of birth cannot be in the future.';
+      else if (photoInput.files && photoInput.files[0]) {
+        var pfile = photoInput.files[0];
+        if (['image/jpeg', 'image/png', 'image/webp'].indexOf(pfile.type) === -1) err = 'Photo must be a JPG, PNG or WebP image.';
+        else if (pfile.size > 2097152) err = 'The photo must be 2 MB or smaller.';
+      }
+      if (err) { e.preventDefault(); msg.textContent = err; return; }
+      save.disabled = true;
+    });
+  }
+
   document.addEventListener('click', function (e) {
     var t;
-    if ((t = e.target.closest('[data-view]'))) { var a = find(parseInt(t.getAttribute('data-view'), 10)); if (a) showDetails(a); }
+    if ((t = e.target.closest('[data-profile]'))) showProfile();
+    else if ((t = e.target.closest('[data-view]'))) { var a = find(parseInt(t.getAttribute('data-view'), 10)); if (a) showDetails(a); }
     else if ((t = e.target.closest('[data-cancel]'))) { if (data.next) showCancel(data.next); }
     else if ((t = e.target.closest('[data-reschedule]'))) { if (data.next) showReschedule(data.next); }
     else if (e.target.closest('[data-close]') || e.target === modal) close();

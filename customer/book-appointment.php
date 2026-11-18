@@ -23,9 +23,10 @@ $member   = cu_booking_member($pdo, (int)$me['id']);
 $services = cu_service_options($pdo);
 
 $roomRows = [];
-foreach ($pdo->query('SELECT id, room_name, room_type, room_status FROM rooms ORDER BY id')->fetchAll() as $r) {
+foreach ($pdo->query('SELECT r.id, r.room_name, r.room_type, r.room_status, d.maximum_capacity FROM rooms r LEFT JOIN room_details d ON d.room_id = r.id ORDER BY r.id')->fetchAll() as $r) {
     $r['code'] = bk_room_code((string)$r['room_name']);
-    $r['bookable'] = !in_array(strtolower((string)$r['room_status']), ['maintenance', 'cleaning'], true);
+    $r['cap'] = ($r['maximum_capacity'] !== null && (int)$r['maximum_capacity'] > 0) ? (int)$r['maximum_capacity'] : 0;
+    $r['bookable'] = strtolower((string)$r['room_status']) === 'available';
     $roomRows[] = $r;
 }
 $therapists = $pdo->query("SELECT id, full_name, specialization FROM therapists WHERE availability_status = 'available' ORDER BY full_name")->fetchAll();
@@ -63,7 +64,7 @@ $pct = $memberOk ? (float)$member['discount_pct'] : 0.0;
         <div>
             <p class="bk-eyebrow"><span>Rituals &amp; Haven Booking</span></p>
             <h1 class="bk-title">Schedule Your Sanctuary Session</h1>
-            <p class="bk-lead">Immerse in exceptional botanical rituals and bespoke restorative therapies. Experience your sanctuary with personalized care and exceptional wellness.<?php if ($hours !== ''): ?> Operating <?= e($hours) ?><?php if ($gap > 0): ?>, with a thorough <?= (int)$gap ?>-minute medical-grade chamber sanitation between appointments<?php endif; ?>.<?php endif; ?></p>
+            <p class="bk-lead">Choose your treatment, pick a time that suits you, and confirm your private session in four simple steps.</p>
         </div>
         <aside class="bk-sanit" aria-label="Sanctuary sanitation standard">
             <span class="bk-sanit-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.4-3 8.2-7 10-4-1.8-7-5.6-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
@@ -154,7 +155,7 @@ $pct = $memberOk ? (float)$member['discount_pct'] : 0.0;
                             <select id="bkRoom" name="room_id">
                                 <option value="">Best available chamber</option>
                                 <?php foreach ($roomRows as $r): ?>
-                                <option value="<?= (int)$r['id'] ?>" data-code="<?= e($r['code']) ?>" <?= $r['bookable'] ? '' : 'disabled' ?>><?= e($r['room_name']) ?> &middot; <?= e((string)$r['room_type']) ?><?= $r['bookable'] ? '' : ' (unavailable)' ?></option>
+                                <option value="<?= (int)$r['id'] ?>" data-code="<?= e($r['code']) ?>" data-cap="<?= (int)$r['cap'] ?>" <?= $r['bookable'] ? '' : 'disabled' ?>><?= e($r['room_name']) ?> &middot; <?= e((string)$r['room_type']) ?><?= $r['cap'] > 0 ? ' &middot; up to ' . (int)$r['cap'] . ' guest' . ($r['cap'] === 1 ? '' : 's') : '' ?><?= $r['bookable'] ? '' : ' (unavailable)' ?></option>
                                 <?php endforeach; ?>
                             </select></div>
                         <div class="bk-field bk-span2"><label for="bkTherapist">Preferred Therapist</label>
@@ -165,7 +166,7 @@ $pct = $memberOk ? (float)$member['discount_pct'] : 0.0;
                                 <?php endforeach; ?>
                             </select></div>
                     </div>
-                    <p class="bk-note">A preferred chamber or therapist is assigned when free for your slot. Otherwise the next open one is used, and a therapist who is busy or on leave is declined when you confirm.</p>
+                    <p class="bk-note">Your preferred chamber or therapist is used when free for your slot; otherwise the next open one is assigned.</p>
                     <p class="bk-msg" data-msg="2" aria-live="polite"></p>
                     <div class="bk-actions"><button type="button" class="bk-btn bk-btn-line" data-prev>&larr; Back</button><button type="button" class="bk-btn bk-btn-primary" data-next>Continue to Scheduling &rarr;</button></div>
                 </section>
@@ -206,11 +207,6 @@ $pct = $memberOk ? (float)$member['discount_pct'] : 0.0;
                     <p class="bk-msg" data-msg="4" aria-live="polite"></p>
                     <div class="bk-actions"><button type="button" class="bk-btn bk-btn-line" data-prev>&larr; Back</button></div>
                 </section>
-
-                <div class="bk-promos">
-                    <article class="bk-promo"><img src="<?= e(cu_url('/assets/images/wellness-collage-1.jpg')) ?>" alt="" loading="lazy"><div><small>Hydrotherapy Chamber</small><h3>Mineral Immersion Bath Included</h3><p>Discover a relaxing sanctuary experience designed to complement your wellness journey.</p></div></article>
-                    <article class="bk-promo"><img src="<?= e(cu_url('/assets/images/wellness-collage-2.jpg')) ?>" alt="" loading="lazy"><div><small>Botanical Ritual</small><h3>Complimentary Herbal Welcoming</h3><p>Enjoy a thoughtful welcome ritual that creates a relaxing beginning to your sanctuary visit.</p></div></article>
-                </div>
             </div>
 
             <aside class="bk-side">
@@ -231,11 +227,9 @@ $pct = $memberOk ? (float)$member['discount_pct'] : 0.0;
                         <div class="bk-row bk-subtotal"><span>Subtotal</span><b id="sumSubtotal">—</b></div>
                     </div>
                     <div class="bk-total"><span>Total Payable:</span><b id="sumTotal">₱0</b></div>
-                    <p class="bk-fine">Final amount is calculated again by the spa when you confirm.</p>
                     <button type="submit" class="bk-btn bk-btn-primary bk-confirm" id="bkConfirm" form="bookingForm">Confirm Appointment &amp; Generate QR Pass</button>
-                    <p class="bk-fine">Saved as <strong>pending</strong> until the spa confirms. No payment is taken online.</p>
+                    <p class="bk-fine">Saved as <strong>pending</strong> until the spa confirms. No online payment.</p>
                 </section>
-                <aside class="bk-remind"><b>Retreat Etiquette Reminder</b><p>Please arrive at your scheduled appointment time. Guests are encouraged to communicate allergies, wellness considerations, and treatment preferences before their session.</p></aside>
             </aside>
         </div>
     </form>

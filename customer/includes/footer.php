@@ -50,6 +50,6 @@ $parking = cu_setting('parking_note');
     </div>
 </footer>
 <script src="<?= e(cu_url('/assets/js/customer-validation.js')) ?>"></script>
-<?php foreach (($pageScripts ?? []) as $s): ?><script src="<?= e(cu_url('/assets/js/' . $s)) ?>"></script><?php endforeach; ?>
+<?php foreach (($pageScripts ?? []) as $s): $jsFile = __DIR__ . '/../assets/js/' . $s; ?><script src="<?= e(cu_url('/assets/js/' . $s)) ?>?v=<?= is_file($jsFile) ? (int)filemtime($jsFile) : 1 ?>"></script><?php endforeach; ?>
 </body>
 </html>

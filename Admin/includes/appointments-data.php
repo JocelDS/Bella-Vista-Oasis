@@ -156,7 +156,7 @@ function appt_fetch(PDO $pdo, array $f): array
                 c.full_name AS customer_name, c.email AS customer_email, c.phone AS customer_phone,
                 s.service_name, s.duration,
                 t.full_name AS therapist_name, r.room_name,
-                COALESCE(p.paid_amount, 0) AS paid_amount, a.is_pregnant, a.downpayment_amount'
+                COALESCE(p.paid_amount, 0) AS paid_amount, a.is_pregnant, a.downpayment_amount, a.guest_count'
         . APPT_FROM . ' WHERE ' . $where
         . ' ORDER BY a.appointment_date DESC, a.start_time ASC, a.id DESC LIMIT ' . $per . ' OFFSET ' . $offset
     );
@@ -286,7 +286,7 @@ function appt_render_rows(array $rows, bool $filtered): string
             </td>
             <td data-label="Service">
                 <span class="cell-main"><?= e((string)($r['service_name'] ?? '—')) ?></span>
-                <span class="cell-sub"><?= (int)$r['duration'] ?> min · <?= e(peso($r['total_amount'])) ?></span>
+                <span class="cell-sub"><?= max(1, (int)$r['guest_count']) ?> <?= max(1, (int)$r['guest_count']) === 1 ? 'guest' : 'guests' ?> · <?= (int)$r['duration'] ?> min · <?= e(peso($r['total_amount'])) ?></span>
             </td>
             <td data-label="Schedule">
                 <span class="cell-main"><?= e(appt_date_label((string)$r['appointment_date'])) ?></span>
@@ -349,7 +349,7 @@ function appt_detail(PDO $pdo, int $id): ?array
                 s.service_name, s.duration,
                 t.full_name AS therapist_name, r.room_name,
                 COALESCE(p.paid_amount, 0) AS paid_amount,
-                a.health_conditions, a.health_injuries, a.is_pregnant, a.downpayment_amount, a.cancellation_forfeited'
+                a.health_conditions, a.health_injuries, a.is_pregnant, a.downpayment_amount, a.cancellation_forfeited, a.guest_count'
         . APPT_FROM . ' WHERE a.id = ?'
     );
     $stmt->execute([$id]);
@@ -410,6 +410,7 @@ function appt_detail(PDO $pdo, int $id): ?array
         'service_id'      => (int)$a['service_id'],
         'service_name'    => (string)($a['service_name'] ?? '—'),
         'duration'        => (int)$a['duration'],
+        'guests'          => max(1, (int)$a['guest_count']),
         'therapist_id'    => (int)$a['therapist_id'],
         'therapist_name'  => (string)($a['therapist_name'] ?? '—'),
         'room_id'         => (int)$a['room_id'],

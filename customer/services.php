@@ -6,37 +6,20 @@ $pdo = db();
 $loggedIn = cu_logged_in();
 
 $services = [];
+$featured = [];
 $rooms = [];
 $addons = [];
-
-/* Treatment cards are sourced only from actual rows in the services table.
-   Empty table or failed query means no treatment cards are rendered. */
 try {
-    $serviceStmt = $pdo->query(
-        'SELECT id, service_name, room_code, description, duration, price, base_capacity, max_capacity
-         FROM services
-         ORDER BY id ASC'
-    );
-    $services = $serviceStmt ? $serviceStmt->fetchAll(PDO::FETCH_ASSOC) : [];
-} catch (Throwable $ex) {
-    error_log('Customer services query failed: ' . $ex->getMessage());
-    $services = [];
-}
-$hasServices = !empty($services);
-
-/* Room information enriches service cards but does not create services. */
-try {
-    $roomStmt = $pdo->query(
-        "SELECT SUBSTRING_INDEX(room_name, '-', 1) AS code, MIN(room_type) AS room_type,
-                COUNT(*) AS total, MIN(description) AS description
-         FROM rooms GROUP BY code"
-    );
-    foreach (($roomStmt ? $roomStmt->fetchAll(PDO::FETCH_ASSOC) : []) as $r) {
+    $services = $pdo->query('SELECT id, service_name, room_code, description, duration, price, base_capacity, max_capacity FROM services ORDER BY id')->fetchAll();
+    $featured = $pdo->query("SELECT s.id, s.service_name, s.room_code, s.description, s.duration, s.price, s.base_capacity, s.max_capacity, COUNT(a.id) AS bookings
+        FROM services s
+        LEFT JOIN appointments a ON a.service_id = s.id AND a.appointment_status NOT IN ('cancelled', 'no_show')
+        GROUP BY s.id, s.service_name, s.room_code, s.description, s.duration, s.price, s.base_capacity, s.max_capacity
+        ORDER BY bookings DESC, s.id ASC")->fetchAll();
+    foreach ($pdo->query("SELECT SUBSTRING_INDEX(room_name, '-', 1) AS code, MIN(room_type) AS room_type, COUNT(*) AS total, MIN(description) AS description FROM rooms GROUP BY code") as $r) {
         $rooms[$r['code']] = $r;
     }
 } catch (Throwable $ex) {
-    error_log('Customer room summary query failed: ' . $ex->getMessage());
-    $rooms = [];
 }
 $roomList = [];
 $imgCol = room_images_ready($pdo) ? ', d.image_path' : ', NULL AS image_path';
@@ -45,6 +28,16 @@ try {
 } catch (Throwable $ex) {
     $roomList = [];
 }
+$codeRate = [];
+foreach ($roomList as $rm) {
+    if ($rm['rate'] === null) continue;
+    $rc = strtoupper(explode('-', (string)$rm['room_name'])[0]);
+    $codeRate[$rc] = isset($codeRate[$rc]) ? min($codeRate[$rc], (float)$rm['rate']) : (float)$rm['rate'];
+}
+$featured = array_slice(array_values(array_map(function ($s) use ($codeRate) {
+    $s['price'] = $codeRate[strtoupper((string)$s['room_code'])];
+    return $s;
+}, array_filter($featured, fn($s) => isset($codeRate[strtoupper((string)$s['room_code'])])))), 0, 3);
 try {
     $addons = $pdo->query("SELECT addon_name AS name, description, price FROM service_addons WHERE is_active = 1 ORDER BY sort_order, id")->fetchAll();
 } catch (Throwable $ex) {
@@ -112,48 +105,6 @@ require __DIR__ . '/includes/header.php';
                 <li><span class="i pink"><?= sv_icon('hand') ?></span><div><strong>Professional Therapists</strong><small>Dedicated care in every room</small></div></li>
                 <li><span class="i purple"><?= sv_icon('door') ?></span><div><strong>Private Sanctuary Suites</strong><small>Rooms for one, two or a group</small></div></li>
             </ul>
-        </div>
-    </section>
-
-    <section class="lp-section sv-treatments" id="treatments">
-        <div class="lp-wrap">
-            <header class="lp-head">
-                <p class="lp-eyebrow pink">Featured Spa Treatments</p>
-                <h2 class="serif">Choose Your Sanctuary Experience</h2>
-                <p>Rates and durations are taken directly from our current treatment menu.</p>
-            </header>
-            <?php if ($hasServices): ?>
-            <div class="sv-grid">
-                <?php foreach ($services as $i => $s):
-                    $code = (string)$s['room_code'];
-                    $room = $rooms[$code] ?? null;
-                    $accent = $i % 2 === 0 ? 'purple' : 'pink';
-                    $extra = ((int)$s['max_capacity'] > (int)$s['base_capacity'] && $extraFee > 0); ?>
-                <article class="lp-card sv-card" data-service="<?= (int)$s['id'] ?>">
-                    <div class="lp-card-img"><img src="<?= e(sv_photo($code, $roomImages, $images)) ?>" alt="<?= e($s['service_name']) ?>" loading="lazy"></div>
-                    <div class="lp-card-body">
-                        <span class="sv-cat <?= $accent ?>"><?= e($room['room_type'] ?? 'Sanctuary Treatment') ?></span>
-                        <h3 class="serif"><?= e($s['service_name']) ?></h3>
-                        <p class="sv-desc"><?= e($s['description']) ?></p>
-                        <div class="sv-price-row">
-                            <span class="lp-price"><?= cu_peso((float)$s['price']) ?></span>
-                            <span class="lp-dur"><?= sv_icon('clock') ?><?= e(cu_duration_label((int)$s['duration'])) ?></span>
-                        </div>
-                        <ul class="sv-features">
-                            <li><?= sv_icon('users') ?>For <?= e(sv_guests($s)) ?></li>
-                            <?php if ($room): ?><li><?= sv_icon('door') ?>Private <?= e(strtolower((string)$room['room_type'])) ?>, <?= (int)$room['total'] ?> available</li><?php endif; ?>
-                            <?php if ($extra): ?><li><?= sv_icon('plus') ?>Extra guest: <?= cu_peso($extraFee) ?> each beyond <?= (int)$s['base_capacity'] ?></li><?php endif; ?>
-                            <?php if ($gap > 0): ?><li><?= sv_icon('shield') ?><?= $gap ?>-minute room preparation between guests</li><?php endif; ?>
-                        </ul>
-                        <?php if ($room && trim((string)$room['description']) !== ''): ?><p class="sv-info"><?= e($room['description']) ?></p><?php endif; ?>
-                        <a class="lp-btn sv-book <?= $accent === 'purple' ? 'lp-btn-purple' : 'lp-btn-pink' ?>" href="<?= e(sv_book_url((int)$s['id'])) ?>" data-book>Book <?= e($s['service_name']) ?></a>
-                    </div>
-                </article>
-                <?php endforeach; ?>
-            </div>
-            <?php else: ?>
-            <p class="lp-empty">No spa treatments are currently listed. Please check back soon.</p>
-            <?php endif; ?>
         </div>
     </section>
 
@@ -233,7 +184,7 @@ require __DIR__ . '/includes/header.php';
             </header>
             <div class="sv-pol-grid">
                 <article><span class="i"><?= sv_icon('calendar') ?></span><h3>Appointment Preparation</h3>
-                    <ul><li>Arrive early before your scheduled treatment<?= $arrive > 0 ? ', about ' . $arrive . ' minutes' : '' ?>.</li><li>Allow time for check-in.</li></ul></article>
+                    <ul><li>Arrive early before your scheduled treatment<?= $arrive > 0 ? ', about ' . $arrive . ' minutes' : '' ?>.</li><li>Allow time for check-in.</li><?php if ($gap > 0): ?><li>Rooms are prepared for <?= $gap ?> minutes between guests.</li><?php endif; ?></ul></article>
                 <article><span class="i pink"><?= sv_icon('x') ?></span><h3>Cancellation Policy</h3>
                     <ul><?php if ($notice > 0): ?><li>Please cancel at least <?= $notice ?> hours before your session.</li><?php else: ?><li>Please contact the concierge to change or cancel a booking.</li><?php endif; ?><li>Late changes may not be possible.</li></ul></article>
                 <article><span class="i"><?= sv_icon('shield') ?></span><h3>Wellness &amp; Safety</h3>
@@ -250,7 +201,7 @@ require __DIR__ . '/includes/header.php';
                 <p class="lp-eyebrow pink">Pricing Guide</p>
                 <h2 class="serif">Sanctuary Experience Overview</h2>
             </header>
-            <?php if ($hasServices): ?>
+            <?php if ($services): ?>
             <div class="sv-table-wrap">
                 <table class="sv-table">
                     <thead><tr><th>Treatment</th><th>Duration</th><th>Price</th><th>Experience Details</th><th>Booking</th></tr></thead>
@@ -267,8 +218,6 @@ require __DIR__ . '/includes/header.php';
                     </tbody>
                 </table>
             </div>
-            <?php else: ?>
-            <p class="lp-empty">Treatment rates will appear here when services are added to the treatment menu.</p>
             <?php endif; ?>
         </div>
     </section>

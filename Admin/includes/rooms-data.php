@@ -369,13 +369,10 @@ function rm_room_input(PDO $pdo, array $in, ?int $id): array
     if (mb_strlen($amen) > 500) {
         return rm_fail('Amenities are too long (max 500 characters).');
     }
-    $capacity = null;
-    if ($cap !== '') {
-        if (!ctype_digit($cap) || (int)$cap < 1 || (int)$cap > 20) {
-            return rm_fail('Maximum capacity must be a whole number from 1 to 20.');
-        }
-        $capacity = (int)$cap;
+    if ($cap === '' || !ctype_digit($cap) || (int)$cap < 1 || (int)$cap > 20) {
+        return rm_fail('Number of guests is required (a whole number from 1 to 20).');
     }
+    $capacity = (int)$cap;
     $stmt = $pdo->prepare('SELECT id FROM rooms WHERE LOWER(room_name) = LOWER(?) AND id <> ?');
     $stmt->execute([$name, $id ?? 0]);
     if ($stmt->fetch()) {
