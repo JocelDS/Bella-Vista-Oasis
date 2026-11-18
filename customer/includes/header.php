@@ -12,11 +12,11 @@ $contactPhone = cu_setting('contact_phone');
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?> | Bella Vista Oasis</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= e(cu_url('/assets/css/customer-login.css')) ?>">
-    <link rel="stylesheet" href="<?= e(cu_url('/assets/css/customer-register.css')) ?>">
-    <link rel="stylesheet" href="<?= e(cu_url('/assets/css/customer-responsive.css')) ?>">
-    <?php foreach (($pageStyles ?? []) as $css): ?><link rel="stylesheet" href="<?= e(cu_url('/assets/css/' . $css)) ?>"><?php endforeach; ?>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<?= e(cu_url('/assets/css/customer-login.css')) ?>?v=<?= e((string)@filemtime(__DIR__ . '/../assets/css/customer-login.css')) ?>">
+    <link rel="stylesheet" href="<?= e(cu_url('/assets/css/customer-register.css')) ?>?v=<?= e((string)@filemtime(__DIR__ . '/../assets/css/customer-register.css')) ?>">
+    <link rel="stylesheet" href="<?= e(cu_url('/assets/css/customer-responsive.css')) ?>?v=<?= e((string)@filemtime(__DIR__ . '/../assets/css/customer-responsive.css')) ?>">
+    <?php foreach (($pageStyles ?? []) as $css): ?><link rel="stylesheet" href="<?= e(cu_url('/assets/css/' . $css)) ?>?v=<?= e((string)@filemtime(__DIR__ . '/../assets/css/' . $css)) ?>"><?php endforeach; ?>
 </head>
 <body>
 <div class="cu-topbar">

@@ -1,3 +1,17 @@
+@font-face {
+  font-family: "Calm Serif";
+  src: local("Calm Serif"), local("CalmSerif"), local("Calm Serif Regular"), local("CalmSerif-Regular"),
+       url("../fonts/CalmSerif.woff2") format("woff2"),
+       url("../fonts/CalmSerif.woff") format("woff"),
+       url("../fonts/CalmSerif.ttf") format("truetype"),
+       url("../fonts/CalmSerif.otf") format("opentype"),
+       url("../fonts/CalmSerif-Regular.ttf") format("truetype"),
+       url("../fonts/CalmSerif-Regular.otf") format("opentype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* QR Check-In: Expedited Sanctuary Check-in */
 .qp {
   --p: #986bc2;
@@ -9,7 +23,7 @@
   --ink: #49364f;
   --mute: #89788d;
   --line: #eedfea;
-  --serif: "Cormorant Garamond", Georgia, serif;
+  --serif: "Calm Serif", "Cormorant Garamond", Georgia, serif;
   max-width: 1180px;
   margin: 0 auto;
   padding: 36px 24px 64px;

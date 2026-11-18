@@ -52,7 +52,7 @@
   margin-bottom: 10px;
 }
 .dp-title {
-  font-family: var(--serif, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--serif, "Calm Serif", "Cormorant Garamond", Georgia, serif);
   font-size: 20px;
   font-weight: 600;
   color: var(--forest, #986BC2);

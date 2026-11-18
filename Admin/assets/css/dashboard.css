@@ -1,3 +1,21 @@
+@font-face {
+  font-family: "Calm Serif";
+  src: local("Calm Serif"), local("CalmSerif"), local("Calm Serif Regular"), local("CalmSerif-Regular"),
+       url("../fonts/CalmSerif.woff2") format("woff2"),
+       url("../fonts/CalmSerif.woff") format("woff"),
+       url("../fonts/CalmSerif.ttf") format("truetype"),
+       url("../fonts/CalmSerif.otf") format("opentype"),
+       url("../fonts/CalmSerif-Regular.ttf") format("truetype"),
+       url("../fonts/CalmSerif-Regular.otf") format("opentype");
+  font-weight: 100 900;
+  size-adjust: 84%;
+  ascent-override: 105%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --purple: #986BC2;
   --pink: #E18BB9;
@@ -16,7 +34,7 @@
   --border: var(--blush);
   --red: var(--pink);
   --ink: #3A2E46;
-  --serif: "Cormorant Garamond", Georgia, serif;
+  --serif: "Calm Serif", "Cormorant Garamond", Georgia, serif;
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --sb-w: 248px;
   --radius: 14px;
@@ -3304,4 +3322,12 @@ button {
   .rc-actions .btn {
     flex: 1 1 100%;
   }
+}
+
+/* Even-height (lining) numerals for Calm Serif */
+*,
+*::before,
+*::after {
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
 }
