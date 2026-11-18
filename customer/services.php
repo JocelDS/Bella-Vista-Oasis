@@ -23,7 +23,7 @@ try {
     $roomList = [];
 }
 try {
-    $addons = $pdo->query("SELECT name, description, price FROM service_addons WHERE status = 'active' ORDER BY sort_order, id")->fetchAll();
+    $addons = $pdo->query("SELECT addon_name AS name, description, price FROM service_addons WHERE is_active = 1 ORDER BY sort_order, id")->fetchAll();
 } catch (Throwable $ex) {
     $addons = [];
 }
@@ -128,7 +128,7 @@ require __DIR__ . '/includes/header.php';
                 </article>
                 <?php endforeach; ?>
             </div>
-            <?php else: ?><p class="lp-empty">Our treatment menu is being updated. Please check back soon.</p><?php endif; ?>
+            <?php endif; ?>
         </div>
     </section>
 

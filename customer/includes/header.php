@@ -41,7 +41,6 @@ $contactPhone = cu_setting('contact_phone');
             <a href="<?= e(cu_url('/book-appointment.php')) ?>" class="<?= $activeNav === 'book' ? 'active' : '' ?>">Book Appointment</a>
             <a href="#" data-soon="QR passes are issued by the concierge for confirmed bookings.">QR Check-In</a>
             <a href="<?= e(cu_url('/loyalty-rewards.php')) ?>" class="<?= $activeNav === 'loyalty' ? 'active' : '' ?>">Loyalty &amp; Rewards</a>
-            <a href="<?= e(ADMIN_URL . '/auth/login.php') ?>">Admin Portal</a>
             <a href="<?= e(cu_url('/help-support.php')) ?>" class="<?= $activeNav === 'help' ? 'active' : '' ?>">Help / Support</a>
             <?php if (!empty($_SESSION['customer_id'])): ?>
                 <a class="cu-nav-cta<?= $activeNav === 'sanctuary' ? ' is-active' : '' ?>" href="<?= e(cu_url('/dashboard.php')) ?>">My Sanctuary</a>

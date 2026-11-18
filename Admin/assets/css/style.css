@@ -13,8 +13,8 @@
   --border: var(--blush);
   --gold: var(--champagne);
   --danger: var(--pink);
-  --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: "DM Serif Display", Georgia, "Times New Roman", serif;
+  --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 *,
 *::before,
