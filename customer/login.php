@@ -12,11 +12,6 @@ require __DIR__ . '/includes/header.php';
 ?>
 <main class="cu-main">
     <section class="cu-card cu-login-card" aria-labelledby="loginTitle">
-        <div class="cu-switch" role="tablist" aria-label="Access type">
-            <button type="button" class="active" role="tab" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Patron &amp; Guest Access</button>
-            <a href="<?= e(ADMIN_URL . '/auth/login.php') ?>" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg>Admin &amp; Concierge</a>
-        </div>
-
         <p class="cu-eyebrow pink">Welcome to Serenity</p>
         <h1 id="loginTitle" class="serif">Return to Your Sanctuary</h1>
         <p class="cu-sub">Access your bespoke treatment bookings, loyalty points balance, and contactless QR passes.</p>
