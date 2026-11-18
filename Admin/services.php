@@ -32,12 +32,15 @@ $fromPrice = $prices ? min($prices) : 0.0;
 
 $pageTitle     = 'Services Management';
 $crumb         = 'Services Management';
-$footerScripts = [url('/assets/js/services.js')];
+$footerScripts = [url('/assets/js/services.js'), url('/assets/js/room-addons.js')];
 $cssFile       = __DIR__ . '/assets/css/services.css';
 $cssVer        = is_file($cssFile) ? (string)filemtime($cssFile) : '1';
+$addonCss      = __DIR__ . '/assets/css/service-addons.css';
+$addonCssVer   = is_file($addonCss) ? (string)filemtime($addonCss) : '1';
 require __DIR__ . '/includes/header.php';
 ?>
 <link rel="stylesheet" href="<?= e(url('/assets/css/services.css')) ?>?v=<?= e($cssVer) ?>">
+<link rel="stylesheet" href="<?= e(url('/assets/css/service-addons.css')) ?>?v=<?= e($addonCssVer) ?>">
 <section class="page-head">
     <div>
         <p class="label-small">Treatments · Rates · Guests</p>
@@ -45,6 +48,7 @@ require __DIR__ . '/includes/header.php';
         <p class="page-sub">Manage every spa treatment guests can book online: name, description, price, duration, compatible room code, base guests and maximum guests. Physical rooms are managed separately in <a href="<?= e(url('/room-management.php')) ?>">Room Management</a>.</p>
     </div>
     <div class="page-actions">
+        <a class="btn btn-outline" href="#spaAddonsSection"><span>Spa Ritual Add-ons</span></a>
         <button type="button" class="btn btn-primary" id="svNew"><?= icon('plus') ?><span>New Treatment</span></button>
     </div>
 </section>
@@ -169,6 +173,69 @@ require __DIR__ . '/includes/header.php';
     <?php endif; ?>
     <p class="sv-foot">A treatment appears on the customer booking page only when at least one chamber in <a href="<?= e(url('/room-management.php')) ?>">Room Management</a> is named with its code, such as <strong>SR-1</strong> for code <strong>SR</strong>.</p>
 </section>
+
+<section class="card addons-panel" id="spaAddonsSection" aria-labelledby="addonsTitle">
+    <div class="addons-head">
+        <div class="addons-heading">
+            <span class="addons-icon" aria-hidden="true">✧</span>
+            <div>
+                <p class="label-small">Enhancements · Rituals</p>
+                <h2 class="card-title" id="addonsTitle">Spa Ritual Add-ons</h2>
+                <p class="addons-intro">Optional enhancements guests can pair with a treatment, such as a hot stone upgrade or aromatherapy. Active add-ons appear on the customer Services page and can be charged on a guest folio in Payments.</p>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="addonAddBtn"><?= icon('plus') ?><span>New Add-on</span></button>
+    </div>
+    <div class="addons-summary">
+        <div><span class="addons-summary-value" id="addonTotal">0</span><span class="addons-summary-label">Total add-ons</span></div>
+        <div><span class="addons-summary-value" id="addonActive">0</span><span class="addons-summary-label">Visible to guests</span></div>
+        <div><span class="addons-summary-value" id="addonInactive">0</span><span class="addons-summary-label">Hidden from guests</span></div>
+    </div>
+    <div class="addons-toolbar">
+        <label class="addons-search-wrap" for="addonSearch">
+            <span aria-hidden="true"><?= icon('search') ?></span>
+            <input type="search" id="addonSearch" placeholder="Search add-ons" autocomplete="off">
+        </label>
+        <select id="addonStatusFilter" aria-label="Filter add-ons by status">
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+    </div>
+    <div class="addons-grid" id="addonGrid"></div>
+    <p class="addons-footnote">Commissionable add-ons count toward therapist commission using the add-on commission rate in Settings. Deactivating an add-on hides it from guests and new folios without removing past charges.</p>
+</section>
+
+<div class="modal" id="addonModal" role="dialog" aria-modal="true" aria-labelledby="addonModalTitle" hidden>
+    <div class="modal-card addon-modal-card">
+        <form id="addonForm" novalidate>
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" id="addonAction" value="create">
+            <input type="hidden" name="id" id="addonId" value="">
+            <header class="modal-head">
+                <div><p class="label-small">Spa Ritual</p><h2 class="card-title" id="addonModalTitle">New Spa Ritual Add-on</h2></div>
+                <button type="button" class="icon-btn" data-addon-close aria-label="Close"><?= icon('close') ?></button>
+            </header>
+            <p class="form-error" id="addonError" role="alert" hidden></p>
+            <div class="form-grid">
+                <div class="field field-full"><label for="addonName">Add-on Name</label><input type="text" id="addonName" name="addon_name" maxlength="120" required></div>
+                <div class="field field-full"><label for="addonDescription">Description</label><textarea id="addonDescription" name="description" rows="3" maxlength="500"></textarea></div>
+                <div class="field"><label for="addonPrice">Price (₱)</label><input type="number" id="addonPrice" name="price" min="0" max="999999" step="0.01" required></div>
+                <div class="field"><label for="addonSort">Display Order</label><input type="number" id="addonSort" name="sort_order" min="0" max="9999" step="1" value="0"></div>
+                <div class="field field-full">
+                    <div class="addon-checkboxes">
+                        <label class="addon-check"><input type="checkbox" id="addonCommissionable" name="commissionable" value="1"><span><strong>Commissionable</strong><small>Counts toward therapist commission.</small></span></label>
+                        <label class="addon-check"><input type="checkbox" id="addonIsActive" name="is_active" value="1" checked><span><strong>Active</strong><small>Visible to guests and available on folios.</small></span></label>
+                    </div>
+                </div>
+            </div>
+            <footer class="modal-foot">
+                <button type="button" class="btn btn-outline" data-addon-close>Cancel</button>
+                <button type="submit" class="btn btn-primary" id="addonSaveBtn">Save Add-on</button>
+            </footer>
+        </form>
+    </div>
+</div>
 
 <div class="modal" id="svModal" role="dialog" aria-modal="true" aria-labelledby="svTitle" hidden>
     <div class="modal-card">

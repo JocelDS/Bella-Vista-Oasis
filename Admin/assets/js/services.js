@@ -181,4 +181,138 @@
             busy(delBtn, false, 'Delete Treatment');
         });
     });
+
+
+    // Spa Ritual Add-ons: integrated into this page and backed by the existing API.
+    var addonRows = $('#addonRows');
+    var addonSummary = $('#addonSummary');
+    var addonModal = $('#addonModal');
+    var addonForm = $('#addonForm');
+    var addonError = $('#addonError');
+    var addonSaveBtn = $('#addonSaveBtn');
+    var addons = [];
+
+    function addonRequest(options) {
+        options = options || {};
+        options.credentials = 'same-origin';
+        options.headers = options.headers || { 'Accept': 'application/json' };
+        return fetch(apiBase + '/service-addons.php', options).then(function (res) {
+            if (res.status === 401) { window.location.reload(); throw new Error('unauthorized'); }
+            return res.json().catch(function () { return { ok: false, error: 'Unexpected server response.' }; });
+        });
+    }
+
+    function addonEscape(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+            return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[c];
+        });
+    }
+
+    function addonMoney(value) {
+        return '₱' + Number(value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderAddons() {
+        var active = addons.filter(function (a) { return a.active; }).length;
+        addonSummary.innerHTML = '<span><strong>' + addons.length + '</strong> Total Add-ons</span>' +
+            '<span><strong>' + active + '</strong> Active</span>' +
+            '<span><strong>' + (addons.length - active) + '</strong> Inactive</span>';
+        if (!addons.length) {
+            addonRows.innerHTML = '<tr><td colspan="6" class="sv-empty">No spa ritual add-ons yet. Click “Add New Add-on” to create one.</td></tr>';
+            return;
+        }
+        addonRows.innerHTML = addons.map(function (a) {
+            return '<tr>' +
+                '<td><p class="cell-title">' + addonEscape(a.name) + '</p><p class="cell-sub">' + addonEscape(a.description || '') + '</p></td>' +
+                '<td class="num">' + addonMoney(a.price) + '</td>' +
+                '<td>' + Number(a.sort_order || 0) + '</td>' +
+                '<td>' + (a.commissionable ? 'Yes' : 'No') + '</td>' +
+                '<td><span class="badge ' + (a.active ? 'rs-available' : 'rs-maintenance') + '">' + (a.active ? 'Active' : 'Inactive') + '</span></td>' +
+                '<td class="num"><div class="sv-actions"><button type="button" class="btn btn-outline btn-sm" data-addon-edit="' + a.id + '">Edit</button>' +
+                '<button type="button" class="btn btn-outline btn-sm" data-addon-toggle="' + a.id + '" data-active="' + (a.active ? '1' : '0') + '">' + (a.active ? 'Deactivate' : 'Activate') + '</button></div></td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    function loadAddons() {
+        if (!addonRows) return;
+        addonRequest().then(function (res) {
+            if (!res.ok) {
+                addonRows.innerHTML = '<tr><td colspan="6" class="sv-empty">' + addonEscape(res.error || 'Unable to load add-ons.') + '</td></tr>';
+                addonSummary.textContent = res.setup_required ? 'Database setup required' : 'Add-ons unavailable';
+                return;
+            }
+            addons = Array.isArray(res.addons) ? res.addons : [];
+            renderAddons();
+        }).catch(function () {
+            addonRows.innerHTML = '<tr><td colspan="6" class="sv-empty">Connection error while loading add-ons. Refresh the page to try again.</td></tr>';
+        });
+    }
+
+    function closeAddonModal() { if (addonModal) closeModal(addonModal); }
+    function openAddonModal(addon) {
+        addonForm.reset();
+        $('#addonId').value = addon ? addon.id : '';
+        $('#addonAction').value = addon ? 'update' : 'create';
+        $('#addonName').value = addon ? addon.name : '';
+        $('#addonDescription').value = addon ? addon.description : '';
+        $('#addonPrice').value = addon ? addon.price : '';
+        $('#addonSort').value = addon ? addon.sort_order : 0;
+        $('#addonCommissionable').checked = addon ? !!addon.commissionable : true;
+        $('#addonActive').checked = addon ? !!addon.active : true;
+        $('#addonTitle').textContent = addon ? 'Edit Add-on' : 'Add New Add-on';
+        addonSaveBtn.textContent = 'Save Add-on';
+        addonSaveBtn.disabled = false;
+        showError(addonError, '');
+        openModal(addonModal);
+        $('#addonName').focus();
+    }
+
+    if (addonModal && addonForm) {
+        $('#addonAddBtn').addEventListener('click', function () { openAddonModal(null); });
+        $$('[data-addon-close]').forEach(function (b) { b.addEventListener('click', closeAddonModal); });
+        addonModal.addEventListener('mousedown', function (ev) { if (ev.target === addonModal) closeAddonModal(); });
+
+        addonRows.addEventListener('click', function (ev) {
+            var editBtn = ev.target.closest('[data-addon-edit]');
+            var toggleBtn = ev.target.closest('[data-addon-toggle]');
+            if (editBtn) {
+                var found = addons.find(function (a) { return String(a.id) === editBtn.getAttribute('data-addon-edit'); });
+                if (found) openAddonModal(found);
+            }
+            if (toggleBtn) {
+                var id = toggleBtn.getAttribute('data-addon-toggle');
+                var next = toggleBtn.getAttribute('data-active') !== '1';
+                var body = new FormData(addonForm);
+                body.set('action', 'set_active');
+                body.set('id', id);
+                body.set('is_active', next ? '1' : '0');
+                addonRequest({ method: 'POST', body: body }).then(function (res) {
+                    if (!res.ok) { toast(res.error || 'Unable to update add-on status.'); return; }
+                    toast(res.message || 'Add-on status updated.');
+                    loadAddons();
+                }).catch(function () { toast('Unable to update add-on status.'); });
+            }
+        });
+
+        addonForm.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            showError(addonError, '');
+            addonSaveBtn.disabled = true;
+            addonSaveBtn.textContent = 'Saving…';
+            addonRequest({ method: 'POST', body: new FormData(addonForm) }).then(function (res) {
+                if (!res.ok) { showError(addonError, res.error || 'Unable to save add-on.'); return; }
+                closeAddonModal();
+                toast(res.message || 'Add-on saved successfully.');
+                loadAddons();
+            }).catch(function () {
+                showError(addonError, 'Network problem. Please try again.');
+            }).finally(function () {
+                addonSaveBtn.disabled = false;
+                addonSaveBtn.textContent = 'Save Add-on';
+            });
+        });
+        loadAddons();
+    }
+
 }());
