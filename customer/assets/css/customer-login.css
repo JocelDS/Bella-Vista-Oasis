@@ -816,6 +816,61 @@ svg {
   border-radius: 2px;
 }
 
+
+/* =========================================
+   AUTHENTICATED NAVIGATION LOGOUT BUTTON
+========================================= */
+
+.cu-nav-logout-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.cu-nav-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 42px;
+    padding: 10px 17px;
+
+    border: 1px solid #e8c8d8;
+    border-radius: 999px;
+
+    background: #fff;
+    color: #a33d68;
+
+    font: 600 12px Inter, sans-serif;
+
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.cu-nav-logout:hover {
+    background: #fff1f6;
+    border-color: #d99ab7;
+}
+
+.cu-nav-logout:focus-visible {
+    outline: 3px solid rgba(152,107,194,.35);
+    outline-offset: 2px;
+}
+
+/* Responsive Logout Button */
+@media (max-width: 1040px) {
+
+    .cu-nav-logout-form {
+        display: flex;
+        margin: 8px 0 0;
+    }
+
+    .cu-nav-logout {
+        width: 100%;
+    }
+}
+
+
 /* Even-height (lining) numerals for Calm Serif */
 *,
 *::before,

@@ -8,12 +8,35 @@ $loggedIn = cu_logged_in();
 $services = [];
 $rooms = [];
 $addons = [];
+
+/* Treatment cards are sourced only from actual rows in the services table.
+   Empty table or failed query means no treatment cards are rendered. */
 try {
-    $services = $pdo->query('SELECT id, service_name, room_code, description, duration, price, base_capacity, max_capacity FROM services ORDER BY id')->fetchAll();
-    foreach ($pdo->query("SELECT SUBSTRING_INDEX(room_name, '-', 1) AS code, MIN(room_type) AS room_type, COUNT(*) AS total, MIN(description) AS description FROM rooms GROUP BY code") as $r) {
+    $serviceStmt = $pdo->query(
+        'SELECT id, service_name, room_code, description, duration, price, base_capacity, max_capacity
+         FROM services
+         ORDER BY id ASC'
+    );
+    $services = $serviceStmt ? $serviceStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+} catch (Throwable $ex) {
+    error_log('Customer services query failed: ' . $ex->getMessage());
+    $services = [];
+}
+$hasServices = !empty($services);
+
+/* Room information enriches service cards but does not create services. */
+try {
+    $roomStmt = $pdo->query(
+        "SELECT SUBSTRING_INDEX(room_name, '-', 1) AS code, MIN(room_type) AS room_type,
+                COUNT(*) AS total, MIN(description) AS description
+         FROM rooms GROUP BY code"
+    );
+    foreach (($roomStmt ? $roomStmt->fetchAll(PDO::FETCH_ASSOC) : []) as $r) {
         $rooms[$r['code']] = $r;
     }
 } catch (Throwable $ex) {
+    error_log('Customer room summary query failed: ' . $ex->getMessage());
+    $rooms = [];
 }
 $roomList = [];
 $imgCol = room_images_ready($pdo) ? ', d.image_path' : ', NULL AS image_path';
@@ -99,7 +122,7 @@ require __DIR__ . '/includes/header.php';
                 <h2 class="serif">Choose Your Sanctuary Experience</h2>
                 <p>Rates and durations are taken directly from our current treatment menu.</p>
             </header>
-            <?php if ($services): ?>
+            <?php if ($hasServices): ?>
             <div class="sv-grid">
                 <?php foreach ($services as $i => $s):
                     $code = (string)$s['room_code'];
@@ -128,6 +151,8 @@ require __DIR__ . '/includes/header.php';
                 </article>
                 <?php endforeach; ?>
             </div>
+            <?php else: ?>
+            <p class="lp-empty">No spa treatments are currently listed. Please check back soon.</p>
             <?php endif; ?>
         </div>
     </section>
@@ -225,7 +250,7 @@ require __DIR__ . '/includes/header.php';
                 <p class="lp-eyebrow pink">Pricing Guide</p>
                 <h2 class="serif">Sanctuary Experience Overview</h2>
             </header>
-            <?php if ($services): ?>
+            <?php if ($hasServices): ?>
             <div class="sv-table-wrap">
                 <table class="sv-table">
                     <thead><tr><th>Treatment</th><th>Duration</th><th>Price</th><th>Experience Details</th><th>Booking</th></tr></thead>
@@ -242,6 +267,8 @@ require __DIR__ . '/includes/header.php';
                     </tbody>
                 </table>
             </div>
+            <?php else: ?>
+            <p class="lp-empty">Treatment rates will appear here when services are added to the treatment menu.</p>
             <?php endif; ?>
         </div>
     </section>

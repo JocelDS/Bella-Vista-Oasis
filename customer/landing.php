@@ -9,16 +9,45 @@ $firstName = $loggedIn ? explode(' ', trim((string)($_SESSION['customer_name'] ?
 $services = [];
 $facilities = [];
 $tiers = [];
+
+/* Featured treatment cards are sourced only from the services table.
+   No hard-coded/default cards are displayed when there are no service rows. */
 try {
-    /* Featured treatments = the 3 most booked services (cancelled and no-show bookings do not count). */
-    $services = $pdo->query("SELECT s.id, s.service_name, s.room_code, s.description, s.duration, s.price, s.base_capacity, s.max_capacity, COUNT(a.id) AS bookings
+    $serviceStmt = $pdo->query("SELECT s.id, s.service_name, s.room_code, s.description, s.duration, s.price,
+            s.base_capacity, s.max_capacity, COUNT(a.id) AS bookings
         FROM services s
-        LEFT JOIN appointments a ON a.service_id = s.id AND a.appointment_status NOT IN ('cancelled', 'no_show')
-        GROUP BY s.id, s.service_name, s.room_code, s.description, s.duration, s.price, s.base_capacity, s.max_capacity
-        ORDER BY bookings DESC, s.id ASC LIMIT 3")->fetchAll();
-    $facilities = $pdo->query("SELECT room_type, COUNT(*) AS total, MIN(description) AS description FROM rooms WHERE room_type IS NOT NULL GROUP BY room_type ORDER BY MIN(id)")->fetchAll();
-    $tiers = $pdo->query("SELECT tier_name, discount_percentage, points_multiplier FROM membership_tiers WHERE status = 'active' ORDER BY sort_order, id")->fetchAll();
+        LEFT JOIN appointments a
+            ON a.service_id = s.id
+            AND a.appointment_status NOT IN ('cancelled', 'no_show')
+        GROUP BY s.id, s.service_name, s.room_code, s.description, s.duration, s.price,
+                 s.base_capacity, s.max_capacity
+        ORDER BY bookings DESC, s.id ASC
+        LIMIT 3");
+    $services = $serviceStmt ? $serviceStmt->fetchAll(PDO::FETCH_ASSOC) : [];
 } catch (Throwable $ex) {
+    error_log('Landing-page services query failed: ' . $ex->getMessage());
+    $services = [];
+}
+$hasServices = !empty($services);
+
+/* Facilities and membership tiers load independently so their query errors
+   cannot interfere with the treatment-card list. */
+try {
+    $facilityStmt = $pdo->query("SELECT room_type, COUNT(*) AS total, MIN(description) AS description
+        FROM rooms WHERE room_type IS NOT NULL
+        GROUP BY room_type ORDER BY MIN(id)");
+    $facilities = $facilityStmt ? $facilityStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+} catch (Throwable $ex) {
+    error_log('Landing-page facilities query failed: ' . $ex->getMessage());
+    $facilities = [];
+}
+try {
+    $tierStmt = $pdo->query("SELECT tier_name, discount_percentage, points_multiplier
+        FROM membership_tiers WHERE status = 'active' ORDER BY sort_order, id");
+    $tiers = $tierStmt ? $tierStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+} catch (Throwable $ex) {
+    error_log('Landing-page membership tiers query failed: ' . $ex->getMessage());
+    $tiers = [];
 }
 
 $phone = cu_setting('contact_phone');
@@ -117,7 +146,7 @@ require __DIR__ . '/includes/header.php';
                 <h2 class="serif">Restorative Treatments &amp; Signature Rituals</h2>
                 <p>Discover thoughtfully curated treatments designed to restore balance, comfort, and well-being.</p>
             </header>
-            <?php if ($services): ?>
+            <?php if ($hasServices): ?>
             <div class="lp-cards">
                 <?php foreach ($services as $i => $s):
                     $imgUrl = isset($roomImages[$s['room_code']]) ? (string)room_image_url($roomImages[$s['room_code']]) : cu_url('/assets/images/' . ($serviceImages[$s['room_code']] ?? 'hero-spa.jpg'));

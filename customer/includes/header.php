@@ -1,3 +1,4 @@
+
 <?php
 $pageTitle = $pageTitle ?? 'Bella Vista Oasis';
 $activeNav = $activeNav ?? '';
@@ -10,44 +11,162 @@ $contactPhone = cu_setting('contact_phone');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title><?= e($pageTitle) ?> | Bella Vista Oasis</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
+
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="<?= e(cu_url('/assets/css/customer-login.css')) ?>?v=<?= e((string)@filemtime(__DIR__ . '/../assets/css/customer-login.css')) ?>">
+
     <link rel="stylesheet" href="<?= e(cu_url('/assets/css/customer-register.css')) ?>?v=<?= e((string)@filemtime(__DIR__ . '/../assets/css/customer-register.css')) ?>">
+
     <link rel="stylesheet" href="<?= e(cu_url('/assets/css/customer-responsive.css')) ?>?v=<?= e((string)@filemtime(__DIR__ . '/../assets/css/customer-responsive.css')) ?>">
-    <?php foreach (($pageStyles ?? []) as $css): ?><link rel="stylesheet" href="<?= e(cu_url('/assets/css/' . $css)) ?>?v=<?= e((string)@filemtime(__DIR__ . '/../assets/css/' . $css)) ?>"><?php endforeach; ?>
+
+    <?php foreach (($pageStyles ?? []) as $css): ?>
+        <link rel="stylesheet" href="<?= e(cu_url('/assets/css/' . $css)) ?>?v=<?= e((string)@filemtime(__DIR__ . '/../assets/css/' . $css)) ?>">
+    <?php endforeach; ?>
+
 </head>
+
 <body>
+
 <div class="cu-topbar">
     <div class="cu-topbar-in">
-        <span><?php $l1 = cu_setting('address_line1'); $l3 = cu_setting('address_line3'); echo e(trim($l1 . ($l1 !== '' && $l3 !== '' ? ' · ' : '') . $l3)); ?></span>
-        <span class="cu-topbar-contact">
-            <?php if ($contactPhone !== ''): ?><a href="tel:<?= e(preg_replace('/[^0-9+]/', '', $contactPhone)) ?>"><?= e($contactPhone) ?></a><?php endif; ?>
-            <?php if ($contactEmail !== ''): ?><a href="mailto:<?= e($contactEmail) ?>"><?= e($contactEmail) ?></a><?php endif; ?>
+
+        <span>
+            <?php
+            $l1 = cu_setting('address_line1');
+            $l3 = cu_setting('address_line3');
+
+            echo e(trim(
+                $l1 .
+                ($l1 !== '' && $l3 !== '' ? ' · ' : '') .
+                $l3
+            ));
+            ?>
         </span>
+
+        <span class="cu-topbar-contact">
+
+            <?php if ($contactPhone !== ''): ?>
+                <a href="tel:<?= e(preg_replace('/[^0-9+]/', '', $contactPhone)) ?>">
+                    <?= e($contactPhone) ?>
+                </a>
+            <?php endif; ?>
+
+            <?php if ($contactEmail !== ''): ?>
+                <a href="mailto:<?= e($contactEmail) ?>">
+                    <?= e($contactEmail) ?>
+                </a>
+            <?php endif; ?>
+
+        </span>
+
     </div>
 </div>
+
 <header class="cu-nav">
+
     <div class="cu-nav-in">
+
         <a class="cu-brand" href="<?= e(cu_url('/landing.php')) ?>">
-            <img src="<?= e(cu_url('/assets/images/bella-vista-logo.png')) ?>" alt="Bella Vista Oasis Spa logo" width="46" height="46">
-            <span><strong>Bella Vista</strong><small>Oasis Spa &amp; Sanctuary</small></span>
+
+            <img src="<?= e(cu_url('/assets/images/bella-vista-logo.png')) ?>"
+                 alt="Bella Vista Oasis Spa logo"
+                 width="46"
+                 height="46">
+
+            <span>
+                <strong>Bella Vista</strong>
+                <small>Oasis Spa &amp; Sanctuary</small>
+            </span>
+
         </a>
-        <button class="cu-nav-toggle" type="button" aria-expanded="false" aria-controls="cuNav" aria-label="Open menu"><span></span><span></span><span></span></button>
+
+        <button class="cu-nav-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="cuNav"
+                aria-label="Open menu">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </button>
+
         <nav id="cuNav" class="cu-nav-links" aria-label="Main">
-            <a href="<?= e(cu_url('/landing.php')) ?>" class="<?= $activeNav === 'home' ? 'active' : '' ?>">Home</a>
-            <a href="<?= e(cu_url('/services.php')) ?>" class="<?= $activeNav === 'services' ? 'active' : '' ?>">Services &amp; Rates</a>
-            <a href="<?= e(cu_url('/book-appointment.php')) ?>" class="<?= $activeNav === 'book' ? 'active' : '' ?>">Book Appointment</a>
-            <a href="#" data-soon="QR passes are issued by the concierge for confirmed bookings.">QR Check-In</a>
-            <a href="<?= e(cu_url('/loyalty-rewards.php')) ?>" class="<?= $activeNav === 'loyalty' ? 'active' : '' ?>">Loyalty &amp; Rewards</a>
-            <a href="<?= e(cu_url('/help-support.php')) ?>" class="<?= $activeNav === 'help' ? 'active' : '' ?>">Help / Support</a>
+
+            <a href="<?= e(cu_url('/landing.php')) ?>"
+               class="<?= $activeNav === 'home' ? 'active' : '' ?>">
+                Home
+            </a>
+
+            <a href="<?= e(cu_url('/services.php')) ?>"
+               class="<?= $activeNav === 'services' ? 'active' : '' ?>">
+                Services &amp; Rates
+            </a>
+
+            <a href="<?= e(cu_url('/book-appointment.php')) ?>"
+               class="<?= $activeNav === 'book' ? 'active' : '' ?>">
+                Book Appointment
+            </a>
+
+            <a href="#"
+               data-soon="QR passes are issued by the concierge for confirmed bookings.">
+                QR Check-In
+            </a>
+
+            <a href="<?= e(cu_url('/loyalty-rewards.php')) ?>"
+               class="<?= $activeNav === 'loyalty' ? 'active' : '' ?>">
+                Loyalty &amp; Rewards
+            </a>
+
+            <a href="<?= e(cu_url('/help-support.php')) ?>"
+               class="<?= $activeNav === 'help' ? 'active' : '' ?>">
+                Help / Support
+            </a>
+
             <?php if (!empty($_SESSION['customer_id'])): ?>
-                <a class="cu-nav-cta<?= $activeNav === 'sanctuary' ? ' is-active' : '' ?>" href="<?= e(cu_url('/dashboard.php')) ?>">My Sanctuary</a>
+
+                <a class="cu-nav-cta<?= $activeNav === 'sanctuary' ? ' is-active' : '' ?>"
+                   href="<?= e(cu_url('/dashboard.php')) ?>">
+                    My Sanctuary
+                </a>
+
+                <!-- LOGOUT BUTTON -->
+                <form class="cu-nav-logout-form"
+                      method="post"
+                      action="<?= e(cu_url('/auth/logout.php')) ?>">
+
+                    <?= csrf_field() ?>
+
+                    <button class="cu-nav-logout" type="submit">
+                        <span aria-hidden="true">↗</span>
+                        Log Out
+                    </button>
+
+                </form>
+
             <?php else: ?>
-                <a class="cu-nav-cta" href="<?= e(cu_url('/register.php')) ?>">Enroll Guest</a>
+
+                <a class="cu-nav-cta"
+                   href="<?= e(cu_url('/register.php')) ?>">
+                    Enroll Guest
+                </a>
+
             <?php endif; ?>
+
         </nav>
+
     </div>
+
 </header>
-<div id="cuToast" class="cu-toast" role="status" aria-live="polite"></div>
+
+<div id="cuToast"
+     class="cu-toast"
+     role="status"
+     aria-live="polite">
+</div>
