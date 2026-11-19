@@ -250,6 +250,20 @@ require __DIR__ . '/includes/header.php';
                             <option value="Bank Transfer">Bank Transfer</option>
                         </select>
                     </div>
+                    <div class="pay-qr" id="qrPanel" hidden>
+                        <p class="label-small" id="qrTitle">Scan to pay</p>
+                        <div class="pay-qr-frame" id="qrFrame">
+                            <img id="qrImg" alt="" hidden>
+                            <p class="pay-qr-empty" id="qrEmpty">No QR uploaded for this channel yet.</p>
+                        </div>
+                        <p class="pay-qr-amount">Amount to pay <strong id="qrAmount">₱0.00</strong></p>
+                        <p class="pay-hint">Ask the guest to scan this QR and enter the exact amount. After they pay, enter the reference number from their receipt below.</p>
+                        <div class="pay-qr-actions">
+                            <label class="btn btn-outline btn-sm" for="qrFile"><span id="qrUploadLabel">Upload QR</span></label>
+                            <input type="file" id="qrFile" accept="image/png,image/jpeg,image/webp" hidden>
+                            <button type="button" class="btn btn-outline btn-sm btn-danger-soft" id="qrRemove" hidden>Remove</button>
+                        </div>
+                    </div>
                     <div class="field" id="amountRow">
                         <label for="sfAmount">Amount Received (₱)</label>
                         <input type="number" id="sfAmount" name="amount" min="0.01" step="0.01" inputmode="decimal">

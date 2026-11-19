@@ -975,3 +975,63 @@
     box-shadow: none;
   }
 }
+.pay-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border: 1px dashed var(--pink);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff 0%, var(--blush) 100%);
+  text-align: center;
+}
+.pay-qr[hidden] {
+  display: none;
+}
+.pay-qr-frame {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 260px;
+  min-height: 200px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+}
+.pay-qr-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+}
+.pay-qr-empty {
+  margin: 0;
+  color: var(--gray);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.pay-qr-amount {
+  margin: 0;
+  color: var(--gray);
+  font-size: 12px;
+}
+.pay-qr-amount strong {
+  display: block;
+  margin-top: 2px;
+  color: #6B2F55;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 600;
+}
+.pay-qr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.pay-qr-actions label.btn {
+  cursor: pointer;
+}

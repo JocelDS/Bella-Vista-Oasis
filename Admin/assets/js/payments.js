@@ -553,7 +553,83 @@
         var amt = $('#sfAmount');
         if (!amountEdited) { amt.value = due > 0 ? due.toFixed(2) : ''; }
         amt.max = due > 0 ? due.toFixed(2) : '';
+        renderQrAmount();
     }
+
+    var qrCache = {};
+    var qrToken = 0;
+
+    function qrChannel() { return $('#sfDigital').value; }
+
+    function renderQrAmount() {
+        var amt = parseFloat($('#sfAmount').value);
+        $('#qrAmount').textContent = money(isFinite(amt) && amt > 0 ? amt : dueNow());
+    }
+
+    function renderQr() {
+        var panel = $('#qrPanel');
+        var show = method === 'digital';
+        panel.hidden = !show;
+        if (!show) { return; }
+        var channel = qrChannel();
+        var url = qrCache[channel];
+        $('#qrTitle').textContent = 'Scan to pay with ' + channel;
+        var img = $('#qrImg');
+        if (url) {
+            img.src = url;
+            img.alt = channel + ' payment QR code';
+            img.hidden = false;
+            $('#qrEmpty').hidden = true;
+        } else {
+            img.hidden = true;
+            img.removeAttribute('src');
+            $('#qrEmpty').textContent = url === null ? 'No ' + channel + ' QR uploaded yet. Upload the spa ' + channel + ' QR below.' : 'Loading QR…';
+            $('#qrEmpty').hidden = false;
+        }
+        $('#qrUploadLabel').textContent = url ? 'Replace QR' : 'Upload QR';
+        $('#qrRemove').hidden = !url;
+        renderQrAmount();
+    }
+
+    function loadQr() {
+        var channel = qrChannel();
+        var token = ++qrToken;
+        if (qrCache[channel] === undefined) { renderQr(); }
+        api('/payment-qr.php?channel=' + encodeURIComponent(channel)).then(function (d) {
+            if (d && d.ok) { qrCache[channel] = d.url || null; }
+            else { qrCache[channel] = null; }
+            if (token === qrToken) { renderQr(); }
+        }).catch(function () {
+            qrCache[channel] = null;
+            if (token === qrToken) { renderQr(); }
+        });
+    }
+
+    function qrSend(fd) {
+        fd.append('csrf', csrf);
+        fd.append('channel', qrChannel());
+        return api('/payment-qr.php', { method: 'POST', body: fd }).then(function (d) {
+            if (!d.ok) { toast(d.error || 'Unable to update the QR.'); return; }
+            qrCache[qrChannel()] = d.url || null;
+            renderQr();
+            toast(d.message || 'QR updated.');
+        }).catch(function () { toast('Network error. Please try again.'); });
+    }
+
+    $('#qrFile').addEventListener('change', function (ev) {
+        var f = ev.target.files && ev.target.files[0];
+        ev.target.value = '';
+        if (!f) { return; }
+        var fd = new FormData();
+        fd.append('action', 'upload');
+        fd.append('qr', f);
+        qrSend(fd);
+    });
+    $('#qrRemove').addEventListener('click', function () {
+        var fd = new FormData();
+        fd.append('action', 'remove');
+        qrSend(fd);
+    });
 
     function setMethod(m) {
         method = m;
@@ -578,13 +654,14 @@
             : 'I confirm this payment was actually received. Bella Vista does not verify GCash, Maya, or bank payments automatically.';
         $('#sfMethod').value = digital ? $('#sfDigital').value : m;
         errBox.hidden = true;
+        if (digital) { loadQr(); } else { renderQr(); }
     }
     $$('.pay-method').forEach(function (b) {
         b.addEventListener('click', function () { if (!b.disabled) { setMethod(b.getAttribute('data-method')); } });
     });
-    $('#sfDigital').addEventListener('change', function () { if (method === 'digital') { $('#sfMethod').value = $('#sfDigital').value; } });
+    $('#sfDigital').addEventListener('change', function () { if (method === 'digital') { $('#sfMethod').value = $('#sfDigital').value; loadQr(); } });
 
-    $('#sfAmount').addEventListener('input', function () { amountEdited = true; errBox.hidden = true; });
+    $('#sfAmount').addEventListener('input', function () { amountEdited = true; errBox.hidden = true; renderQrAmount(); });
     $('#sfDisc').addEventListener('input', function () { amountEdited = false; refreshDue(); });
     $('#addonList').addEventListener('change', function () { amountEdited = false; refreshDue(); });
 

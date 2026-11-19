@@ -1,0 +1,3 @@
+php_flag engine off
+Options -Indexes -ExecCGI
+RemoveHandler .php .phtml .php3 .php5

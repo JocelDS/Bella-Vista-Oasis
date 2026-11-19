@@ -1,0 +1,348 @@
+/* Account & Sanctuary Settings — scoped with .acc-; reuses dashboard.css + settings.css tokens. */
+
+.acc-head {
+  align-items: flex-start;
+}
+.acc-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.acc-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.acc-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--blush);
+  color: var(--purple);
+}
+.acc-pill-soft {
+  background: rgba(197, 160, 221, 0.2);
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.acc-grid {
+  margin-top: 4px;
+}
+.acc-err {
+  min-height: 0;
+  font-size: 12px;
+  color: #c0508a;
+}
+.acc-err:empty {
+  display: none;
+}
+.field.has-error input,
+.field.has-error select {
+  border-color: var(--pink);
+}
+.acc-static {
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(244, 190, 213, 0.12);
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.card .field + .field {
+  margin-top: 14px;
+}
+.card .sc-note {
+  margin-top: 6px;
+}
+
+/* Avatar */
+.acc-avatar-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin: 4px 0 20px;
+  flex-wrap: wrap;
+}
+.acc-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: var(--purple);
+  color: var(--cream);
+  font-family: var(--serif);
+  font-size: 28px;
+  border: 3px solid var(--blush);
+}
+.acc-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.acc-avatar-name {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--forest);
+}
+.acc-avatar-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.acc-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 8px;
+}
+
+/* Language chips */
+.acc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.acc-chip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--gray);
+  font: 600 12.5px var(--sans);
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+.acc-chip:hover {
+  background: rgba(244, 190, 213, 0.25);
+}
+.acc-chip.is-on {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: var(--cream);
+}
+
+/* Security */
+.acc-sec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.acc-sec-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 247, 252, 0.7);
+}
+.acc-sec-card h3 {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--forest);
+}
+.acc-sec-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: var(--purple);
+}
+.acc-sec-top .ico {
+  width: 22px;
+  height: 22px;
+}
+.acc-sec-top select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  font: 600 12.5px var(--sans);
+  color: var(--ink);
+}
+.acc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+.acc-row-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Alerts */
+.acc-alerts {
+  display: flex;
+  flex-direction: column;
+}
+.acc-alert {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+.acc-alert:first-child {
+  border-top: 0;
+  padding-top: 4px;
+}
+
+/* Powers */
+.acc-powers {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+}
+.acc-powers li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink);
+}
+.acc-powers .ico {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.acc-powers li.is-on .ico {
+  color: var(--purple);
+}
+.acc-powers li.is-off {
+  color: var(--gray);
+  opacity: 0.65;
+}
+
+.acc-photo-card {
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+.acc-photo-card img {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+.acc-photo-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 16px;
+  color: #fff;
+  background: linear-gradient(transparent, rgba(58, 46, 70, 0.75));
+}
+.acc-photo-cap .label-small {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Lists / links */
+.acc-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+.acc-list-item {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.acc-list-item:first-child {
+  border-top: 0;
+}
+.acc-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.acc-links .btn {
+  text-decoration: none;
+}
+
+/* Commit bar */
+.acc-bar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 20;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+}
+.acc-bar-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--forest);
+}
+.acc-bar-text small {
+  display: block;
+  font-weight: 400;
+  color: var(--gray);
+  font-size: 11.5px;
+}
+.acc-bar-text .ico {
+  width: 20px;
+  height: 20px;
+}
+.acc-bar-actions {
+  display: flex;
+  gap: 10px;
+}
+.acc-bar.is-hidden {
+  display: none;
+}
+
+/* Console density preference */
+.dash-body[data-density="compact"] .content .card {
+  padding: 16px;
+}
+.dash-body[data-density="compact"] .content .card-head {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 900px) {
+  .acc-sec-grid {
+    grid-template-columns: 1fr;
+  }
+}

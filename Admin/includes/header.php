@@ -8,6 +8,20 @@ $crumb       = $crumb ?? 'Dashboard';
 $headerName  = (string)($_SESSION['admin_name'] ?? 'Administrator');
 $notifList   = $notifications ?? [];
 $latestNotif = $notifList ? (int)$notifList[0]['id'] : 0;
+$accIdle     = '0';
+$accDensity  = 'comfortable';
+try {
+    if (!empty($_SESSION['admin_id'])) {
+        $accSt = db()->prepare("SELECT pref_key, pref_value FROM admin_preferences WHERE admin_id = ? AND pref_key IN ('idle_minutes', 'density')");
+        $accSt->execute([(int)$_SESSION['admin_id']]);
+        foreach ($accSt->fetchAll() as $accRow) {
+            if ($accRow['pref_key'] === 'idle_minutes' && in_array((int)$accRow['pref_value'], [0, 5, 15, 30, 60], true)) { $accIdle = (string)(int)$accRow['pref_value']; }
+            if ($accRow['pref_key'] === 'density' && in_array($accRow['pref_value'], ['comfortable', 'compact'], true)) { $accDensity = $accRow['pref_value']; }
+        }
+    }
+} catch (Throwable $e) {
+    // admin_preferences is created the first time Account Settings is opened.
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,7 +40,7 @@ $latestNotif = $notifList ? (int)$notifList[0]['id'] : 0;
         <link rel="stylesheet" href="<?= e((string)$href) ?>">
     <?php endforeach; ?>
 </head>
-<body class="dash-body" data-api="<?= e(url('/api')) ?>">
+<body class="dash-body" data-api="<?= e(url('/api')) ?>" data-idle="<?= e($accIdle) ?>" data-density="<?= e($accDensity) ?>">
 <div class="scrim" id="scrim" hidden></div>
 <div class="app">
     <?php require __DIR__ . '/sidebar.php'; ?>
@@ -78,8 +92,7 @@ $latestNotif = $notifList ? (int)$notifList[0]['id'] : 0;
                             <p class="profile-name"><?= e($headerName) ?></p>
                             <p class="profile-role">Administrator</p>
                         </div>
-                        <?php $hasSettings = is_file(__DIR__ . '/../settings.php'); ?>
-                        <a class="dd-item <?= $hasSettings ? '' : 'is-soon' ?>" href="<?= $hasSettings ? e(url('/settings.php')) : '#' ?>" <?= $hasSettings ? '' : 'data-soon="Account Settings"' ?>>
+                        <a class="dd-item" href="<?= e(url('/account-settings.php')) ?>">
                             <?= icon('gear') ?><span>Account Settings</span>
                         </a>
                         <form method="post" action="<?= e(url('/auth/logout.php')) ?>">

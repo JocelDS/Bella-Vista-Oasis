@@ -37,10 +37,12 @@ $cssFile       = __DIR__ . '/assets/css/services.css';
 $cssVer        = is_file($cssFile) ? (string)filemtime($cssFile) : '1';
 $addonCss      = __DIR__ . '/assets/css/service-addons.css';
 $addonCssVer   = is_file($addonCss) ? (string)filemtime($addonCss) : '1';
+$extraStyles   = [
+    url('/assets/css/services.css') . '?v=' . $cssVer,
+    url('/assets/css/service-addons.css') . '?v=' . $addonCssVer,
+];
 require __DIR__ . '/includes/header.php';
 ?>
-<link rel="stylesheet" href="<?= e(url('/assets/css/services.css')) ?>?v=<?= e($cssVer) ?>">
-<link rel="stylesheet" href="<?= e(url('/assets/css/service-addons.css')) ?>?v=<?= e($addonCssVer) ?>">
 <section class="page-head">
     <div>
         <p class="label-small">Treatments · Rates · Guests</p>
@@ -97,7 +99,7 @@ require __DIR__ . '/includes/header.php';
 </section>
 
 <section class="card card-wide">
-    <div class="card-head">
+    <div class="card-head manifest-head">
         <div>
             <p class="label-small">Treatment Catalogue</p>
             <h2 class="card-title">All Treatments</h2>
@@ -137,18 +139,18 @@ require __DIR__ . '/includes/header.php';
                     $guests = $s['base_capacity'] === $s['max_capacity'] ? (string)$s['base_capacity'] : $s['base_capacity'] . ' to ' . $s['max_capacity'];
                     ?>
                 <tr>
-                    <td>
+                    <td data-label="Treatment">
                         <p class="cell-title"><?= e($s['service_name']) ?></p>
                         <?php if ((string)$s['description'] !== ''): ?><p class="cell-sub sv-desc"><?= e((string)$s['description']) ?></p><?php endif; ?>
                     </td>
-                    <td><span class="sv-code"><?= e($s['room_code']) ?></span></td>
-                    <td><?= e(sv_duration_label($s['duration'])) ?></td>
-                    <td>
+                    <td data-label="Room Code"><span class="sv-code"><?= e($s['room_code']) ?></span></td>
+                    <td data-label="Duration"><?= e(sv_duration_label($s['duration'])) ?></td>
+                    <td data-label="Guests">
                         <?= e($guests) ?>
                         <p class="cell-sub">Base <?= (int)$s['base_capacity'] ?> · Max <?= (int)$s['max_capacity'] ?></p>
                     </td>
-                    <td class="num"><?= e(sv_peso($s['price'])) ?></td>
-                    <td>
+                    <td class="num" data-label="Price"><?= e(sv_peso($s['price'])) ?></td>
+                    <td data-label="Compatible Rooms">
                         <?php if ($s['room_open'] > 0): ?>
                             <span class="badge rs-available"><span class="dot"></span><?= $s['room_open'] ?> open</span>
                             <?php if ($s['room_total'] > $s['room_open']): ?><p class="cell-sub"><?= $s['room_total'] ?> total</p><?php endif; ?>
@@ -158,8 +160,8 @@ require __DIR__ . '/includes/header.php';
                             <span class="badge rs-maintenance"><span class="dot"></span>No chamber</span>
                         <?php endif; ?>
                     </td>
-                    <td><?= $s['bookings'] ?></td>
-                    <td class="num">
+                    <td data-label="Bookings"><?= $s['bookings'] ?></td>
+                    <td class="num" data-label="Actions">
                         <div class="sv-actions">
                             <button type="button" class="btn btn-outline btn-sm" data-edit="<?= e((string)$json) ?>">Edit</button>
                             <button type="button" class="btn btn-outline btn-sm btn-danger-soft" data-delete="<?= e((string)$json) ?>">Delete</button>

@@ -53,9 +53,7 @@ $sidebarName = (string)($_SESSION['admin_name'] ?? 'Administrator');
             <?= icon('chevron', 'ico ico-sm') ?>
         </button>
         <div class="dropdown dropdown-up" data-dropdown-menu hidden>
-            <a class="dd-item <?= is_file(__DIR__ . '/../settings.php') ? '' : 'is-soon' ?>"
-               href="<?= is_file(__DIR__ . '/../settings.php') ? e(url('/settings.php')) : '#' ?>"
-               <?= is_file(__DIR__ . '/../settings.php') ? '' : 'data-soon="Account Settings"' ?>>
+            <a class="dd-item" href="<?= e(url('/account-settings.php')) ?>">
                 <?= icon('gear') ?><span>Account Settings</span>
             </a>
             <a class="dd-item" href="<?= e(BASE_URL . '/customer/landing.php') ?>" target="_blank" rel="noopener">
