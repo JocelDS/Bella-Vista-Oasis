@@ -27,8 +27,8 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 .stat-hl {
-  background: #f3e6e2;
-  border-color: rgba(196,154,148, 0.6);
+  background: var(--white);
+  border-color: var(--border);
 }
 .stat-hl .stat-ico {
   background: var(--white);

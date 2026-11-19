@@ -1,0 +1,180 @@
+/* ==========================================================================
+   Admin consistency layer — loaded LAST on every admin page.
+   One look for page headers, stat cards and panels (Payment Management is
+   the reference style). Edit the variables below to retune every page.
+   ========================================================================== */
+body.dash-body {
+  --ac-card-pad: 18px 20px 16px;
+  --ac-card-radius: var(--radius, 14px);
+  --ac-gap: 16px;
+  --ac-value-size: 36px;
+  --ac-label-size: 10px;
+  --ac-label-track: 0.1em;
+  --ac-ico: 32px;
+}
+
+/* ---------- Page header ---------- */
+/* Hero card — same look as the Appointment Calendar header, on every page */
+body.dash-body .content > .page-head,
+body.dash-body .page-head,
+body.dash-body .cal-hero,
+body.dash-body .pay-hero,
+body.dash-body .welcome {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 0 0 24px;
+  padding: 28px 30px;
+  border: 1px solid var(--border);
+  border-radius: var(--ac-card-radius);
+  background: linear-gradient(115deg, #FFFAFE 0%, #FBEAF3 52%, #F6D9E8 100%);
+  box-shadow: var(--shadow);
+}
+body.dash-body .page-head > div:first-child {
+  flex: 1 1 420px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+body.dash-body .page-head .label-small {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  line-height: 1.35;
+}
+body.dash-body .page-head .page-title {
+  margin: 0;
+  font-size: clamp(30px, 3.2vw, 40px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0;
+  color: var(--forest);
+}
+body.dash-body .page-head .page-sub {
+  margin: 8px 0 0;
+  max-width: 640px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--gray);
+}
+body.dash-body .page-head .page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+}
+
+/* ---------- Stat grid + card (all pages) ---------- */
+body.dash-body .stats,
+body.dash-body .kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--ac-gap);
+  align-items: stretch;
+  margin: 0 0 24px;
+}
+body.dash-body .stats > .stat,
+body.dash-body .kpi-grid > .kpi-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--ac-card-pad);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--ac-card-radius);
+  box-shadow: var(--shadow);
+}
+body.dash-body .stats > .stat.stat-hl {
+  background: var(--white);
+  border-color: var(--border);
+}
+/* dark / revenue highlight: same gradient everywhere */
+body.dash-body .stats > .stat.stat-revenue,
+body.dash-body .stats > .stat.stat-dark {
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  border-color: transparent;
+}
+body.dash-body .stat-dark .label-small,
+body.dash-body .stat-dark .stat-note { color: rgba(255,255,255,.88); }
+body.dash-body .stat-dark .stat-value { color: var(--cream); }
+body.dash-body .stat-dark .stat-ico {
+  background: rgba(255,255,255,.14);
+  color: var(--cream);
+}
+
+body.dash-body .stats > .stat .stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 34px;
+}
+body.dash-body .stats-rm > .stat .stat-top { min-height: 46px; }
+body.dash-body .stats > .stat .stat-top .label-small {
+  font-size: var(--ac-label-size);
+  letter-spacing: var(--ac-label-track);
+  line-height: 1.35;
+}
+body.dash-body .stats > .stat .stat-ico {
+  width: var(--ac-ico);
+  height: var(--ac-ico);
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 0;
+  background: var(--blush);
+  color: var(--purple);
+}
+body.dash-body .stats > .stat.stat-revenue .stat-ico {
+  background: rgba(255,255,255,.18);
+  color: var(--cream);
+}
+body.dash-body .stats > .stat .stat-value {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  margin: 12px 0 8px;
+  padding: 0;
+  font-size: var(--ac-value-size);
+  font-weight: 600;
+  line-height: 1;
+}
+body.dash-body .stats > .stat .stat-value.stat-money { font-size: 30px; }
+body.dash-body .stats > .stat .stat-note {
+  margin-top: auto;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Reports KPI cards: same shell, no coloured top bar */
+body.dash-body .kpi-card::before { display: none; }
+body.dash-body .kpi-card .kpi-value {
+  font-size: var(--ac-value-size);
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Payment stat cards: align value size with the rest */
+body.dash-body .pay-stat-val { font-size: var(--ac-value-size); }
+
+/* ---------- Panels ---------- */
+body.dash-body .card,
+body.dash-body .panel {
+  border-radius: var(--ac-card-radius);
+}
+
+@media (max-width: 720px) {
+  body.dash-body .stats,
+  body.dash-body .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 460px) {
+  body.dash-body .stats,
+  body.dash-body .kpi-grid { grid-template-columns: 1fr; }
+}

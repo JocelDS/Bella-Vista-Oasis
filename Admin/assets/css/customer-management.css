@@ -220,7 +220,7 @@
 }
 .cm-guest.is-selected {
   border-color: var(--forest);
-  background: #fdfaf7;
+  background: #FFFAFE;
   box-shadow:
     0 0 0 1px var(--forest),
     var(--shadow);
@@ -346,7 +346,7 @@
   grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
   gap: 10px 14px;
   padding: 12px 14px;
-  background: #f8f1ec;
+  background: #FFF7FC;
   border: 1px solid var(--border);
   border-radius: 10px;
 }
@@ -494,7 +494,7 @@
 }
 .cm-kv > div {
   padding: 10px 12px;
-  background: #f8f1ec;
+  background: #FFF7FC;
   border: 1px solid var(--border);
   border-radius: 10px;
 }
@@ -517,7 +517,7 @@
   border-radius: 10px;
   margin-bottom: 8px;
   border: 1px solid var(--border);
-  background: #f8f1ec;
+  background: #FFF7FC;
 }
 .cm-alert strong {
   display: block;
@@ -689,8 +689,8 @@
   padding: 10px 14px;
   margin-bottom: 14px;
   border-radius: 10px;
-  background: #f3e6e2;
-  border: 1px solid rgba(196,154,148, 0.6);
+  background: var(--white);
+  border: 1px solid var(--border);
   font-size: 13px;
   color: var(--forest);
 }
@@ -758,7 +758,7 @@
 }
 .cm-p-grid > div {
   padding: 12px 14px;
-  background: #f8f1ec;
+  background: #FFF7FC;
   border: 1px solid var(--border);
   border-radius: 10px;
 }
@@ -806,7 +806,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--gray);
-  background: #f8f1ec;
+  background: #FFF7FC;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -830,7 +830,7 @@
 }
 .cm-text-block {
   padding: 12px 14px;
-  background: #f8f1ec;
+  background: #FFF7FC;
   border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 13px;

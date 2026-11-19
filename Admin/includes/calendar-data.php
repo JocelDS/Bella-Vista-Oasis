@@ -406,7 +406,7 @@ function cal_primary(array $d, string $today): array
         ];
     }
     if ($d['status'] === 'completed' && (float)$d['balance'] > 0) {
-        return ['action' => 'pay', 'label' => 'Record Payment · ' . $d['balance_label'], 'disabled' => false, 'hint' => 'Session finished. Collect the remaining balance.'];
+        return ['action' => '', 'label' => 'Session Completed', 'disabled' => true, 'hint' => 'Payment is collected in Billing & Transactions.'];
     }
     return ['action' => '', 'label' => 'No Further Updates', 'disabled' => true, 'hint' => 'This appointment is already ' . strtolower((string)$d['status_label']) . '.'];
 }

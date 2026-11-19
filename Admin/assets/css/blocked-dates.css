@@ -38,7 +38,7 @@
   justify-content: space-between;
   gap: 14px;
   padding: 12px 14px;
-  background: #f8f1ec;
+  background: #FFF7FC;
   border: 1px solid var(--border);
   border-radius: 10px;
 }
@@ -93,7 +93,7 @@
   text-align: center;
   font-size: 13px;
   color: var(--gray);
-  background: #f8f1ec;
+  background: #FFF7FC;
   border: 1px dashed var(--border);
   border-radius: 10px;
 }

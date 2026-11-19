@@ -185,108 +185,6 @@ require __DIR__ . '/includes/header.php';
     </div>
 
     <aside class="pay-side">
-        <section class="card pay-folio" id="folioCard" aria-label="Quick settle folio">
-            <div class="pay-folio-head">
-                <h2 class="card-title">Quick Settle Folio</h2>
-                <span class="pay-pos">POS Terminal</span>
-            </div>
-
-            <div class="field">
-                <label for="folioSelect">Select Active Folio</label>
-                <select id="folioSelect"><option value="">Select a guest and appointment</option></select>
-            </div>
-            <p class="pay-hint" id="folioEmpty">Confirmed or completed appointments with an unpaid balance appear here.</p>
-
-            <form id="settleForm" novalidate hidden>
-                <?= csrf_field() ?>
-                <input type="hidden" name="action" value="settle">
-                <input type="hidden" name="appointment_id" id="sfAppt" value="">
-                <input type="hidden" name="payment_method" id="sfMethod" value="">
-                <input type="hidden" name="idempotency_key" id="sfKey" value="">
-
-                <div class="pay-guest">
-                    <strong id="fgGuest"></strong>
-                    <span id="fgService"></span>
-                    <span class="pay-muted" id="fgMeta"></span>
-                </div>
-
-                <div class="pay-lines" id="fgLines"></div>
-
-                <div class="pay-addons" id="addonBox" hidden>
-                    <p class="label-small">Add In-Session Add-ons</p>
-                    <div id="addonList"></div>
-                </div>
-
-                <div class="pay-disc">
-                    <div class="field">
-                        <label for="sfDisc">Discount (₱)</label>
-                        <input type="number" id="sfDisc" name="discount_amount" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
-                    </div>
-                    <div class="field">
-                        <label for="sfDiscWhy">Discount Reason</label>
-                        <input type="text" id="sfDiscWhy" name="discount_reason" maxlength="100" placeholder="Required if discounted">
-                    </div>
-                </div>
-
-                <div class="pay-due">
-                    <span>Balance Due</span>
-                    <strong id="fgDue">₱0.00</strong>
-                </div>
-
-                <p class="label-small pay-sub">Select Settlement Method</p>
-                <div class="pay-methods" id="methodGrid" role="radiogroup" aria-label="Settlement method">
-                    <button type="button" class="pay-method" data-method="digital" role="radio" aria-checked="false"><?= icon('qr') ?><span>GCash / Maya QR</span></button>
-                    <button type="button" class="pay-method" data-method="Card" role="radio" aria-checked="false"><?= icon('wallet') ?><span>Terminal Card</span></button>
-                    <button type="button" class="pay-method" data-method="Post to Suite" role="radio" aria-checked="false"><?= icon('bed') ?><span>Post to Suite</span></button>
-                    <button type="button" class="pay-method" data-method="Cash" role="radio" aria-checked="false"><?= icon('gift') ?><span>Cash Drawer</span></button>
-                </div>
-
-                <div class="pay-method-box" id="methodBox" hidden>
-                    <div class="field" id="digitalRow" hidden>
-                        <label for="sfDigital">Digital Channel</label>
-                        <select id="sfDigital">
-                            <option value="GCash">GCash</option>
-                            <option value="Maya">Maya</option>
-                            <option value="Bank Transfer">Bank Transfer</option>
-                        </select>
-                    </div>
-                    <div class="pay-qr" id="qrPanel" hidden>
-                        <p class="label-small" id="qrTitle">Scan to pay</p>
-                        <div class="pay-qr-frame" id="qrFrame">
-                            <img id="qrImg" alt="" hidden>
-                            <p class="pay-qr-empty" id="qrEmpty">No QR uploaded for this channel yet.</p>
-                        </div>
-                        <p class="pay-qr-amount">Amount to pay <strong id="qrAmount">₱0.00</strong></p>
-                        <p class="pay-hint">Ask the guest to scan this QR and enter the exact amount. After they pay, enter the reference number from their receipt below.</p>
-                        <div class="pay-qr-actions">
-                            <label class="btn btn-outline btn-sm" for="qrFile"><span id="qrUploadLabel">Upload QR</span></label>
-                            <input type="file" id="qrFile" accept="image/png,image/jpeg,image/webp" hidden>
-                            <button type="button" class="btn btn-outline btn-sm btn-danger-soft" id="qrRemove" hidden>Remove</button>
-                        </div>
-                    </div>
-                    <div class="field" id="amountRow">
-                        <label for="sfAmount">Amount Received (₱)</label>
-                        <input type="number" id="sfAmount" name="amount" min="0.01" step="0.01" inputmode="decimal">
-                    </div>
-                    <div class="field" id="refRow" hidden>
-                        <label for="sfRef" id="sfRefLabel">Reference Number</label>
-                        <input type="text" id="sfRef" name="reference" maxlength="60" autocomplete="off">
-                    </div>
-                    <label class="pay-check" id="confirmRow" hidden>
-                        <input type="checkbox" id="sfConfirm" name="confirmed" value="1">
-                        <span id="confirmText">I confirm this payment was actually received. Bella Vista does not verify GCash, Maya, or card payments automatically.</span>
-                    </label>
-                    <p class="pay-hint" id="suiteNote" hidden>The full balance is posted as an authorized suite charge. It stays open until it is settled by another method.</p>
-                    <div class="field">
-                        <label for="sfNotes">Notes (optional)</label>
-                        <input type="text" id="sfNotes" name="notes" maxlength="255">
-                    </div>
-                </div>
-
-                <div class="form-error" id="sfError" role="alert" hidden></div>
-                <button type="submit" class="btn btn-grad pay-submit" id="sfSubmit"><?= icon('check') ?><span>Complete &amp; Print Thermal Slip</span></button>
-            </form>
-        </section>
 
         <section class="card pay-escrow" aria-label="Escrow and cancellation policy">
             <div class="pay-escrow-head">
@@ -330,6 +228,143 @@ require __DIR__ . '/includes/header.php';
             </div>
         </form>
         <footer class="modal-foot" id="dmFoot"></footer>
+    </div>
+</div>
+
+<div class="modal" id="folioModal" role="dialog" aria-modal="true" aria-labelledby="folioTitle" hidden>
+    <div class="modal-card pay-folio" id="folioCard">
+        <header class="pos-head">
+            <div class="pos-head-text">
+                <p class="label-small">POS Terminal</p>
+                <h2 class="card-title" id="folioTitle">Quick Settle Folio</h2>
+            </div>
+            <button type="button" class="icon-btn" data-close aria-label="Close"><?= icon('close') ?></button>
+        </header>
+
+        <div class="pos-folio-pick">
+            <div class="field">
+                <label for="folioSelect">Select Active Folio</label>
+                <select id="folioSelect"><option value="">Select a guest and appointment</option></select>
+            </div>
+            <p class="pay-hint" id="folioEmpty">Confirmed or completed appointments with an unpaid balance appear here.</p>
+        </div>
+
+        <form id="settleForm" novalidate hidden>
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="settle">
+            <input type="hidden" name="appointment_id" id="sfAppt" value="">
+            <input type="hidden" name="payment_method" id="sfMethod" value="">
+            <input type="hidden" name="idempotency_key" id="sfKey" value="">
+
+            <div class="pos-grid">
+                <section class="pos-summary" aria-label="Order summary">
+                    <p class="pos-h">Order Summary</p>
+
+                    <div class="pay-guest">
+                        <strong id="fgGuest"></strong>
+                        <span id="fgService"></span>
+                        <span class="pay-muted" id="fgMeta"></span>
+                    </div>
+
+                    <div class="pay-lines" id="fgLines"></div>
+
+                    <div class="pay-addons" id="addonBox" hidden>
+                        <p class="label-small">Add In-Session Add-ons</p>
+                        <div id="addonList"></div>
+                    </div>
+
+                    <div class="pay-disc">
+                        <div class="field">
+                            <label for="sfDisc">Discount (₱)</label>
+                            <input type="number" id="sfDisc" name="discount_amount" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label for="sfDiscWhy">Discount Reason</label>
+                            <input type="text" id="sfDiscWhy" name="discount_reason" maxlength="100" placeholder="Required if discounted">
+                        </div>
+                    </div>
+
+                    <div class="pay-due">
+                        <span>Balance Due</span>
+                        <strong id="fgDue">₱0.00</strong>
+                    </div>
+                </section>
+
+                <section class="pos-pay" aria-label="Payment">
+                    <p class="pos-h">Settlement Method</p>
+
+                    <div class="pay-methods" id="methodGrid" role="radiogroup" aria-label="Settlement method">
+                        <button type="button" class="pay-method" data-method="digital" role="radio" aria-checked="false">
+                            <span class="pay-method-ico"><?= icon('qr') ?></span>
+                            <span class="pay-method-text"><strong>GCash / Maya QR</strong><small>Customer pays by scanning a QR code.</small></span>
+                            <span class="pay-method-radio" aria-hidden="true"></span>
+                        </button>
+                        <button type="button" class="pay-method" data-method="Card" role="radio" aria-checked="false">
+                            <span class="pay-method-ico"><?= icon('card') ?></span>
+                            <span class="pay-method-text"><strong>Terminal Card</strong><small>Payment using debit or credit card through a card terminal.</small></span>
+                            <span class="pay-method-radio" aria-hidden="true"></span>
+                        </button>
+                        <button type="button" class="pay-method" data-method="Cash" role="radio" aria-checked="false">
+                            <span class="pay-method-ico"><?= icon('cash') ?></span>
+                            <span class="pay-method-text"><strong>Cash</strong><small>Customer pays with physical cash at the counter.</small></span>
+                            <span class="pay-method-radio" aria-hidden="true"></span>
+                        </button>
+                        <button type="button" class="pay-method" data-method="Post to Suite" role="radio" aria-checked="false">
+                            <span class="pay-method-ico"><?= icon('bed') ?></span>
+                            <span class="pay-method-text"><strong>Post to Suite</strong><small>Charge the balance to the guest's suite folio to settle later.</small></span>
+                            <span class="pay-method-radio" aria-hidden="true"></span>
+                        </button>
+                    </div>
+
+                    <div class="pay-method-box" id="methodBox" hidden>
+                        <div class="field" id="digitalRow" hidden>
+                            <label for="sfDigital">Digital Channel</label>
+                            <select id="sfDigital">
+                                <option value="GCash">GCash</option>
+                                <option value="Maya">Maya</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="pay-qr" id="qrPanel" hidden>
+                            <p class="label-small" id="qrTitle">Scan to pay</p>
+                            <div class="pay-qr-frame" id="qrFrame">
+                                <img id="qrImg" alt="" hidden>
+                                <p class="pay-qr-empty" id="qrEmpty">No QR uploaded for this channel yet.</p>
+                            </div>
+                            <p class="pay-qr-amount">Amount to pay <strong id="qrAmount">₱0.00</strong></p>
+                            <p class="pay-hint">Ask the guest to scan this QR and enter the exact amount. After they pay, enter the reference number from their receipt below.</p>
+                            <div class="pay-qr-actions">
+                                <label class="btn btn-outline btn-sm" for="qrFile"><span id="qrUploadLabel">Upload QR</span></label>
+                                <input type="file" id="qrFile" accept="image/png,image/jpeg,image/webp" hidden>
+                                <button type="button" class="btn btn-outline btn-sm btn-danger-soft" id="qrRemove" hidden>Remove</button>
+                            </div>
+                        </div>
+                        <div class="field" id="amountRow">
+                            <label for="sfAmount">Amount Received (₱)</label>
+                            <input type="number" id="sfAmount" name="amount" min="0.01" step="0.01" inputmode="decimal">
+                        </div>
+                        <div class="field" id="refRow" hidden>
+                            <label for="sfRef" id="sfRefLabel">Reference Number</label>
+                            <input type="text" id="sfRef" name="reference" maxlength="60" autocomplete="off">
+                        </div>
+                        <label class="pay-check" id="confirmRow" hidden>
+                            <input type="checkbox" id="sfConfirm" name="confirmed" value="1">
+                            <span id="confirmText">I confirm this payment was actually received. Bella Vista does not verify GCash, Maya, or card payments automatically.</span>
+                        </label>
+                        <p class="pay-hint" id="suiteNote" hidden>The full balance is posted as an authorized suite charge. It stays open until it is settled by another method.</p>
+                        <div class="field">
+                            <label for="sfNotes">Notes (optional)</label>
+                            <input type="text" id="sfNotes" name="notes" maxlength="255">
+                        </div>
+                    </div>
+
+                    <p class="pay-hint pos-pick-hint" id="methodHint">Choose how the guest is paying to continue.</p>
+
+                    <div class="form-error" id="sfError" role="alert" hidden></div>
+                    <button type="submit" class="btn btn-grad pay-submit" id="sfSubmit"><?= icon('check') ?><span>Complete &amp; Print Thermal Slip</span></button>
+                </section>
+            </div>
+        </form>
     </div>
 </div>
 

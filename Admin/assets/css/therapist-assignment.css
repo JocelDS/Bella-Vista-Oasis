@@ -141,7 +141,7 @@
 }
 .queue-item {
   padding: 14px;
-  background: #f8f1ec;
+  background: #FFF7FC;
   border: 1px solid var(--border);
   border-radius: 12px;
   display: grid;
@@ -234,7 +234,7 @@
   gap: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f8f1ec;
+  background: #FFF7FC;
   border: 1px solid var(--border);
   border-left-width: 3px;
 }
@@ -322,7 +322,7 @@
 }
 .th-stat {
   padding: 10px;
-  background: #f4ece7;
+  background: #FCEEF6;
   border: 1px solid var(--border);
   border-radius: 10px;
   display: grid;
@@ -367,13 +367,13 @@
     45deg,
     #FFF7FC,
     #FFF7FC 6px,
-    #f4ece7 6px,
-    #f4ece7 12px
+    #FCEEF6 6px,
+    #FCEEF6 12px
   );
 }
 .th-sched {
   padding: 12px 14px;
-  background: #f8f1ec;
+  background: #FFF7FC;
   border: 1px solid var(--border);
   border-radius: 12px;
   display: grid;
@@ -440,12 +440,12 @@
 }
 .as-item:hover {
   border-color: var(--sage);
-  background: #f8f1ec;
+  background: #FFF7FC;
 }
 .as-item.is-off {
   opacity: 0.6;
   cursor: not-allowed;
-  background: #f8f1ec;
+  background: #FFF7FC;
 }
 .as-item.is-current {
   border-color: var(--sage);
@@ -557,7 +557,7 @@ form.is-disabled {
   border-color: var(--forest);
 }
 .lg-open {
-  background: rgba(196,154,148, 0.35);
+  background: rgba(244, 190, 213, 0.35);
 }
 .lg-leave {
   background: rgba(179,38,30, 0.25);
@@ -588,7 +588,7 @@ form.is-disabled {
   text-align: left;
 }
 .wk-table thead th {
-  background: #fdfaf7;
+  background: #FFFAFE;
   font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -605,7 +605,7 @@ form.is-disabled {
   margin-top: 2px;
 }
 .wk-table thead th.is-today {
-  background: #f3e6e2;
+  background: var(--white);
 }
 .wk-table th:first-child,
 .wk-table td:first-child {
@@ -616,7 +616,7 @@ form.is-disabled {
   z-index: 1;
 }
 .wk-table thead th:first-child {
-  background: #fdfaf7;
+  background: #FFFAFE;
 }
 .wk-name {
   display: flex;
@@ -652,10 +652,10 @@ td.is-today {
 }
 .wk-table td.wk-off,
 .wk-table td.wk-none {
-  background: #f4ece7;
+  background: #FCEEF6;
 }
 .wk-table td.wk-open {
-  background: rgba(196,154,148, 0.15);
+  background: rgba(244, 190, 213, 0.15);
 }
 .wk-flag {
   font-weight: 700;

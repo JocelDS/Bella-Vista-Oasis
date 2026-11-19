@@ -661,7 +661,7 @@
 
     function runPrimary(a) {
         var action = a.primary.action;
-        if (action === 'pay') { openPayment(a); return; }
+        if (action === 'pay') { goPayment(a.id); return; }
         var text = action === 'confirm'
             ? 'Confirm ' + a.customer_name + "'s appointment on " + a.date_label + ' at ' + a.start_label + '?'
             : 'Mark ' + a.customer_name + "'s session as completed? This cannot be undone from the calendar.";
@@ -669,60 +669,24 @@
             post('/appointment-action.php', { action: action, id: String(a.id) }).then(function (d) {
                 if (!d.ok) { toast(d.error || 'Action failed.'); return; }
                 toast(d.message || 'Appointment updated.');
+                if (action === 'complete') { offerPayment(a.id); return; }
                 load();
-                if (action === 'complete') { offerPayment(a.id); }
             }).catch(function () { toast('Network error. Please try again.'); });
         });
     }
 
-    var payModal = $('#payModal');
-    var payForm = $('#payForm');
-    var payError = $('#payError');
-
-    function openPayment(a) {
-        payForm.reset();
-        payError.hidden = true;
-        $('#pay_id').value = String(a.id);
-        $('#payKicker').textContent = 'Session Settlement · #' + a.code;
-        $('#payTitle').textContent = 'Record Payment';
-        var sum = $('#paySummary');
-        sum.innerHTML = '';
-        dlItem(sum, 'Guest', a.customer_name);
-        dlItem(sum, 'Ritual', a.service_name, a.date_label + ' · ' + a.start_label + ' – ' + a.end_label);
-        dlItem(sum, 'Total Amount', a.total_label);
-        dlItem(sum, 'Already Received', a.paid_label);
-        $('#payDue').textContent = a.balance_label;
-        openModal(payModal);
-        $('#pay_method').focus();
+    function goPayment(id) {
+        var base = app.getAttribute('data-payments') || '';
+        if (!base) { return; }
+        window.location.href = base + (base.indexOf('?') === -1 ? '?' : '&') + 'appointment=' + encodeURIComponent(id);
     }
 
     function offerPayment(id) {
         api('/calendar-detail.php?id=' + encodeURIComponent(id)).then(function (d) {
-            if (d.ok && d.appointment && d.appointment.can_pay) { openPayment(d.appointment); }
-        }).catch(function () {});
-    }
-
-    payForm.addEventListener('submit', function (ev) {
-        ev.preventDefault();
-        payError.hidden = true;
-        if (!$('#pay_method').value) {
-            payError.textContent = 'Select how the guest paid.';
-            payError.hidden = false;
-            return;
-        }
-        var btn = $('#paySubmit');
-        btn.disabled = true;
-        api('/calendar-action.php', { method: 'POST', body: new FormData(payForm) }).then(function (d) {
-            if (!d.ok) { payError.textContent = d.error || 'Unable to record the payment.'; payError.hidden = false; return; }
-            closeModal(payModal);
-            toast(d.message || 'Payment recorded.');
-            if (d.id) { selectedId = d.id; }
+            if (d.ok && d.appointment && d.appointment.can_pay) { goPayment(id); return; }
             load();
-        }).catch(function () {
-            payError.textContent = 'Network error. Please try again.';
-            payError.hidden = false;
-        }).then(function () { btn.disabled = false; });
-    });
+        }).catch(function () { load(); });
+    }
 
     function folioSection(title) {
         var s = el('section', 'folio-sec');

@@ -152,7 +152,7 @@
 }
 .dp-day.is-off,
 .dp-day.is-off:hover {
-  background: repeating-linear-gradient(135deg, #f6efeb 0, #f6efeb 4px, #fbf7f4 4px, #fbf7f4 8px);
+  background: repeating-linear-gradient(135deg, #F9E8F2 0, #F9E8F2 4px, #FFF7FC 4px, #FFF7FC 8px);
   color: #a79da2;
   text-decoration: line-through;
   cursor: not-allowed;
@@ -167,7 +167,7 @@
   min-height: 34px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: #f8f1ec;
+  background: #FFF7FC;
   font-size: 12px;
   line-height: 1.4;
   color: var(--gray, #7A648F);

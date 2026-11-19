@@ -72,7 +72,7 @@
         openModals = openModals.filter(function (x) { return x !== m; });
     }
     $$('.modal').forEach(function (m) {
-        m.addEventListener('mousedown', function (ev) { if (ev.target === m) { closeModal(m); } });
+        m.addEventListener('mousedown', function (ev) { if (ev.target === m && m.id !== 'folioModal') { closeModal(m); } });
         $$('[data-close]', m).forEach(function (b) { b.addEventListener('click', function () { closeModal(m); }); });
     });
     document.addEventListener('keydown', function (ev) {
@@ -493,6 +493,12 @@
     var errBox = $('#sfError');
     var submitBtn = $('#sfSubmit');
     var inFlight = false;
+    var folioModal = $('#folioModal');
+
+    function openFolioModal() {
+        openModal(folioModal);
+        if (!folio) { folioSelect.focus(); }
+    }
 
     function loadFolios(keep) {
         return api('/payments.php?action=folios').then(function (d) {
@@ -682,7 +688,7 @@
         var run = function () {
             folioSelect.value = String(id);
             folioSelect.dispatchEvent(new Event('change'));
-            $('#folioCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            openModal(folioModal);
         };
         if (has) { run(); } else { loadFolios(id).then(run); }
     }
@@ -790,6 +796,7 @@
                 return;
             }
             var url = receiptUrl + '?id=' + d.payment_id + '&print=1';
+            closeModal(folioModal);
             if (win) { win.location.href = url; }
             $('#dnText').textContent = d.message || 'Payment recorded.';
             var pl = $('#dnPrint');
@@ -810,13 +817,7 @@
         });
     });
 
-    $('#btnNewCharge').addEventListener('click', function () {
-        var card = $('#folioCard');
-        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        card.classList.add('is-flash');
-        setTimeout(function () { card.classList.remove('is-flash'); }, 1400);
-        folioSelect.focus();
-    });
+    $('#btnNewCharge').addEventListener('click', openFolioModal);
 
     $('#btnDrawer').addEventListener('click', function () {
         var body = $('#drBody');
@@ -907,5 +908,18 @@
 
     renderSortState();
     load();
-    loadFolios();
+
+    var incoming = null;
+    try { incoming = new URLSearchParams(window.location.search).get('appointment'); } catch (e) { incoming = null; }
+    if (incoming && /^\d+$/.test(incoming)) {
+        loadFolios(incoming).then(function () {
+            var has = $$('option', folioSelect).some(function (o) { return o.value === incoming; });
+            if (has) { selectFolio(incoming); } else { toast('This appointment has no open balance to settle.'); }
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, '', window.location.pathname);
+            }
+        });
+    } else {
+        loadFolios();
+    }
 }());

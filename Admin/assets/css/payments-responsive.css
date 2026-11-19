@@ -17,7 +17,7 @@
   }
   .pay-side {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
   }
   .pay-hero-actions {
@@ -30,6 +30,12 @@
 }
 
 @media (max-width: 760px) {
+  .pos-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .modal-card.pay-folio {
+    padding: 20px 16px 22px;
+  }
   .pay-stats {
     grid-template-columns: minmax(0, 1fr);
   }

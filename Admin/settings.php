@@ -285,11 +285,48 @@ function sc_switch(string $key, bool $checked, string $label): string
     </div>
 </section>
 
-<!-- ============ GALLERY ============ -->
+<!-- ============ SANCTUARY GALLERY ============ -->
 <section class="sc-gallery" aria-label="Sanctuary facilities">
-    <figure class="sc-shot sc-shot-1"><figcaption>Single &amp; Dual Chambers</figcaption></figure>
-    <figure class="sc-shot sc-shot-2"><figcaption>Organic Ritual Oils</figcaption></figure>
-    <figure class="sc-shot sc-shot-3"><figcaption>Private Couples Suites</figcaption></figure>
+
+    <!-- Single & Dual Chambers -->
+    <figure class="sc-shot sc-shot-1">
+        <img
+            src="<?= e(url('/assets/images/single-dual-chambers.jpg')) ?>"
+            alt="Single and Dual Chambers"
+            loading="lazy"
+        >
+        <figcaption>
+            <span>01</span>
+            Single &amp; Dual Chambers
+        </figcaption>
+    </figure>
+
+    <!-- Organic Ritual Oils -->
+    <figure class="sc-shot sc-shot-2">
+        <img
+            src="<?= e(url('/assets/images/organic-ritual-oils.jpg')) ?>"
+            alt="Organic Ritual Oils"
+            loading="lazy"
+        >
+        <figcaption>
+            <span>02</span>
+            Organic Ritual Oils
+        </figcaption>
+    </figure>
+
+    <!-- Private Couples Suites -->
+    <figure class="sc-shot sc-shot-3">
+        <img
+            src="<?= e(url('/assets/images/private-couples-suites.jpg')) ?>"
+            alt="Private Couples Suites"
+            loading="lazy"
+        >
+        <figcaption>
+            <span>03</span>
+            Private Couples Suites
+        </figcaption>
+    </figure>
+
 </section>
 
 <!-- ============ ACTION BAR ============ -->

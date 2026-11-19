@@ -13,7 +13,7 @@
   padding: 28px 30px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(115deg, #fdfaf7 0%, #f6ece8 52%, #eddad5 100%);
+  background: linear-gradient(115deg, #FFFAFE 0%, #FBEAF3 52%, #F6D9E8 100%);
   box-shadow: var(--shadow);
 }
 .cal-hero-text .label-small {
@@ -138,7 +138,7 @@
   border-color: rgba(200,157,102, 0.8);
 }
 .lg-open {
-  background: rgba(196,154,148, 0.12);
+  background: rgba(244, 190, 213, 0.12);
   border: 1px dashed var(--sage);
 }
 .lg-off {
@@ -196,7 +196,7 @@
   grid-template-columns: var(--room-w) minmax(0, 1fr);
 }
 .mx-head {
-  background: #fdfaf7;
+  background: #FFFAFE;
   border-bottom: 1px solid var(--border);
 }
 .mx-corner {
@@ -204,7 +204,7 @@
   left: 0;
   z-index: 4;
   padding: 14px 16px;
-  background: #fdfaf7;
+  background: #FFFAFE;
   border-right: 1px solid var(--border);
   font-size: 10.5px;
   font-weight: 600;
@@ -306,7 +306,7 @@
   padding: 0 8px;
   border: 1.5px dashed var(--sage);
   border-radius: 10px;
-  background: rgba(196,154,148, 0.09);
+  background: rgba(244, 190, 213, 0.09);
   color: #986BC2;
   font-size: 11px;
   font-weight: 500;
@@ -316,7 +316,7 @@
   white-space: nowrap;
 }
 .mx-open.is-now {
-  background: rgba(196,154,148, 0.18);
+  background: rgba(244, 190, 213, 0.18);
   font-weight: 600;
 }
 .mx-gap {
@@ -348,7 +348,7 @@
 .mx-foot {
   height: 30px;
   border-top: 1px solid var(--border);
-  background: #fdfaf7;
+  background: #FFFAFE;
 }
 
 .mx-card {
@@ -566,7 +566,7 @@
   color: var(--gray);
   letter-spacing: 0.04em;
   border-right: 1px solid var(--border);
-  background: #fdfaf7;
+  background: #FFFAFE;
 }
 .day-row.is-now .day-hour {
   color: var(--red);
@@ -644,7 +644,7 @@
 }
 .wk-corner {
   padding: 14px 16px;
-  background: #fdfaf7;
+  background: #FFFAFE;
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -661,7 +661,7 @@
   gap: 1px;
   width: 100%;
   padding: 12px 14px;
-  background: #fdfaf7;
+  background: #FFFAFE;
   border: 0;
   border-bottom: 1px solid var(--border);
   text-align: left;
@@ -690,7 +690,7 @@
   color: var(--red);
 }
 .wk-head.is-picked .wk-day {
-  background: rgba(196,154,148, 0.2);
+  background: rgba(244, 190, 213, 0.2);
 }
 .wk-room {
   position: sticky;
@@ -859,7 +859,7 @@
   margin-top: 16px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #fdfaf7;
+  background: #FFFAFE;
   border: 1px dashed var(--border);
   font-size: 12px;
   color: var(--gray);

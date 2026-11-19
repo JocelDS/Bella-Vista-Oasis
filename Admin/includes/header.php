@@ -39,6 +39,8 @@ try {
     <?php $extraStyles = $extraStyles ?? []; foreach ($extraStyles as $href): ?>
         <link rel="stylesheet" href="<?= e((string)$href) ?>">
     <?php endforeach; ?>
+    <?php $acCss = __DIR__ . '/../assets/css/admin-consistency.css'; ?>
+    <link rel="stylesheet" href="<?= e(url('/assets/css/admin-consistency.css')) ?>?v=<?= e(is_file($acCss) ? (string)filemtime($acCss) : '1') ?>">
 </head>
 <body class="dash-body" data-api="<?= e(url('/api')) ?>" data-idle="<?= e($accIdle) ?>" data-density="<?= e($accDensity) ?>">
 <div class="scrim" id="scrim" hidden></div>
