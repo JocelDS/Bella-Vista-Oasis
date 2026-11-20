@@ -314,11 +314,11 @@
 }
 .cm-badge.is-inactive {
   background: rgba(225,139,185, 0.2);
-  color: #E18BB9;
+  color: #A02A5E;
 }
 .cm-badge.is-tier {
   background: rgba(231,198,143, 0.22);
-  color: #E7C68F;
+  color: #7A4E14;
 }
 .cm-badge.is-paid {
   background: rgba(225,139,185, 0.18);
@@ -328,13 +328,13 @@
 .cm-badge.is-deposit,
 .cm-badge.is-confirmed {
   background: rgba(231,198,143, 0.22);
-  color: #E7C68F;
+  color: #7A4E14;
 }
 .cm-badge.is-cancelled,
 .cm-badge.is-no_show,
 .cm-badge.is-refunded {
   background: rgba(225,139,185, 0.2);
-  color: #E18BB9;
+  color: #A02A5E;
 }
 .cm-badge.is-completed {
   background: rgba(122,85,104, 0.2);
@@ -402,7 +402,7 @@
   background: var(--cream);
 }
 .cm-menu .is-danger {
-  color: #E18BB9;
+  color: #A02A5E;
 }
 
 .cm-pager-row {

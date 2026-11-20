@@ -201,8 +201,8 @@
     color: var(--gray);
 }
 
-.summary-meta.up { color: #C5A0DD; }
-.summary-meta.down { color: #E18BB9; }
+.summary-meta.up { color: #6F4A99; }
+.summary-meta.down { color: #A02A5E; }
 
 .analytics-shell {
     display: grid;

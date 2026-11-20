@@ -172,11 +172,11 @@
 }
 .queue-tag.is-open {
   background: rgba(200,157,102, 0.25);
-  color: #E7C68F;
+  color: #7A4E14;
 }
 .queue-tag.is-leave {
   background: rgba(179,38,30, 0.12);
-  color: #E18BB9;
+  color: #8F1D17;
 }
 .queue-item .btn {
   justify-self: start;
@@ -225,7 +225,7 @@
 }
 .ts-on_leave {
   background: rgba(225,139,185, 0.18);
-  color: #E18BB9;
+  color: #8F1D17;
 }
 .alert-item {
   display: flex;
@@ -239,7 +239,7 @@
   border-left-width: 3px;
 }
 .alert-item.al-warn {
-  border-left-color: #E7C68F;
+  border-left-color: #7A4E14;
 }
 .alert-item.al-danger {
   border-left-color: var(--red);
@@ -313,7 +313,7 @@
 }
 .th-leave {
   font-size: 12px;
-  color: #E18BB9;
+  color: #8F1D17;
 }
 .th-stats {
   display: grid;
@@ -473,7 +473,7 @@
   background: rgba(200,157,102, 0.22);
   border-radius: 10px;
   font-size: 12.5px;
-  color: #E7C68F;
+  color: #7A4E14;
 }
 .as-override input {
   margin-top: 2px;
@@ -662,7 +662,7 @@ td.is-today {
   font-size: 10.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #E18BB9;
+  color: #8F1D17;
 }
 .wk-off .wk-flag {
   color: var(--gray);
@@ -811,7 +811,7 @@ td.is-today {
   align-items: center;
   gap: 6px;
   font-size: 12.5px;
-  color: #E18BB9;
+  color: #8F1D17;
 }
 @media (max-width: 560px) {
   .tf-photo {

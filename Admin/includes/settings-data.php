@@ -266,6 +266,19 @@ function sc_validate(PDO $pdo, array $in): array
             $clean['config'][$k] = (string)(int)$v;
         } elseif ($k === 'housekeeping_note') {
             $clean['config'][$k] = mb_substr($v, 0, 300);
+        } elseif ($k === 'contact_phone') {
+            if (!preg_match('/^[0-9A-Za-z+()\-\s\/.]{5,40}$/', $v)) { $err[$k] = 'Enter a valid phone number.'; continue; }
+            $clean['config'][$k] = $v;
+        } elseif ($k === 'contact_email') {
+            if (mb_strlen($v) > 150 || !filter_var($v, FILTER_VALIDATE_EMAIL)) { $err[$k] = 'Enter a valid email address.'; continue; }
+            $clean['config'][$k] = $v;
+        } elseif ($k === 'address_line1') {
+            if ($v === '') { $err[$k] = 'Address line 1 is required.'; continue; }
+            $clean['config'][$k] = mb_substr($v, 0, 120);
+        } elseif ($k === 'address_line2' || $k === 'address_line3') {
+            $clean['config'][$k] = mb_substr($v, 0, 120);
+        } elseif ($k === 'parking_note') {
+            $clean['config'][$k] = mb_substr($v, 0, 200);
         }
     }
 

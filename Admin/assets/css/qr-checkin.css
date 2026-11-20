@@ -155,12 +155,12 @@
 .qr-pill[data-state="warn"],
 .qr-pill.is-warn {
   background: rgba(200,157,102, 0.42);
-  color: #E7C68F;
+  color: #7A4E14;
 }
 .qr-pill[data-state="bad"],
 .qr-pill.is-bad {
   background: rgba(225,139,185, 0.2);
-  color: #E18BB9;
+  color: #A02A5E;
 }
 .qr-pill.is-muted {
   background: #FFF7FC;
@@ -398,7 +398,7 @@
   line-height: 1.5;
 }
 .qr-note.is-error {
-  color: #E18BB9;
+  color: #A02A5E;
   background: rgba(179,38,30, 0.1);
   border-radius: 10px;
   padding: 9px 12px;
@@ -780,12 +780,12 @@
 }
 .qr-alert.tone-warn {
   background: rgba(200,157,102, 0.26);
-  color: #E7C68F;
+  color: #7A4E14;
   border-color: rgba(200,157,102, 0.6);
 }
 .qr-alert.tone-bad {
   background: rgba(179,38,30, 0.12);
-  color: #E18BB9;
+  color: #A02A5E;
   border-color: rgba(179,38,30, 0.35);
 }
 .qr-alert.tone-muted {
@@ -950,7 +950,7 @@
 .qr-badge.k-pending,
 .qr-badge.k-expected {
   background: rgba(231,198,143, 0.24);
-  color: #E7C68F;
+  color: #7A4E14;
 }
 .qr-badge.k-arrived {
   background: rgba(94,62,80, 0.13);
@@ -960,7 +960,7 @@
 .qr-badge.k-expired,
 .qr-badge.k-cancelled {
   background: rgba(225,139,185, 0.2);
-  color: #E18BB9;
+  color: #A02A5E;
 }
 .qr-badge.k-no_show,
 .qr-badge.k-completed,
@@ -1045,7 +1045,7 @@ button.qr-result:hover {
 }
 .qr-result-why {
   font-size: 11.5px;
-  color: #E18BB9;
+  color: #A02A5E;
   margin-top: 4px;
 }
 .qr-form-row {

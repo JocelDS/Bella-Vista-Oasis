@@ -21,7 +21,7 @@
   display: none;
 }
 .dp-note.is-error {
-  color: #E18BB9;
+  color: #A02A5E;
   font-weight: 600;
 }
 .dp-note.is-info {
@@ -159,7 +159,7 @@
 }
 .dp-day.is-off.is-selected {
   border-color: var(--red, #E18BB9);
-  color: #E18BB9;
+  color: #A02A5E;
 }
 
 .dp-msg {
@@ -174,7 +174,7 @@
 }
 .dp-msg.is-error {
   background: rgba(179, 38, 30, 0.1);
-  color: #E18BB9;
+  color: #A02A5E;
   font-weight: 600;
 }
 

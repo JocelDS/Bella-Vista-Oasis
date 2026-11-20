@@ -219,11 +219,11 @@
 }
 .cb-low {
   background: rgba(231, 198, 143, 0.22);
-  color: #e7c68f;
+  color: #7A4E14;
 }
 .cb-high {
   background: rgba(225, 139, 185, 0.2);
-  color: #e18bb9;
+  color: #A02A5E;
 }
 .mb-scheduled {
   background: #fff7fc;
@@ -231,7 +231,7 @@
 }
 .mb-in_progress {
   background: rgba(231, 198, 143, 0.22);
-  color: #e7c68f;
+  color: #7A4E14;
 }
 .mb-completed {
   background: rgba(225, 139, 185, 0.18);
@@ -269,7 +269,7 @@
   padding: 8px 12px;
   border-radius: 10px;
   background: rgba(179, 38, 30, 0.1);
-  color: #e18bb9;
+  color: #A02A5E;
   font-size: 12px;
   font-weight: 500;
 }

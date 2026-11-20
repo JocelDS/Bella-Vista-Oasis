@@ -63,8 +63,26 @@ body.dash-body .page-head .page-sub {
 body.dash-body .page-head .page-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 10px;
-  margin: 0;
+  margin: 0 0 0 auto;
+}
+
+@media (min-width: 1101px) {
+  body.dash-body .page-head {
+    flex-wrap: nowrap;
+    align-items: flex-end;
+  }
+  body.dash-body .page-head > div:first-child {
+    flex: 1 1 0;
+    min-width: 320px;
+  }
+  body.dash-body .page-head .page-actions {
+    flex: 0 1 auto;
+    max-width: 560px;
+    margin-left: auto;
+    justify-content: flex-end;
+  }
 }
 
 /* ---------- Stat grid + card (all pages) ---------- */

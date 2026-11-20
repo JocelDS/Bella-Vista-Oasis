@@ -1000,7 +1000,7 @@
 }
 .check-line.is-bad {
   background: rgba(179,38,30, 0.12);
-  color: #E18BB9;
+  color: #A02A5E;
 }
 
 @media (max-width: 1100px) {

@@ -61,10 +61,6 @@ function sc_switch(string $key, bool $checked, string $label): string
             <p class="label-small">Current Operational Status</p>
             <p class="sc-meta-value"><span class="sc-dot <?= $status['open'] ? 'is-open' : 'is-closed' ?>" id="scDot"></span><span id="scStatusText"><?= e($status['text']) ?></span></p>
         </div>
-        <div class="sc-meta-card">
-            <p class="label-small">Last Configuration Update</p>
-            <p class="sc-meta-value" id="scLastText"><?= $status['last'] ? e($status['last']) : 'No changes yet' ?></p>
-        </div>
     </div>
     <?php endif; ?>
 </section>
@@ -88,12 +84,13 @@ function sc_switch(string $key, bool $checked, string $label): string
     <button type="button" class="sc-tab" role="tab" aria-selected="false" data-tab="pricing"><?= icon('wallet') ?><span>Pricing &amp; Room Rates</span></button>
     <button type="button" class="sc-tab" role="tab" aria-selected="false" data-tab="sanitation"><?= icon('shield') ?><span>Sanitation &amp; Safety Protocols</span></button>
     <button type="button" class="sc-tab" role="tab" aria-selected="false" data-tab="staff"><?= icon('users') ?><span>Staff &amp; Operational Rules</span></button>
+    <button type="button" class="sc-tab" role="tab" aria-selected="false" data-tab="contact"><?= icon('calendar') ?><span>Spa Contact &amp; Location</span></button>
     <button type="button" class="sc-tab" role="tab" aria-selected="false" data-tab="blocked"><?= icon('calendar') ?><span>Blocked Dates</span></button>
 </nav>
 
 <!-- ============ TAB 1 · HOURS ============ -->
 <section class="sc-panel" data-panel="hours" role="tabpanel">
-    <div class="sc-cols">
+    <div class="sc-cols sc-cols-single">
         <div class="sc-stack">
             <article class="card">
                 <div class="card-head"><div><p class="label-small">Operating Schedule</p><h2 class="card-title">Sanctuary Operating Hours</h2></div><span class="sc-tag">Saved to database</span></div>
@@ -138,11 +135,6 @@ function sc_switch(string $key, bool $checked, string $label): string
 
                 <div class="sc-mini-grid">
                     <div class="sc-mini">
-                        <p class="label-small">Daily Reset / Cleaning Gap</p>
-                        <div class="sc-num"><input type="number" min="0" max="120" step="5" inputmode="numeric" data-cfg="cleaning_gap_minutes" value="<?= e($c('cleaning_gap_minutes', '30')) ?>" aria-label="Cleaning gap in minutes"><span>Minutes</span></div>
-                        <p class="sc-note">Rooms stay blocked this long after each session. Used by every booking.</p>
-                    </div>
-                    <div class="sc-mini">
                         <p class="label-small">Cancellation Notice Period</p>
                         <div class="sc-num"><input type="number" min="0" max="720" step="1" inputmode="numeric" data-cfg="cancellation_notice_hours" value="<?= e($c('cancellation_notice_hours', '48')) ?>" aria-label="Cancellation notice in hours"><span>Hours prior</span></div>
                         <p class="sc-note">Guests cancelling later than this may forfeit their deposit.</p>
@@ -151,13 +143,6 @@ function sc_switch(string $key, bool $checked, string $label): string
             </article>
         </div>
 
-        <aside class="sc-stack">
-            <article class="card">
-                <div class="card-head"><div><p class="label-small">Rates &amp; Rooms</p><h2 class="card-title">Sanctuary Room Tariffs</h2></div></div>
-                <div class="sc-tariffs" id="scTariffSummary"></div>
-                <button type="button" class="btn btn-soft btn-sm sc-link-btn" data-goto="pricing">Manage room rates</button>
-            </article>
-        </aside>
     </div>
 </section>
 
@@ -247,6 +232,38 @@ function sc_switch(string $key, bool $checked, string $label): string
                 <li>Cleaning gap and operating hours above apply to every therapist’s sessions.</li>
             </ul>
             <p class="sc-note">Per-therapist working hours and daily appointment limits need an extra table and are not part of this release.</p>
+        </aside>
+    </div>
+</section>
+
+<!-- ============ TAB · CONTACT & LOCATION ============ -->
+<section class="sc-panel" data-panel="contact" role="tabpanel" hidden>
+    <div class="sc-cols">
+        <article class="card">
+            <div class="card-head"><div><p class="label-small">Public Details</p><h2 class="card-title">Spa Contact &amp; Location</h2></div><span class="sc-tag">Saved to database</span></div>
+            <div class="sc-contact-grid">
+                <label class="sc-field"><span class="label-small">Phone number</span>
+                    <input type="text" maxlength="40" data-cfg="contact_phone" value="<?= e($c('contact_phone')) ?>" placeholder="0917 123 4567" aria-label="Spa phone number"></label>
+                <label class="sc-field"><span class="label-small">Email address</span>
+                    <input type="email" maxlength="150" data-cfg="contact_email" value="<?= e($c('contact_email')) ?>" placeholder="concierge@example.com" aria-label="Spa email address"></label>
+                <label class="sc-field sc-field-full"><span class="label-small">Address line 1</span>
+                    <input type="text" maxlength="120" data-cfg="address_line1" value="<?= e($c('address_line1')) ?>" placeholder="Street, building" aria-label="Address line 1"></label>
+                <label class="sc-field sc-field-full"><span class="label-small">Address line 2</span>
+                    <input type="text" maxlength="120" data-cfg="address_line2" value="<?= e($c('address_line2')) ?>" placeholder="Barangay, area" aria-label="Address line 2"></label>
+                <label class="sc-field sc-field-full"><span class="label-small">Address line 3</span>
+                    <input type="text" maxlength="120" data-cfg="address_line3" value="<?= e($c('address_line3')) ?>" placeholder="City, province, country" aria-label="Address line 3"></label>
+                <label class="sc-field sc-field-full"><span class="label-small">Parking note</span>
+                    <textarea rows="2" maxlength="200" data-cfg="parking_note" aria-label="Parking note"><?= e($c('parking_note')) ?></textarea></label>
+            </div>
+        </article>
+        <aside class="card">
+            <div class="card-head"><div><p class="label-small">How It Applies</p><h2 class="card-title">Where It Shows</h2></div></div>
+            <ul class="sc-list">
+                <li>The customer site header, footer, help &amp; support page and loyalty pages.</li>
+                <li>The concierge line and address printed on the guest QR pass.</li>
+                <li>The sender address used for emails to guests.</li>
+            </ul>
+            <p class="sc-note">Press Save Configuration Changes at the bottom to apply.</p>
         </aside>
     </div>
 </section>

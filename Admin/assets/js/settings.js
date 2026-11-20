@@ -278,8 +278,8 @@
     }
     function renderRooms() {
         var grid = $('#scRoomGrid'), sum = $('#scTariffSummary');
-        grid.textContent = ''; sum.textContent = '';
-        if (!rooms.length) { grid.appendChild(el('p', 'sc-empty', 'No rooms are registered yet.')); sum.appendChild(el('p', 'sc-note', 'No rooms are registered yet.')); return; }
+        grid.textContent = ''; if (sum) { sum.textContent = ''; }
+        if (!rooms.length) { grid.appendChild(el('p', 'sc-empty', 'No rooms are registered yet.')); if (sum) { sum.appendChild(el('p', 'sc-note', 'No rooms are registered yet.')); } return; }
         rooms.forEach(function (c) {
             var card = el('article', 'sc-room');
             card.appendChild(el('div', 'sc-room-img ' + imgClass(c.type)));
@@ -297,7 +297,7 @@
             var l = el('div'); l.appendChild(el('strong', null, c.type)); l.appendChild(el('span', null, c.count + (c.count === 1 ? ' room' : ' rooms')));
             t.appendChild(l);
             t.appendChild(el('b', c.current === null ? 'is-unset' : '', c.current === null ? 'No rate set' : c.label.split(' · ')[0]));
-            sum.appendChild(t);
+            if (sum) { sum.appendChild(t); }
         });
     }
 

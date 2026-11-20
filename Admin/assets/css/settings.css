@@ -473,7 +473,7 @@
   font-family: inherit;
   font-size: 12px;
   font-weight: 600;
-  color: #E18BB9;
+  color: #A02A5E;
 }
 .sc-link-btn {
   margin-top: 14px;
@@ -538,7 +538,7 @@
 .sc-room-rate.is-unset {
   font-family: inherit;
   font-size: 13px;
-  color: #E18BB9;
+  color: #A02A5E;
   font-weight: 600;
 }
 .sc-room-foot {
@@ -808,5 +808,45 @@
   }
   .sc-rule {
     flex-direction: column;
+  }
+}
+
+.sc-cols.sc-cols-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sc-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+  margin-top: 14px;
+}
+.sc-contact-grid .sc-field {
+  margin-top: 0;
+}
+.sc-contact-grid .sc-field-full {
+  grid-column: 1 / -1;
+}
+.sc-contact-grid input[type="text"],
+.sc-contact-grid input[type="email"] {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+}
+.sc-contact-grid input:focus {
+  outline: 0;
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px rgba(196, 154, 148, 0.25);
+}
+@media (max-width: 640px) {
+  .sc-contact-grid {
+    grid-template-columns: 1fr;
   }
 }
