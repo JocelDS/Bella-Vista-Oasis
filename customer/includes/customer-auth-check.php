@@ -17,3 +17,5 @@ if (!$currentCustomer) {
     header('Location: ' . cu_url('/login.php'));
     exit;
 }
+
+auto_mark_no_shows();

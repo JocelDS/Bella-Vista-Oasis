@@ -54,6 +54,62 @@ function db(): PDO
     return $pdo;
 }
 
+/* ---------- Auto no-show ---------- */
+/**
+ * Confirmed appointments whose end time has passed and that were never checked in
+ * (no QR scan and no manual check-in) are marked 'no_show' automatically.
+ * No cron needed: it runs on admin/customer page loads and API calls, at most
+ * once every 15 seconds per session.
+ */
+function auto_mark_no_shows(bool $force = false): int
+{
+    if (!$force && isset($_SESSION['_ns_sweep']) && (time() - (int)$_SESSION['_ns_sweep']) < 15) {
+        return 0;
+    }
+    $_SESSION['_ns_sweep'] = time();
+
+    $pdo = db();
+    $now = date('Y-m-d H:i:s');
+    try {
+        $stmt = $pdo->prepare(
+            "UPDATE appointments a SET a.appointment_status = 'no_show'
+              WHERE a.appointment_status = 'confirmed'
+                AND TIMESTAMP(a.appointment_date, a.end_time) <= ?
+                AND NOT EXISTS (SELECT 1 FROM appointment_checkins k
+                                 WHERE k.appointment_id = a.id AND k.checkin_status = 'checked_in')"
+        );
+        $stmt->execute([$now]);
+        $n = $stmt->rowCount();
+    } catch (Throwable $e) {
+        try {
+            // check-in tables not installed yet: no scans are possible, so end time alone decides
+            $stmt = $pdo->prepare(
+                "UPDATE appointments SET appointment_status = 'no_show'
+                  WHERE appointment_status = 'confirmed' AND TIMESTAMP(appointment_date, end_time) <= ?"
+            );
+            $stmt->execute([$now]);
+            return $stmt->rowCount();
+        } catch (Throwable $e2) {
+            error_log('[BVO auto no-show] ' . $e2->getMessage());
+            return 0;
+        }
+    }
+
+    if ($n > 0) {
+        try {
+            // a no-show can no longer use its QR pass
+            $pdo->prepare(
+                "UPDATE appointment_checkins k JOIN appointments a ON a.id = k.appointment_id
+                    SET k.verification_status = 'invalid', k.verified_at = NULL, k.updated_at = ?
+                  WHERE a.appointment_status = 'no_show' AND k.checkin_status = 'pending'
+                    AND k.verification_status <> 'invalid'"
+            )->execute([$now]);
+        } catch (Throwable $e) {
+        }
+    }
+    return $n;
+}
+
 /* ---------- Helpers ---------- */
 function e(?string $v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 function now(): string { return date('Y-m-d H:i:s'); }

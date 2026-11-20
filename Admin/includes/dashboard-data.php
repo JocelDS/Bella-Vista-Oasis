@@ -91,6 +91,7 @@ function api_guard(): void
         echo json_encode(['ok' => false, 'error' => 'Session expired. Please sign in again.']);
         exit;
     }
+    auto_mark_no_shows();
 }
 
 function get_dashboard_stats(PDO $pdo, string $today, string $yesterday): array

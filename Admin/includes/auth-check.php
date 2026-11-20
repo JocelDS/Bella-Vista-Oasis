@@ -15,3 +15,5 @@ if (!$stmt->fetch()) {
     clear_remember_cookie();
     redirect('/auth/login.php');
 }
+
+auto_mark_no_shows();
