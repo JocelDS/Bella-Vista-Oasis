@@ -290,6 +290,7 @@ require __DIR__ . '/includes/header.php';
             <?= csrf_field() ?>
             <input type="hidden" name="action" value="reschedule">
             <input type="hidden" name="id" id="rs_id" value="">
+            <input type="hidden" name="service_id" id="rs_service" value="">
             <div class="form-error" id="reschedError" role="alert" hidden></div>
             <p class="resched-note" id="reschedNote"></p>
             <div class="form-grid">
@@ -353,4 +354,4 @@ require __DIR__ . '/includes/header.php';
     </div>
 </div>
 <?php
-require __DIR__ . '/includes/footer.php';   
+require __DIR__ . '/includes/footer.php';

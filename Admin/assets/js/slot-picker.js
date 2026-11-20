@@ -222,7 +222,7 @@
         var p = {
             sel: sel,
             form: form,
-            service: form.querySelector('select[name="service_id"]'),
+            service: form.querySelector('[name="service_id"]'),
             room: form.querySelector('select[name="room_id"]'),
             date: form.querySelector('input[name="appointment_date"]'),
             idField: form.querySelector('input[name="id"]'),

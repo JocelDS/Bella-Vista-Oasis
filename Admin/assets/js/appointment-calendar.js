@@ -889,6 +889,7 @@
         reschedError.hidden = true;
         reschedCheck.hidden = true;
         $('#rs_id').value = String(a.id);
+        $('#rs_service').value = String(a.service_id);
         $('#reschedKicker').textContent = 'Appointment #' + a.code;
         $('#reschedNote').textContent = 'Moving ' + a.customer_name + "'s " + a.service_name + ' (' + fmtDur(a.duration) + '). Currently ' + a.date_label + ', ' + a.start_label + ' in ' + a.room_name + ' with ' + a.therapist_name + '. The session length stays the same.';
         rsDate.min = a.date < today ? a.date : today;
