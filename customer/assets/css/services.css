@@ -457,3 +457,20 @@
   gap: 10px;
   margin: 0 0 22px;
 }
+
+/* ---------- Layout fixes ---------- */
+/* Room photos keep the sign at the top of the picture in view */
+.sv-room img { object-position: center 22%; }
+
+/* Add-ons: centred rows, no lone card left at the end */
+.sv-addons { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; --cols: 4; }
+.sv-addon { flex: 0 0 calc((100% - (var(--cols) - 1) * 16px) / var(--cols)); min-width: 0; }
+
+/* Pricing table: readable treatment names, booking button never wraps */
+.sv-table { table-layout: fixed; }
+.sv-table col.c-treat { width: 24%; }
+.sv-table col.c-dur { width: 11%; }
+.sv-table col.c-price { width: 10%; }
+.sv-table col.c-book { width: 138px; }
+.sv-table td:last-child, .sv-table th:last-child { text-align: right; }
+.sv-table .lp-btn { white-space: nowrap; padding-inline: 20px; }

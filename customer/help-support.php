@@ -136,7 +136,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <aside class="hs-feature">
-                <img src="<?= e(cu_url('/assets/images/facility-single-rooms.jpg')) ?>" alt="Therapist giving a relaxing facial massage" loading="lazy">
+                <img src="<?= e(cu_url('/assets/images/help-support.jpg')) ?>" alt="Relaxing spa treatment at Bella Vista Oasis" loading="lazy" onerror="this.onerror=null;this.src='<?= e(cu_url('/assets/images/hero-spa.jpg')) ?>'">
                 <div class="hs-feature-body">
                     <p class="lp-eyebrow">Sanctuary Wellness</p>
                     <h3 class="serif">The Art of Personalized Relaxation</h3>
@@ -150,7 +150,7 @@ require __DIR__ . '/includes/header.php';
 
     <section class="hs-strip">
         <div class="lp-wrap hs-strip-grid">
-            <div><span class="i purple"><?= hs_icon('clock') ?></span><div><h3>Support Operating Hours</h3><p><strong>Concierge support</strong></p><p><?= $hours !== '' ? e($hours) : 'Please contact the concierge for hours.' ?></p><?php if ($phone !== ''): ?><p><?= e($phone) ?></p><?php endif; ?></div></div>
+            <div><span class="i purple"><?= hs_icon('clock') ?></span><div><h3>Support Operating Hours</h3><p><strong>Concierge support</strong></p><?php $hrows = cu_hours_rows(); if ($hrows): ?><dl class="hs-hours"><?php foreach ($hrows as $hr): ?><div><dt><?= e($hr['days']) ?></dt><dd><?= e($hr['hours']) ?></dd></div><?php endforeach; ?></dl><?php else: ?><p>Please contact the concierge for hours.</p><?php endif; ?><?php if ($phone !== ''): ?><p><?= e($phone) ?></p><?php endif; ?></div></div>
             <div><span class="i pink"><?= hs_icon('chat') ?></span><div><h3>Reservation Guidance</h3><p>Booking assistance</p><p>Appointment-related inquiries</p><p>Rescheduling and cancellation guidance</p></div></div>
             <div><span class="i gold"><?= hs_icon('pin') ?></span><div><h3>Sanctuary Location</h3><?php foreach ($addr as $l): ?><p><?= e($l) ?></p><?php endforeach; ?><?php if ($mail !== ''): ?><p><?= e($mail) ?></p><?php endif; ?><?php if ($parking !== ''): ?><p class="muted"><?= e($parking) ?></p><?php endif; ?></div></div>
         </div>

@@ -143,7 +143,7 @@ $pct = $memberOk ? (float)$member['discount_pct'] : 0.0;
                                    data-duration="<?= (int)$s['duration'] ?>" data-code="<?= e(strtoupper((string)$s['room_code'])) ?>" data-durlabel="<?= e(cu_duration_label((int)$s['duration'])) ?>">
                             <span class="bk-svc-in">
                                 <span class="bk-svc-top"><b><?= e($s['service_name']) ?></b><em><?= cu_peso((float)$s['price']) ?></em></span>
-                                <small><?= e($s['description']) ?></small>
+                                <small><?= e(cu_clean_desc($s['description'] ?? '')) ?></small>
                                 <span class="bk-svc-meta"><?= e(cu_duration_label((int)$s['duration'])) ?> &middot; <?= (int)$s['min_guests'] === (int)$s['max_guests'] ? (int)$s['min_guests'] . ' guest' . ((int)$s['min_guests'] === 1 ? '' : 's') : (int)$s['min_guests'] . '–' . (int)$s['max_guests'] . ' guests' ?><?php if ((float)$s['extra_fee'] > 0): ?> &middot; <?= cu_peso((float)$s['extra_fee']) ?> per extra guest<?php endif; ?></span>
                             </span>
                         </label>

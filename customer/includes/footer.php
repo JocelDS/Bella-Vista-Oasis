@@ -1,5 +1,6 @@
 <?php
 $hoursText = cu_hours_text();
+$hoursRows = cu_hours_rows();
 $arrive = (int)cu_setting('arrival_minutes_before', '15');
 $addr = array_filter([cu_setting('address_line1'), cu_setting('address_line2'), cu_setting('address_line3')]);
 $phone = cu_setting('contact_phone');
@@ -25,7 +26,11 @@ $parking = cu_setting('parking_note');
         </section>
         <section>
             <h3>Hours &amp; Contact</h3>
-            <?php if ($hoursText !== ''): ?><p class="cu-footer-strong"><?= e($hoursText) ?></p><?php endif; ?>
+            <?php if ($hoursRows): ?>
+                <dl class="cu-footer-hours">
+                    <?php foreach ($hoursRows as $hr): ?><div><dt><?= e($hr['days']) ?></dt><dd><?= e($hr['hours']) ?></dd></div><?php endforeach; ?>
+                </dl>
+            <?php elseif ($hoursText !== ''): ?><p class="cu-footer-strong"><?= e($hoursText) ?></p><?php endif; ?>
             <?php if ($arrive > 0): ?><p class="cu-footer-text">Please arrive <?= $arrive ?> minutes before your session.</p><?php endif; ?>
             <?php if ($phone !== ''): ?><p class="cu-footer-text tight"><a href="tel:<?= e(preg_replace('/[^0-9+]/', '', $phone)) ?>"><?= e($phone) ?></a></p><?php endif; ?>
             <?php if ($mail !== ''): ?><p class="cu-footer-text tight"><a href="mailto:<?= e($mail) ?>"><?= e($mail) ?></a></p><?php endif; ?>

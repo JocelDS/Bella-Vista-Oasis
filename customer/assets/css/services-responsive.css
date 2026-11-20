@@ -72,3 +72,10 @@
     font-size: 30px;
   }
 }
+
+@media (max-width: 1040px) { .sv-addons { --cols: 2 !important; } }
+@media (max-width: 700px) {
+  .sv-table { table-layout: auto; }
+  .sv-table td:last-child { text-align: left; }
+}
+@media (max-width: 620px) { .sv-addons { --cols: 1 !important; } }

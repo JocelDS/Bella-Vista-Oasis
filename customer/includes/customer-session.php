@@ -180,6 +180,60 @@ function cu_hours_text(): string
     return implode(' · ', $parts);
 }
 
+/**
+ * Opening hours as tidy rows, consecutive days with the same hours merged:
+ * [['days' => 'Mon – Wed', 'hours' => '1:00 PM – 9:00 PM'], ...]  ('Closed' for closed days)
+ */
+function cu_hours_rows(): array
+{
+    try {
+        $rows = db()->query('SELECT day_of_week, opening_time, closing_time, is_open FROM spa_operating_hours ORDER BY day_of_week')->fetchAll();
+    } catch (Throwable $e) {
+        return [];
+    }
+    $names = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
+    $fmt = fn(string $t) => date('g:i A', strtotime($t));
+    $out = [];
+    foreach ($rows as $r) {
+        $d = (int)$r['day_of_week'];
+        if (!isset($names[$d])) continue;
+        $h = (int)$r['is_open'] === 1 ? $fmt((string)$r['opening_time']) . ' – ' . $fmt((string)$r['closing_time']) : 'Closed';
+        $last = count($out) - 1;
+        if ($last >= 0 && $out[$last]['hours'] === $h && $out[$last]['end'] === $d - 1) {
+            $out[$last]['end'] = $d;
+        } else {
+            $out[] = ['start' => $d, 'end' => $d, 'hours' => $h];
+        }
+    }
+    $res = [];
+    foreach ($out as $g) {
+        $days = $g['start'] === $g['end'] ? $names[$g['start']] : $names[$g['start']] . ($g['end'] - $g['start'] === 1 ? ' & ' : ' – ') . $names[$g['end']];
+        $res[] = ['days' => $days, 'hours' => $g['hours']];
+    }
+    return $res;
+}
+
+/** Today's opening hours, e.g. "1:00 PM – 9:00 PM" or "Closed today"; '' when unknown. */
+function cu_hours_today(): string
+{
+    try {
+        $st = db()->prepare('SELECT opening_time, closing_time, is_open FROM spa_operating_hours WHERE day_of_week = ?');
+        $st->execute([(int)date('N')]);
+        $r = $st->fetch();
+    } catch (Throwable $e) {
+        return '';
+    }
+    if (!$r) return '';
+    if ((int)$r['is_open'] !== 1) return 'Closed today';
+    return date('g:i A', strtotime((string)$r['opening_time'])) . ' – ' . date('g:i A', strtotime((string)$r['closing_time']));
+}
+
+/** Service text without the stray "Description:" label some records start with. */
+function cu_clean_desc(?string $text): string
+{
+    return trim((string)preg_replace('/^\s*Description\s*:\s*/i', '', (string)$text));
+}
+
 function cu_duration_label(int $minutes): string
 {
     if ($minutes % 60 === 0) return ($minutes / 60) . ($minutes === 60 ? ' hour' : ' hours');

@@ -61,6 +61,9 @@ $hasServices = !empty($services);
 | SPA FACILITIES
 |--------------------------------------------------------------------------
 */
+// "Our Spaces" shows at most this many space types (the gallery grid is built for 6: 2 large + 4 small).
+const LANDING_SPACES_LIMIT = 6;
+
 try {
     $facilityStmt = $pdo->query("
         SELECT
@@ -71,9 +74,10 @@ try {
         WHERE room_type IS NOT NULL
         GROUP BY room_type
         ORDER BY MIN(id)
+        LIMIT " . LANDING_SPACES_LIMIT . "
     ");
 
-    $facilities = $facilityStmt->fetchAll(PDO::FETCH_ASSOC);
+    $facilities = array_slice($facilityStmt->fetchAll(PDO::FETCH_ASSOC), 0, LANDING_SPACES_LIMIT);
 
 } catch (Throwable $ex) {
     error_log('Landing-page facilities query failed: ' . $ex->getMessage());
@@ -110,6 +114,8 @@ try {
 */
 $phone = cu_setting('contact_phone');
 $hoursText = cu_hours_text();
+$hoursRows = cu_hours_rows();
+$hoursToday = cu_hours_today();
 $gap = (int)cu_setting('cleaning_gap_minutes', '30');
 
 $serviceImages = [
@@ -271,7 +277,9 @@ require __DIR__ . '/includes/header.php';
                         <strong>Your private retreat</strong>
                         <p>
                             Suites for one, two or a group
-                            <?= $hoursText !== '' ? ' &middot; Open ' . e($hoursText) : '' ?>
+                            <?php if ($hoursToday !== ''): ?>
+                                <span class="lp-float-hours"><?= $hoursToday === 'Closed today' ? 'Closed today' : 'Open today &middot; ' . e($hoursToday) ?></span>
+                            <?php endif; ?>
                         </p>
                     </div>
                 </div>
@@ -365,7 +373,7 @@ require __DIR__ . '/includes/header.php';
                                 </h3>
 
                                 <p class="lp-card-desc">
-                                    <?= e($s['description']) ?>
+                                    <?= e(cu_clean_desc($s['description'] ?? '')) ?>
                                 </p>
 
                                 <div class="lp-details" hidden>
@@ -721,19 +729,23 @@ require __DIR__ . '/includes/header.php';
 
                 <p class="lp-eyebrow pink">Reservations</p>
 
-                <h2 class="serif">Your Sanctuary Awaits</h2>
+                <h2 class="serif">Reserve Your Visit</h2>
 
                 <p>
                     Reserve your preferred treatment and discover
                     your next moment of relaxation.
                 </p>
 
-                <?php if ($hoursText !== ''): ?>
+                <?php if ($hoursRows): ?>
 
-                    <p class="lp-promo-hours">
-                        <span class="i pink"><?= lp_icon('clock') ?></span>
-                        Open <?= e($hoursText) ?>
-                    </p>
+                    <div class="lp-hours" aria-label="Opening hours">
+                        <p class="lp-hours-title"><span class="i pink"><?= lp_icon('clock') ?></span> Opening hours</p>
+                        <dl>
+                            <?php foreach ($hoursRows as $hr): ?>
+                                <div><dt><?= e($hr['days']) ?></dt><dd><?= e($hr['hours']) ?></dd></div>
+                            <?php endforeach; ?>
+                        </dl>
+                    </div>
 
                 <?php endif; ?>
 

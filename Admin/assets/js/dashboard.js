@@ -107,8 +107,8 @@
         try { payload = JSON.parse(chartCanvas.getAttribute('data-chart') || '{}'); } catch (e) { payload = {}; }
         var ctx = chartCanvas.getContext('2d');
         var grad = ctx.createLinearGradient(0, 0, 0, 260);
-        grad.addColorStop(0, 'rgba(23, 61, 48, .22)');
-        grad.addColorStop(1, 'rgba(23, 61, 48, 0)');
+        grad.addColorStop(0, 'rgba(152, 107, 194, .28)');
+        grad.addColorStop(1, 'rgba(225, 139, 185, 0)');
         var maxVal = Math.max.apply(null, (payload.values || [0]).concat([1]));
         new window.Chart(chartCanvas, {
             type: 'line',
@@ -117,7 +117,7 @@
                 datasets: [{
                     label: 'Appointments',
                     data: payload.values || [],
-                    borderColor: '#173D30',
+                    borderColor: '#986BC2',
                     backgroundColor: grad,
                     borderWidth: 2.5,
                     fill: true,
@@ -125,7 +125,7 @@
                     pointRadius: 4,
                     pointHoverRadius: 6,
                     pointBackgroundColor: '#FFFFFF',
-                    pointBorderColor: '#173D30',
+                    pointBorderColor: '#986BC2',
                     pointBorderWidth: 2
                 }]
             },
@@ -136,9 +136,9 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#102B22',
-                        titleColor: '#F5F2EA',
-                        bodyColor: '#F5F2EA',
+                        backgroundColor: '#49364F',
+                        titleColor: '#FFF7FC',
+                        bodyColor: '#FFF7FC',
                         padding: 10,
                         displayColors: false,
                         callbacks: {
@@ -159,7 +159,7 @@
                         beginAtZero: true,
                         suggestedMax: maxVal + 1,
                         ticks: { color: '#85877F', precision: 0, stepSize: maxVal > 8 ? undefined : 1, font: { size: 11 } },
-                        grid: { color: 'rgba(229, 226, 218, .7)' },
+                        grid: { color: 'rgba(152, 107, 194, .15)' },
                         border: { display: false }
                     }
                 }

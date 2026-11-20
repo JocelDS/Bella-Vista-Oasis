@@ -472,3 +472,65 @@
 body.lr-lock {
   overflow: hidden;
 }
+
+/* ---------- Layout fixes ---------- */
+/* Reward cards: never show a broken-image icon or alt text over the photo; keep rows level */
+.lr-reward .lp-card-img img {
+  color: transparent;
+  font-size: 0;
+}
+.lr-reward .sv-desc {
+  flex: 1;
+}
+@media (min-width: 1041px) {
+  .lr-reward h3 {
+    min-height: 2.7em;
+  }
+}
+
+/* Points history table (this page does not load services.css, so it is styled here) */
+.lr-table-wrap {
+  background: linear-gradient(180deg, #fff7fc, #fdeaf3);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 8px 22px 14px;
+  box-shadow: 0 14px 36px rgba(152, 107, 194, 0.12);
+  overflow-x: auto;
+}
+.lr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.lr-table th {
+  text-align: left;
+  padding: 16px 12px;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--purple);
+  border-bottom: 2px solid var(--blush);
+  white-space: nowrap;
+}
+.lr-table th.num {
+  text-align: right;
+}
+.lr-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text);
+}
+.lr-table tr:last-child td {
+  border-bottom: 0;
+}
+.lr-table tbody tr {
+  transition: background 0.2s;
+}
+.lr-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+.lr-table td:first-child {
+  white-space: nowrap;
+  color: var(--text-2);
+}

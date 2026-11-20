@@ -967,3 +967,78 @@ html {
   font-size: 11px;
   font-weight: 600;
 }
+
+/* ---------- Layout fixes ---------- */
+/* Hero floating card: short, readable text instead of a 6-line hours string */
+.lp-float {
+  max-width: 300px;
+}
+.lp-float p {
+  line-height: 1.5;
+}
+.lp-float-hours {
+  display: block;
+  margin-top: 2px;
+  font-weight: 700;
+  color: var(--purple, #986bc2);
+}
+
+/* Membership tiers fill the card in a neat 2 x 2 grid */
+.lp-tiers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  gap: 10px;
+}
+.lp-tiers li {
+  padding: 12px 14px;
+}
+
+/* Reservations card: structured opening hours */
+.lp-hours {
+  width: 100%;
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--blush);
+  border-radius: 18px;
+}
+.lp-hours-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.lp-hours dl {
+  margin: 0;
+  display: grid;
+  gap: 7px;
+}
+.lp-hours dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+}
+.lp-hours dt {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-2);
+}
+.lp-hours dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+}
+
+@media (max-width: 520px) {
+  .lp-tiers {
+    grid-template-columns: 1fr;
+  }
+}

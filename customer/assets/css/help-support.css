@@ -519,3 +519,38 @@
     transition: none;
   }
 }
+
+/* ---------- Layout fixes ---------- */
+/* Same photo as the home page hero, framed on the face */
+.hs-feature img {
+  object-position: center 25%;
+  background: #f3e8fa;
+}
+
+/* Support hours as tidy day / time rows */
+.hs-hours {
+  margin: 2px 0 6px;
+  display: grid;
+  gap: 4px;
+}
+.hs-hours > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+}
+.hs-hours dt {
+  margin: 0;
+  color: var(--text-2);
+}
+.hs-hours dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+  white-space: nowrap;
+}
+.hs-strip-grid > div > div {
+  flex: 1;
+  min-width: 0;
+}

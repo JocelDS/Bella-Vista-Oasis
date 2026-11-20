@@ -196,3 +196,25 @@ body.dash-body .panel {
   body.dash-body .stats,
   body.dash-body .kpi-grid { grid-template-columns: 1fr; }
 }
+
+/* ---------- Dashboard layout fixes ---------- */
+/* Six KPI cards fit in one row instead of 5 + 1 orphan */
+body.dash-body .stats.stats-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 1400px) { body.dash-body .stats.stats-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 720px)  { body.dash-body .stats.stats-6 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 460px)  { body.dash-body .stats.stats-6 { grid-template-columns: 1fr; } }
+
+/* Operational standards: full-width row below the two columns (no empty gap on the left) */
+body.dash-body .grid-2 { margin-bottom: 24px; }
+body.dash-body .card.std-wide { margin-bottom: 24px; background: #FFF9FC; }
+body.dash-body .std-wide .std-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px 24px;
+}
+body.dash-body .std-wide .std-list li { border-left-color: var(--pink); }
+@media (max-width: 1280px) { body.dash-body .std-wide .std-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px)  { body.dash-body .std-wide .std-list { grid-template-columns: 1fr; } }
+
+/* Manifest header no longer sticks to the card edge */
+body.dash-body .card.card-wide { padding-top: 24px; }

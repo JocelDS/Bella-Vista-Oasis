@@ -1,12 +1,16 @@
 @font-face {
   font-family: "Calm Serif";
-  src: local("Calm Serif"), local("CalmSerif"), local("Calm Serif Regular"), local("CalmSerif-Regular"),
-       url("../fonts/CalmSerif.woff2") format("woff2"),
-       url("../fonts/CalmSerif.woff") format("woff"),
-       url("../fonts/CalmSerif.ttf") format("truetype"),
-       url("../fonts/CalmSerif.otf") format("opentype"),
-       url("../fonts/CalmSerif-Regular.ttf") format("truetype"),
-       url("../fonts/CalmSerif-Regular.otf") format("opentype");
+  src:
+    local("Calm Serif"),
+    local("CalmSerif"),
+    local("Calm Serif Regular"),
+    local("CalmSerif-Regular"),
+    url("../fonts/CalmSerif.woff2") format("woff2"),
+    url("../fonts/CalmSerif.woff") format("woff"),
+    url("../fonts/CalmSerif.ttf") format("truetype"),
+    url("../fonts/CalmSerif.otf") format("opentype"),
+    url("../fonts/CalmSerif-Regular.ttf") format("truetype"),
+    url("../fonts/CalmSerif-Regular.otf") format("opentype");
   font-weight: 100 900;
   size-adjust: 84%;
   ascent-override: 105%;
@@ -26,7 +30,8 @@
   --text: #49364f;
   --text-2: #89788d;
   --border: #eedfea;
-  --serif: "Calm Serif", "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --serif:
+    "Calm Serif", "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --grad: linear-gradient(90deg, var(--purple), var(--pink));
 }
@@ -816,60 +821,59 @@ svg {
   border-radius: 2px;
 }
 
-
 /* =========================================
    AUTHENTICATED NAVIGATION LOGOUT BUTTON
 ========================================= */
 
 .cu-nav-logout-form {
-    display: inline-flex;
-    margin: 0;
+  display: inline-flex;
+  margin: 0;
 }
 
 .cu-nav-logout {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 
-    min-height: 42px;
-    padding: 10px 17px;
+  min-height: 42px;
+  padding: 10px 17px;
 
-    border: 1px solid #e8c8d8;
-    border-radius: 999px;
+  border: 1px solid #e8c8d8;
+  border-radius: 999px;
 
-    background: #fff;
-    color: #a33d68;
+  background: #fff;
+  color: #a33d68;
 
-    font: 600 12px Inter, sans-serif;
+  font:
+    600 12px Inter,
+    sans-serif;
 
-    cursor: pointer;
-    transition: .2s ease;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .cu-nav-logout:hover {
-    background: #fff1f6;
-    border-color: #d99ab7;
+  background: #fff1f6;
+  border-color: #d99ab7;
 }
 
 .cu-nav-logout:focus-visible {
-    outline: 3px solid rgba(152,107,194,.35);
-    outline-offset: 2px;
+  outline: 3px solid rgba(152, 107, 194, 0.35);
+  outline-offset: 2px;
 }
 
 /* Responsive Logout Button */
 @media (max-width: 1040px) {
+  .cu-nav-logout-form {
+    display: flex;
+    margin: 8px 0 0;
+  }
 
-    .cu-nav-logout-form {
-        display: flex;
-        margin: 8px 0 0;
-    }
-
-    .cu-nav-logout {
-        width: 100%;
-    }
+  .cu-nav-logout {
+    width: 100%;
+  }
 }
-
 
 /* Even-height (lining) numerals for Calm Serif */
 *,
@@ -877,4 +881,28 @@ svg {
 *::after {
   font-variant-numeric: lining-nums;
   font-feature-settings: "lnum" 1;
+}
+
+/* Footer opening hours: tidy day / time rows */
+.cu-footer-hours {
+  margin: 0 0 10px;
+  display: grid;
+  gap: 4px;
+}
+.cu-footer-hours > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 11px;
+}
+.cu-footer-hours dt {
+  color: var(--text-2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.cu-footer-hours dd {
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
 }

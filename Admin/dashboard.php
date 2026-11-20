@@ -78,7 +78,7 @@ require __DIR__ . '/includes/header.php';
     </div>
 </section>
 
-<section class="stats" aria-label="Key statistics">
+<section class="stats stats-6" aria-label="Key statistics">
     <article class="stat">
         <div class="stat-top"><span class="label-small">Total Appointments</span><span class="stat-ico"><?= icon('calendar') ?></span></div>
         <p class="stat-value"><?= (int)$t['all'] ?></p>
@@ -196,38 +196,38 @@ require __DIR__ . '/includes/header.php';
                 <span class="banner-text">Bella Vista Oasis</span>
             </div>
         </section>
-
-        <section class="card card-soft" aria-labelledby="stdTitle">
-            <header class="card-head card-head-icon">
-                <span class="stat-ico"><?= icon('leaf') ?></span>
-                <div>
-                    <p class="label-small">Operational Standards</p>
-                    <h2 id="stdTitle" class="card-title">Sanctuary Operational Standard</h2>
-                </div>
-            </header>
-            <?php if (!$announcements): ?>
-                <p class="empty">No announcements have been posted.</p>
-            <?php else: ?>
-                <ul class="std-list">
-                    <?php foreach ($announcements as $a):
-                        $pr = strtolower((string)$a['priority']);
-                        $prKnown = ['high' => 'High', 'normal' => 'Normal', 'low' => 'Low'];
-                        $prCls = isset($prKnown[$pr]) ? 'pr-' . $pr : 'pr-normal';
-                        $prLbl = $prKnown[$pr] ?? ucfirst($pr);
-                        ?>
-                        <li>
-                            <div class="std-head">
-                                <p class="std-title"><?= e((string)$a['title']) ?></p>
-                                <span class="badge <?= e($prCls) ?>"><?= e($prLbl) ?></span>
-                            </div>
-                            <p class="std-desc"><?= e((string)$a['description']) ?></p>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
-        </section>
     </div>
 </div>
+
+    <section class="card card-soft std-wide" aria-labelledby="stdTitle">
+        <header class="card-head card-head-icon">
+            <span class="stat-ico"><?= icon('leaf') ?></span>
+            <div>
+                <p class="label-small">Operational Standards</p>
+                <h2 id="stdTitle" class="card-title">Sanctuary Operational Standard</h2>
+            </div>
+        </header>
+        <?php if (!$announcements): ?>
+            <p class="empty">No announcements have been posted.</p>
+        <?php else: ?>
+            <ul class="std-list">
+                <?php foreach ($announcements as $a):
+                    $pr = strtolower((string)$a['priority']);
+                    $prKnown = ['high' => 'High', 'normal' => 'Normal', 'low' => 'Low'];
+                    $prCls = isset($prKnown[$pr]) ? 'pr-' . $pr : 'pr-normal';
+                    $prLbl = $prKnown[$pr] ?? ucfirst($pr);
+                    ?>
+                    <li>
+                        <div class="std-head">
+                            <p class="std-title"><?= e((string)$a['title']) ?></p>
+                            <span class="badge <?= e($prCls) ?>"><?= e($prLbl) ?></span>
+                        </div>
+                        <p class="std-desc"><?= e((string)$a['description']) ?></p>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+    </section>
 
 <section class="card card-wide" id="manifest" aria-labelledby="manifestTitle"
          data-page="<?= (int)$schedule['page'] ?>" data-pages="<?= (int)$schedule['pages'] ?>" data-total="<?= (int)$schedule['total'] ?>">

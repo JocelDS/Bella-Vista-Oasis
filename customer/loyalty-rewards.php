@@ -58,7 +58,7 @@ $pages = max(1, (int)ceil($totalRows / $perPage));
 $pg = $showAll ? max(1, min($pages, (int)($_GET['page'] ?? 1))) : 1;
 $rows = $showAll ? array_slice($history, ($pg - 1) * $perPage, $perPage) : array_slice($history, 0, 5);
 
-$images = ['Discount' => 'treatment-single-room.jpg', 'Upgrade' => 'wellness-collage-1.png', 'Experience' => 'hero-spa.jpg', 'Add-on' => 'treatment-couples-suite.jpg', 'Product' => 'wellness-collage-2.png'];
+$images = ['Discount' => 'treatment-single-room.jpg', 'Upgrade' => 'wellness-collage-1.jpg', 'Experience' => 'hero-spa.jpg', 'Add-on' => 'treatment-couples-suite.jpg', 'Product' => 'wellness-collage-2.jpg'];
 function lr_icon(string $n): string
 {
     $p = [
@@ -176,11 +176,12 @@ require __DIR__ . '/includes/header.php';
             <?php if ($rewards): ?>
             <div class="lr-rewards">
                 <?php foreach ($rewards as $i => $rw):
-                    $img = $rw['image'] ? ADMIN_URL . '/assets/uploads/rewards/' . rawurlencode($rw['image']) : cu_url('/assets/images/' . ($images[$rw['category']] ?? 'hero-spa.jpg'));
+                    $fallbackImg = cu_url('/assets/images/' . ($images[$rw['category']] ?? 'hero-spa.jpg'));
+                    $img = $rw['image'] ? ADMIN_URL . '/assets/uploads/rewards/' . rawurlencode($rw['image']) : $fallbackImg;
                     $ok = $rw['block'] === null; $accent = $i % 2 ? 'pink' : 'purple';
                     $needMore = $rw['block'] !== null && str_starts_with($rw['block'], 'Needs '); ?>
                 <article class="lp-card lr-reward <?= $ok ? '' : 'locked' ?>">
-                    <div class="lp-card-img"><img src="<?= e($img) ?>" alt="<?= e($rw['name']) ?>" loading="lazy"><span class="lr-cat <?= $accent ?>"><?= e($rw['category']) ?></span></div>
+                    <div class="lp-card-img"><img src="<?= e($img) ?>" alt="<?= e($rw['name']) ?>" loading="lazy" onerror="this.onerror=null;this.src='<?= e($fallbackImg) ?>'"><span class="lr-cat <?= $accent ?>"><?= e($rw['category']) ?></span></div>
                     <div class="lp-card-body">
                         <h3 class="serif"><?= e($rw['name']) ?></h3>
                         <p class="sv-desc"><?= e($rw['description']) ?></p>

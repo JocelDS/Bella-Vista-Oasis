@@ -158,8 +158,13 @@ require __DIR__ . '/includes/header.php';
             }
             foreach ($addons as $a) $cards[] = ['name' => $a['name'], 'description' => $a['description'], 'price' => (float)$a['price'], 'unit' => ''];
             ?>
-            <?php if ($cards): ?>
-            <div class="sv-addons">
+            <?php if ($cards):
+                // pick 3 or 4 per row so the last row is never a lone orphan card
+                $nc = count($cards);
+                $cols = ($nc % 4 === 0) ? 4 : (($nc % 3 === 0) ? 3 : (($nc % 3) > ($nc % 4) ? 3 : 4));
+                $cols = max(1, min($cols, $nc));
+            ?>
+            <div class="sv-addons" style="--cols: <?= $cols ?>">
                 <?php foreach ($cards as $i => $a): ?>
                 <div class="sv-addon">
                     <span class="i <?= $i % 2 ? 'pink' : 'purple' ?>"><?= sv_icon($i % 2 ? 'heart' : 'lotus') ?></span>
@@ -204,6 +209,7 @@ require __DIR__ . '/includes/header.php';
             <?php if ($services): ?>
             <div class="sv-table-wrap">
                 <table class="sv-table">
+                    <colgroup><col class="c-treat"><col class="c-dur"><col class="c-price"><col class="c-details"><col class="c-book"></colgroup>
                     <thead><tr><th>Treatment</th><th>Duration</th><th>Price</th><th>Experience Details</th><th>Booking</th></tr></thead>
                     <tbody>
                     <?php foreach ($services as $s): ?>
@@ -211,7 +217,7 @@ require __DIR__ . '/includes/header.php';
                             <td data-label="Treatment"><strong><?= e($s['service_name']) ?></strong><small><?= e($rooms[$s['room_code']]['room_type'] ?? '') ?></small></td>
                             <td data-label="Duration"><?= e(cu_duration_label((int)$s['duration'])) ?></td>
                             <td data-label="Price" class="sv-t-price"><?= cu_peso((float)$s['price']) ?></td>
-                            <td data-label="Details"><?= e($s['description']) ?></td>
+                            <td data-label="Details"><?= e(cu_clean_desc($s['description'] ?? '')) ?></td>
                             <td data-label=""><a class="lp-btn lp-btn-line" href="<?= e(sv_book_url((int)$s['id'])) ?>" data-book>Book Now</a></td>
                         </tr>
                     <?php endforeach; ?>
