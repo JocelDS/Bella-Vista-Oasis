@@ -214,12 +214,7 @@
   border-radius: 16px;
   aspect-ratio: 1 / 0.92;
   min-height: 250px;
-  background: radial-gradient(
-    circle at 50% 38%,
-    #986BC2 0%,
-    var(--emerald) 45%,
-    var(--dark) 100%
-  );
+  background: linear-gradient(135deg, #986BC2 0%, #E18BB9 100%);
   color: var(--cream);
   display: flex;
   align-items: center;
