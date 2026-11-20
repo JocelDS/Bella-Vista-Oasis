@@ -853,7 +853,7 @@
         var c = canvas.getContext('2d');
         c.fillStyle = '#ffffff';
         c.fillRect(0, 0, size, size);
-        c.fillStyle = '#0D251E';
+        c.fillStyle = '#49364f';
         for (var r = 0; r < n; r++) {
             for (var col = 0; col < n; col++) {
                 if (q.isDark(r, col)) { c.fillRect((col + margin) * cell, (r + margin) * cell, cell, cell); }
@@ -890,48 +890,153 @@
         } else { doGenerate(id); }
     });
 
+    /* ---- Reservation pass (same layout as the guest's PDF pass) ---- */
+    var logoUrl = page.getAttribute('data-logo') || '';
+
+    function loadLogo(done) {
+        if (!logoUrl) { done(null); return; }
+        var im = new Image();
+        im.onload = function () { done(im); };
+        im.onerror = function () { done(null); };
+        im.src = logoUrl;
+    }
+
+    function passCanvas(g, logo) {
+        var S = 2, W = 595, H = 842, p = g.pass || {};
+        var SERIF = '"Times New Roman", Times, serif', SANS = 'Arial, Helvetica, sans-serif';
+        var cv = document.createElement('canvas');
+        cv.width = W * S; cv.height = H * S;
+        var c = cv.getContext('2d');
+        c.scale(S, S);
+        c.textBaseline = 'alphabetic';
+        function rect(x, y, w, h, col) { c.fillStyle = col; c.fillRect(x, y, w, h); }
+        function text(x, y, font, col, str, maxW) {
+            c.font = font; c.fillStyle = col;
+            str = String(str === undefined || str === null ? '' : str);
+            if (maxW && c.measureText(str).width > maxW) {
+                while (str.length > 1 && c.measureText(str + '\u2026').width > maxW) { str = str.slice(0, -1); }
+                str += '\u2026';
+            }
+            c.fillText(str, x, y);
+        }
+        var INK = '#49364F', PURPLE = '#986BC2', MUTE = '#89788D';
+
+        rect(0, 0, W, H, '#FFF7FC');
+        rect(0, 0, W, 12, PURPLE);
+        rect(W / 3, 0, W / 2 - W / 3, 12, '#E18BB9');
+
+        var tx = 48;
+        if (logo) { c.drawImage(logo, 48, 46, 64, 64); tx = 124; }
+        text(tx, 70, 'bold 26px ' + SERIF, INK, 'Bella Vista Oasis');
+        text(tx, 90, '9px ' + SANS, PURPLE, 'SPA, BATH & SANCTUARY');
+
+        text(48, 150, 'bold 9px ' + SANS, MUTE, 'EXPEDITED SANCTUARY CHECK-IN');
+        text(48, 182, 'bold 30px ' + SERIF, INK, 'Reservation Pass');
+
+        rect(48, 204, 499, 34, '#FFFFFF');
+        text(60, 226, 'bold 12px ' + SANS, PURPLE, 'Reference  ' + (p.code || ''));
+        var st = String(p.status || 'confirmed');
+        text(330, 226, '11px ' + SANS, INK, 'Status: ' + st.charAt(0).toUpperCase() + st.slice(1).replace(/_/g, ' '));
+
+        /* QR */
+        var q = window.qrcode(0, 'M');
+        q.addData(g.payload); q.make();
+        var n = q.getModuleCount(), cell = 6, mg = 3, qs = (n + 2 * mg) * cell, qx = 48, qy = 270;
+        rect(qx, qy, qs, qs, '#FFFFFF');
+        c.fillStyle = INK;
+        for (var r = 0; r < n; r++) {
+            for (var col = 0; col < n; col++) {
+                if (q.isDark(r, col)) { c.fillRect(qx + (col + mg) * cell, qy + (r + mg) * cell, cell, cell); }
+            }
+        }
+        text(qx, qy + qs + 16, '9px ' + SANS, MUTE, 'Valid until ' + (g.expires || ''));
+
+        /* Details */
+        var dx = qx + qs + 34, dy = 290, maxW = W - 48 - dx;
+        var total = 'PHP ' + (p.total || '0.00') + (p.payment ? ' (payment ' + p.payment + ')' : '');
+        var rows = [
+            ['GUEST', p.guest], ['TREATMENT', p.service], ['DATE', p.date], ['TIME', p.time],
+            ['SUITE', p.room || 'To be assigned'], ['THERAPIST', p.therapist || 'Any Master Therapist'],
+            ['GUESTS', p.guests || 1], ['TOTAL', total]
+        ];
+        rows.forEach(function (row) {
+            text(dx, dy, 'bold 8px ' + SANS, MUTE, row[0]);
+            text(dx, dy + 14, '12px ' + SANS, INK, row[1], maxW);
+            dy += 38;
+        });
+
+        /* Instructions: always below the details column */
+        var iy = Math.max(qy + qs + 70, dy + 6);
+        rect(48, iy - 14, 499, 84, '#FCE9F2');
+        text(64, iy + 8, 'bold 11px ' + SANS, '#B23A63', 'Check-in instructions');
+        text(64, iy + 28, '10px ' + SANS, INK, 'Please arrive ' + (p.arrive || 15) + ' minutes before your appointment.');
+        text(64, iy + 43, '10px ' + SANS, INK, 'Present this QR code to reception for verification. Each code works once.');
+        text(64, iy + 58, '10px ' + SANS, INK, 'Concierge: ' + (p.phone || ''));
+
+        text(48, 788, '9px ' + SANS, MUTE, p.address || '', W - 96);
+        text(48, 802, '9px ' + SANS, MUTE, 'Bella Vista Oasis Spa & Wellness Sanctuary');
+        return cv;
+    }
+
+    /* One-page A4 PDF holding the pass image (no library needed). */
+    function passPdf(cv) {
+        var b64 = cv.toDataURL('image/jpeg', 0.92).split(',')[1];
+        var bin = atob(b64), img = new Uint8Array(bin.length), i;
+        for (i = 0; i < bin.length; i++) { img[i] = bin.charCodeAt(i); }
+        var enc = function (str) { var u = new Uint8Array(str.length); for (var k = 0; k < str.length; k++) { u[k] = str.charCodeAt(k) & 255; } return u; };
+        var chunks = [], offs = [], len = 0;
+        function put(x) { var u = typeof x === 'string' ? enc(x) : x; chunks.push(u); len += u.length; }
+        function obj(num, head, body) {
+            offs[num] = len;
+            put(num + ' 0 obj\n' + head);
+            if (body) { put('\nstream\n'); put(body); put('\nendstream'); }
+            put('\nendobj\n');
+        }
+        var content = 'q 595 0 0 842 0 0 cm /Im0 Do Q';
+        put('%PDF-1.4\n');
+        obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+        obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+        obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>');
+        obj(4, '<< /Type /XObject /Subtype /Image /Width ' + cv.width + ' /Height ' + cv.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + img.length + ' >>', img);
+        obj(5, '<< /Length ' + content.length + ' >>', content);
+        var xref = len;
+        put('xref\n0 6\n0000000000 65535 f \n');
+        for (i = 1; i <= 5; i++) { put(('0000000000' + offs[i]).slice(-10) + ' 00000 n \n'); }
+        put('trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF');
+        return new Blob(chunks, { type: 'application/pdf' });
+    }
+
     $('#btnQrDownload').addEventListener('click', function () {
         if (!gen.payload) { return; }
-        var c = document.createElement('canvas');
-        drawQr(c, gen.payload, 12, 4);
-        c.toBlob(function (blob) {
+        loadLogo(function (logo) {
+            var blob = passPdf(passCanvas(gen, logo));
             var a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = gen.pass.code + '-checkin-qr.png';
+            a.download = gen.pass.code + '-pass.pdf';
             document.body.appendChild(a); a.click(); a.remove();
             setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-        }, 'image/png');
+        });
     });
 
     $('#btnQrPrint').addEventListener('click', function () {
         if (!gen.payload) { return; }
-        var c = document.createElement('canvas');
-        drawQr(c, gen.payload, 10, 4);
-        var f = document.createElement('iframe');
-        f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
-        document.body.appendChild(f);
-        var d = f.contentDocument;
-        d.open(); d.write('<!doctype html><html><head><meta charset="utf-8"><title>Guest Arrival Pass</title></head><body></body></html>'); d.close();
-        var st = d.createElement('style');
-        st.textContent = '@page{margin:14mm}body{font-family:Georgia,serif;color:#102B22;text-align:center;margin:0;padding:24px}' +
-            '.brand{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#85877F}h1{font-size:26px;margin:6px 0 2px}' +
-            '.ref{font:700 20px/1.2 Arial,sans-serif;letter-spacing:.08em;margin:14px 0 4px}img{width:70mm;height:70mm;margin:16px 0}' +
-            '.row{font:14px/1.6 Arial,sans-serif}.fine{font:12px/1.5 Arial,sans-serif;color:#85877F;margin-top:14px}';
-        d.head.appendChild(st);
-        function line(cls, text) { var p = d.createElement('div'); p.className = cls; p.textContent = text; d.body.appendChild(p); }
-        line('brand', 'Bella Vista Oasis');
-        var h = d.createElement('h1'); h.textContent = 'Guest Arrival Pass'; d.body.appendChild(h);
-        var im = d.createElement('img'); im.src = c.toDataURL('image/png'); im.alt = 'Check-in QR code'; d.body.appendChild(im);
-        line('ref', gen.pass.code);
-        line('row', gen.pass.guest);
-        line('row', gen.pass.service);
-        line('row', gen.pass.date + ' · ' + gen.pass.time);
-        line('fine', 'Show this code at reception on arrival. Valid until ' + gen.expires + '.');
-        im.onload = function () {
-            f.contentWindow.focus();
-            f.contentWindow.print();
-            setTimeout(function () { f.remove(); }, 2000);
-        };
+        loadLogo(function (logo) {
+            var url = passCanvas(gen, logo).toDataURL('image/png');
+            var f = document.createElement('iframe');
+            f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+            document.body.appendChild(f);
+            var d = f.contentDocument;
+            d.open(); d.write('<!doctype html><html><head><meta charset="utf-8"><title>Reservation Pass</title>' +
+                '<style>@page{size:A4;margin:0}html,body{margin:0;padding:0}img{display:block;width:210mm;height:297mm}</style></head><body></body></html>'); d.close();
+            var im = d.createElement('img'); im.alt = 'Reservation pass';
+            im.onload = function () {
+                f.contentWindow.focus();
+                f.contentWindow.print();
+                setTimeout(function () { f.remove(); }, 2000);
+            };
+            d.body.appendChild(im);
+            im.src = url;
+        });
     });
 
     /* ------------------------------------------------------------------ reference / token input */

@@ -247,7 +247,7 @@ function qr_appt(PDO $pdo, int $id, bool $lock = false): ?array
     }
     $stmt = $pdo->prepare(
         'SELECT a.id, a.customer_id, a.service_id, a.room_id, a.therapist_id,
-                a.appointment_date, a.start_time, a.end_time, a.appointment_status, a.payment_status, a.total_amount,
+                a.appointment_date, a.start_time, a.end_time, a.appointment_status, a.payment_status, a.total_amount, a.guest_count,
                 c.full_name AS customer_name, c.email AS customer_email, c.phone AS customer_phone,
                 s.service_name, s.duration,
                 r.room_name, r.room_type,
@@ -521,6 +521,19 @@ function qr_generatable(PDO $pdo, array $s, DateTimeImmutable $now): array
     return $out;
 }
 
+/** One spa_configuration value (contact details, arrival lead time) for the printed pass. */
+function qr_conf(PDO $pdo, string $key, string $default = ''): string
+{
+    try {
+        $st = $pdo->prepare('SELECT setting_value FROM spa_configuration WHERE setting_key = ?');
+        $st->execute([$key]);
+        $v = $st->fetchColumn();
+        return $v === false || $v === null ? $default : (string)$v;
+    } catch (Throwable $e) {
+        return $default;
+    }
+}
+
 function qr_generate(PDO $pdo, int $apptId, ?int $adminId): array
 {
     $s   = qr_settings($pdo);
@@ -592,7 +605,16 @@ function qr_generate(PDO $pdo, int $apptId, ?int $adminId): array
             'guest'   => (string)($a['customer_name'] ?? ''),
             'service' => (string)($a['service_name'] ?? ''),
             'date'    => appt_date_label((string)$a['appointment_date']),
-            'time'    => appt_time_label((string)$a['start_time']) . ' – ' . appt_time_label((string)$a['end_time']),
+            'time'    => appt_time_label((string)$a['start_time']) . ' - ' . appt_time_label((string)$a['end_time']),
+            'status'  => (string)$a['appointment_status'],
+            'room'    => (string)($a['room_name'] ?? ''),
+            'therapist' => (string)($a['therapist_name'] ?? ''),
+            'guests'  => (int)($a['guest_count'] ?? 1),
+            'total'   => number_format((float)$a['total_amount'], 2),
+            'payment' => (string)$a['payment_status'],
+            'phone'   => qr_conf($pdo, 'contact_phone'),
+            'arrive'  => (int)qr_conf($pdo, 'arrival_minutes_before', '15'),
+            'address' => implode(', ', array_filter([qr_conf($pdo, 'address_line1'), qr_conf($pdo, 'address_line2'), qr_conf($pdo, 'address_line3')], static fn($v) => trim($v) !== '')),
         ],
     ];
 }

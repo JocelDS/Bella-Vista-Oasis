@@ -427,7 +427,7 @@
         fAction.value = 'create';
         var t = fDate2.getAttribute('data-today');
         fDate2.min = t;
-        fDate2.value = t;
+        fDate2.value = '';
     }
 
     $('#openAppt').addEventListener('click', function () {

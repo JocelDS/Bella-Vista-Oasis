@@ -31,7 +31,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--emerald);
+  color: #6F4A99;
 }
 .link-btn:hover {
   text-decoration: underline;

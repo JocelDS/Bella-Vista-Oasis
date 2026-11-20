@@ -56,7 +56,7 @@ require __DIR__ . '/includes/header.php';
 ?>
 <link rel="stylesheet" href="<?= e(url('/assets/css/qr-checkin.css')) ?>?v=<?= e($cssVer) ?>">
 
-<div class="qr-page" id="qrPage" data-appointments-url="<?= e(url('/appointments.php')) ?>" data-tz="<?= e(date_default_timezone_get()) ?>">
+<div class="qr-page" id="qrPage" data-appointments-url="<?= e(url('/appointments.php')) ?>" data-tz="<?= e(date_default_timezone_get()) ?>" data-logo="<?= e(url('/assets/images/spa-logo.png')) ?>">
 
 <section class="page-head qr-head">
     <div class="qr-head-text">

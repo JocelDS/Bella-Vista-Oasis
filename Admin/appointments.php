@@ -209,7 +209,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="field">
                     <label for="ap_date">Appointment Date</label>
-                    <input type="date" id="ap_date" name="appointment_date" min="<?= e($today) ?>" value="<?= e($today) ?>" required>
+                    <input type="date" id="ap_date" name="appointment_date" min="<?= e($today) ?>" value="" required>
                 </div>
                 <div class="field">
                     <label for="ap_guests">Guests</label>

@@ -185,7 +185,7 @@
         var titles = { multi: 'Suite Timeline Matrix', day: 'Daily Sanctuary Timeline', week: 'Weekly Sanctuary Schedule' };
         var kickers = { multi: 'Live Room Schedule', day: 'Hour-by-hour Bookings', week: 'All Suites · Seven Days' };
         $('#matrixTitle').textContent = titles[state.view];
-        $('#calKicker').textContent = kickers[state.view];
+        $('#calKicker').textContent = kickers[state.view] + ' \u00b7 ' + data.label;
         $('#calHint').textContent = state.view === 'multi' ? 'Click any open slot to reserve or a card to inspect' : (state.view === 'week' ? 'Click a day to open it, or a booking to inspect' : 'Click a booking to inspect');
         $('#calHours').textContent = state.view === 'week' ? '7 Days' : ((data.axis.end - data.axis.start) / 60) + ' Operating Hours';
 
@@ -526,7 +526,9 @@
         if (!items.length) { items = data.appointments; }
         if (!items.length) { clearInspect(); return; }
         var nm = data.now_min;
-        var pick = items.filter(function (a) { return a.state === 'session'; })[0]
+        var pending = items.filter(function (a) { return a.status === 'pending'; }).sort(function (x, y) { return y.id - x.id; });
+        var pick = pending[0]
+            || items.filter(function (a) { return a.state === 'session'; })[0]
             || items.filter(function (a) { return nm !== null && a.start >= nm && a.status !== 'cancelled' && a.status !== 'no_show' && a.status !== 'completed'; })[0]
             || items[0];
         selectAppt(pick.id, false);

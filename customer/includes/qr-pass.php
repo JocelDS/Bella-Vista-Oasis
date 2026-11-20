@@ -92,22 +92,40 @@ function qrp_matrix(string $payload): array
     return QRcode::text($payload, false, QR_ECLEVEL_M);
 }
 
+/** System palette: purple finder squares, purple-to-pink fade across the data modules. */
+function qrp_is_finder(int $r, int $c, int $n): bool
+{
+    return ($r < 7 && $c < 7) || ($r < 7 && $c >= $n - 7) || ($r >= $n - 7 && $c < 7);
+}
+
+/** @return array{0: float, 1: float, 2: float} RGB 0..1 for one module */
+function qrp_tone(int $r, int $c, int $n): array
+{
+    if (qrp_is_finder($r, $c, $n)) {
+        return [152 / 255, 107 / 255, 194 / 255];
+    }
+    $t = ($r + $c) / (2 * max(1, $n - 1));
+    return [(152 + 73 * $t) / 255, (107 + 32 * $t) / 255, (194 - 9 * $t) / 255];
+}
+
 function qrp_svg(array $matrix, string $label = 'Reservation QR code'): string
 {
     $n = count($matrix);
     $m = 3;
-    $d = '';
+    $fd = '';
+    $dd = '';
     foreach ($matrix as $y => $row) {
         $len = strlen($row);
         for ($x = 0; $x < $len; $x++) {
             if ($row[$x] !== '1') continue;
-            $x0 = $x;
-            while ($x < $len && $row[$x] === '1') $x++;
-            $d .= 'M' . ($x0 + $m) . ' ' . ($y + $m) . 'h' . ($x - $x0) . 'v1h-' . ($x - $x0) . 'z';
+            $seg = 'M' . ($x + $m) . ' ' . ($y + $m) . 'h1v1h-1z';
+            if (qrp_is_finder((int)$y, $x, $n)) $fd .= $seg; else $dd .= $seg;
         }
     }
     $size = $n + 2 * $m;
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $size . ' ' . $size . '" role="img" aria-label="' . e($label) . '" shape-rendering="crispEdges"><rect width="' . $size . '" height="' . $size . '" fill="#fff"/><path d="' . $d . '" fill="#49364F"/></svg>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' . $size . ' ' . $size . '" role="img" aria-label="' . e($label) . '" shape-rendering="crispEdges">'
+        . '<defs><linearGradient id="qrg" gradientUnits="userSpaceOnUse" x1="' . $m . '" y1="' . $m . '" x2="' . ($n + $m) . '" y2="' . ($n + $m) . '"><stop offset="0" stop-color="#986BC2"/><stop offset="1" stop-color="#E18BB9"/></linearGradient></defs>'
+        . '<rect width="' . $size . '" height="' . $size . '" fill="#fff"/><path d="' . $dd . '" fill="url(#qrg)"/><path d="' . $fd . '" fill="#986BC2"/></svg>';
 }
 
 /** The window in which the guest can arrive, from the real appointment time and the spa's check-in policy. */
@@ -214,13 +232,12 @@ function qrp_pdf(array $a, array $matrix, string $expiresLabel): string
     $qs = ($n + 2 * $mg) * $cell;
     $qx = 48; $qy = $H - 270 - $qs;
     $rect($qx, $qy, $qs, $qs, 'FFFFFF');
-    $c .= $fill('49364F');
     foreach ($matrix as $y => $row) {
         for ($x = 0, $len = strlen($row); $x < $len; $x++) {
             if ($row[$x] !== '1') continue;
-            $x0 = $x;
-            while ($x < $len && $row[$x] === '1') $x++;
-            $c .= round($qx + ($x0 + $mg) * $cell, 2) . ' ' . round($qy + $qs - ($y + $mg + 1) * $cell, 2) . ' ' . round(($x - $x0) * $cell, 2) . ' ' . $cell . " re f\n";
+            [$cr, $cg, $cb] = qrp_tone((int)$y, $x, $n);
+            $c .= sprintf('%.3f %.3f %.3f rg ', $cr, $cg, $cb)
+                . round($qx + ($x + $mg) * $cell - 0.15, 2) . ' ' . round($qy + $qs - ($y + $mg + 1) * $cell - 0.15, 2) . ' ' . ($cell + 0.3) . ' ' . ($cell + 0.3) . " re f\n";
         }
     }
     $text($qx, $qy - 16, 'F1', 9, 'Valid until ' . $expiresLabel, '89788D');
@@ -243,7 +260,7 @@ function qrp_pdf(array $a, array $matrix, string $expiresLabel): string
         $dy -= 38;
     }
 
-    $iy = $qy - 70;
+    $iy = min($qy - 70, $dy);
     $rect(48, $iy - 70, 499, 84, 'FCE9F2');
     $text(64, $iy - 8, 'F2', 11, 'Check-in instructions', 'B23A63');
     $text(64, $iy - 28, 'F1', 10, 'Please arrive ' . (int)cu_setting('arrival_minutes_before', '15') . ' minutes before your appointment.', '49364F');

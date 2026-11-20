@@ -282,6 +282,7 @@ function cal_roster(PDO $pdo, string $date, string $today, int $nowMin, array $a
 
 function cal_fetch(PDO $pdo, array $p): array
 {
+    appt_expire_pending($pdo);
     $today  = date('Y-m-d');
     $nowMin = cal_now_minutes();
     [$from, $to] = cal_range($p['view'], $p['date']);

@@ -7,6 +7,20 @@ require_once __DIR__ . '/booking-rules.php';
 const APPT_PER_PAGE_OPTIONS = [10, 25, 50];
 const ROOM_GAP_MINUTES = 30;
 
+function appt_expire_pending(PDO $pdo): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    try {
+        $pdo->prepare("UPDATE appointments SET appointment_status = 'cancelled', cancelled_at = ?, cancellation_forfeited = 0 WHERE appointment_status = 'pending' AND appointment_date < ?")
+            ->execute([date('Y-m-d H:i:s'), date('Y-m-d')]);
+    } catch (Throwable $e) {
+    }
+}
+
 function appt_minutes(string $t): int
 {
     if (!preg_match('/^(\d{1,2}):(\d{2})/', $t, $m)) {
@@ -120,6 +134,7 @@ function appt_where(array $f, bool $withStatus): array
 
 function appt_counts(PDO $pdo, array $f): array
 {
+    appt_expire_pending($pdo);
     [$where, $params] = appt_where($f, false);
     $stmt = $pdo->prepare('SELECT a.appointment_status AS st, COUNT(*) AS n' . APPT_FROM . ' WHERE ' . $where . ' GROUP BY a.appointment_status');
     $stmt->execute($params);
@@ -139,6 +154,7 @@ function appt_counts(PDO $pdo, array $f): array
 
 function appt_fetch(PDO $pdo, array $f): array
 {
+    appt_expire_pending($pdo);
     [$where, $params] = appt_where($f, true);
 
     $stmt = $pdo->prepare('SELECT COUNT(*)' . APPT_FROM . ' WHERE ' . $where);
@@ -158,7 +174,7 @@ function appt_fetch(PDO $pdo, array $f): array
                 t.full_name AS therapist_name, r.room_name,
                 COALESCE(p.paid_amount, 0) AS paid_amount, a.is_pregnant, a.downpayment_amount, a.guest_count'
         . APPT_FROM . ' WHERE ' . $where
-        . ' ORDER BY a.appointment_date DESC, a.start_time ASC, a.id DESC LIMIT ' . $per . ' OFFSET ' . $offset
+        . " ORDER BY (a.appointment_status = 'pending') DESC, IF(a.appointment_status = 'pending', a.id, 0) DESC, a.appointment_date DESC, a.start_time ASC, a.id DESC LIMIT " . $per . ' OFFSET ' . $offset
     );
     $stmt->execute($params);
 
@@ -167,6 +183,7 @@ function appt_fetch(PDO $pdo, array $f): array
 
 function appt_stats(PDO $pdo, string $today): array
 {
+    appt_expire_pending($pdo);
     $r = $pdo->query(
         "SELECT COUNT(*) AS total,
                 COALESCE(SUM(appointment_status = 'pending'), 0) AS pending,

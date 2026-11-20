@@ -147,7 +147,7 @@
 .qr-pill[data-state="live"],
 .qr-pill.is-ok {
   background: rgba(244, 190, 213, 0.34);
-  color: #986BC2;
+  color: #6F4A99;
 }
 .qr-pill[data-state="live"]::before {
   animation: qrPulse 1.4s ease-in-out infinite;
@@ -503,7 +503,7 @@
   height: 38px;
   border-radius: 12px;
   background: rgba(244, 190, 213, 0.3);
-  color: var(--emerald);
+  color: #6F4A99;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -573,7 +573,7 @@
   height: 40px;
   border-radius: 12px;
   background: rgba(244, 190, 213, 0.3);
-  color: var(--emerald);
+  color: #6F4A99;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -587,7 +587,7 @@
 .qr-spot-empty .qr-vp-icon {
   background: var(--cream);
   border-color: var(--border);
-  color: var(--emerald);
+  color: #6F4A99;
   margin-inline: auto;
 }
 .qr-spot-empty h3 {
@@ -839,7 +839,7 @@
   height: 56px;
   border-radius: 50%;
   background: rgba(244, 190, 213, 0.35);
-  color: #986BC2;
+  color: #6F4A99;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -945,7 +945,7 @@
 .qr-badge.k-verified,
 .qr-badge.k-checked_in {
   background: rgba(244, 190, 213, 0.32);
-  color: #986BC2;
+  color: #6F4A99;
 }
 .qr-badge.k-pending,
 .qr-badge.k-expected {
@@ -954,7 +954,7 @@
 }
 .qr-badge.k-arrived {
   background: rgba(94,62,80, 0.13);
-  color: var(--emerald);
+  color: #6F4A99;
 }
 .qr-badge.k-invalid,
 .qr-badge.k-expired,
@@ -967,7 +967,7 @@
 .qr-badge.k-not_used,
 .qr-badge.k-no_record {
   background: #F4BED5;
-  color: #756a6e;
+  color: #4F4259;
 }
 .qr-method {
   display: inline-flex;

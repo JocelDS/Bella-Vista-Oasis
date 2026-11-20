@@ -115,7 +115,6 @@ require __DIR__ . '/includes/header.php';
                 </div>
                 <div class="qp-remind">Please arrive <?= (int)$win['arrive'] ?> minutes before your scheduled appointment (by <b><?= e($win['by']->format('g:i A')) ?></b>). Present this digital pass to our reception for contactless verification.</div>
                 <div class="qp-actions">
-                    <button type="button" class="qp-btn qp-btn-primary" data-open="qpWallet">Save to Apple / Google Wallet</button>
                     <?php if ($pass['state'] === 'active'): ?>
                     <a class="qp-btn qp-btn-line" data-busy href="<?= e(cu_url('/qr-pass-download.php?type=pdf&id=' . (int)$a['id'])) ?>">Download PDF Pass</a>
                     <?php else: ?>
@@ -129,7 +128,7 @@ require __DIR__ . '/includes/header.php';
             </article>
 
             <article class="qp-card qp-banner">
-                <img src="<?= e(cu_url('/assets/images/wellness-collage-1.jpg')) ?>" alt="" loading="lazy">
+                <img src="<?= e(cu_url('/assets/images/wellness-collage-1.png')) ?>" alt="" loading="lazy">
                 <div>
                     <p class="qp-label"><?= $memberOk && $member['perks'] ? 'Your member privileges' : 'Sanctuary care' ?></p>
                     <?php if ($memberOk && $member['perks']): ?>
@@ -141,6 +140,17 @@ require __DIR__ . '/includes/header.php';
                     <?php endif; ?>
                 </div>
             </article>
+
+            <section class="qp-card">
+                <h2 class="qp-h3">Amendment &amp; Cancellation Policy</h2>
+                <ul class="qp-policy">
+                    <li><b>Cancellation deadline.</b> Cancel at least <?= $notice ?> hours before your start time.</li>
+                    <li><b>With enough notice.</b> Any payment received is marked as refunded.</li>
+                    <li><b>Late cancellation.</b> Under <?= $notice ?> hours, any downpayment on file is forfeited.</li>
+                    <li><b>Changes.</b> To change your date or time, contact the concierge or cancel and book again. Changes inside <?= $notice ?> hours count as late.</li>
+                </ul>
+                <p class="qp-fine">Questions about deposits or refunds? Contact the concierge<?= $phone !== '' ? ' at ' . e($phone) : '' ?>.</p>
+            </section>
         </div>
 
         <aside class="qp-right">
@@ -181,17 +191,6 @@ require __DIR__ . '/includes/header.php';
                     <?php if ($valet !== ''): ?><div><dt>Valet &amp; arrival</dt><dd><?= e($valet) ?></dd></div><?php endif; ?>
                 </dl>
             </section>
-
-            <section class="qp-card">
-                <h2 class="qp-h3">Amendment &amp; Cancellation Policy</h2>
-                <ul class="qp-policy">
-                    <li><b>Cancellation deadline.</b> Cancel at least <?= $notice ?> hours before your start time.</li>
-                    <li><b>With enough notice.</b> Any payment received is marked as refunded.</li>
-                    <li><b>Late cancellation.</b> Under <?= $notice ?> hours, any downpayment on file is forfeited.</li>
-                    <li><b>Changes.</b> To change your date or time, contact the concierge or cancel and book again. Changes inside <?= $notice ?> hours count as late.</li>
-                </ul>
-                <p class="qp-fine">Questions about deposits or refunds? Contact the concierge<?= $phone !== '' ? ' at ' . e($phone) : '' ?>.</p>
-            </section>
         </aside>
     </div>
 
@@ -202,12 +201,5 @@ require __DIR__ . '/includes/header.php';
     </section>
     <?php endif; ?>
 
-    <div class="qp-modal" id="qpWallet" role="dialog" aria-modal="true" aria-labelledby="qpWalletT" hidden>
-        <div class="qp-modal-card">
-            <h3 class="qp-h3" id="qpWalletT">Wallet passes are not available yet</h3>
-            <p class="qp-p">Apple and Google Wallet are not set up for Bella Vista Oasis, so we cannot create a wallet pass. Download your PDF pass or add the appointment to your calendar instead.</p>
-            <div class="qp-actions"><button type="button" class="qp-btn qp-btn-line" data-close>Close</button><?php if ($a && $pass['state'] === 'active'): ?><a class="qp-btn qp-btn-primary" href="<?= e(cu_url('/qr-pass-download.php?type=pdf&id=' . (int)$a['id'])) ?>">Download PDF Pass</a><?php endif; ?></div>
-        </div>
-    </div>
 </main>
 <?php require __DIR__ . '/includes/footer.php';

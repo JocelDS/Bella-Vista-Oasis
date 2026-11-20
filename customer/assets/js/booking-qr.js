@@ -1,5 +1,11 @@
 (function () {
   'use strict';
+/* System palette QR: purple finder squares, purple-to-pink fade across the data modules. */
+function qrTone(r, col, n) {
+  if ((r < 7 && col < 7) || (r < 7 && col >= n - 7) || (r >= n - 7 && col < 7)) return 'rgb(152,107,194)';
+  var t = (r + col) / (2 * (n - 1));
+  return 'rgb(' + Math.round(152 + 73 * t) + ',' + Math.round(107 + 32 * t) + ',' + Math.round(194 - 9 * t) + ')';
+}
   var box = document.getElementById('qrBox');
   if (!box) return;
   var canvas = document.getElementById('qrCanvas');
@@ -16,8 +22,7 @@
     var c = canvas.getContext('2d');
     c.fillStyle = '#ffffff';
     c.fillRect(0, 0, size, size);
-    c.fillStyle = '#49364f';
-    for (var r = 0; r < n; r++) for (var col = 0; col < n; col++) if (q.isDark(r, col)) c.fillRect((col + margin) * cell, (r + margin) * cell, cell, cell);
+    for (var r = 0; r < n; r++) for (var col = 0; col < n; col++) if (q.isDark(r, col)) { c.fillStyle = qrTone(r, col, n); c.fillRect((col + margin) * cell, (r + margin) * cell, cell, cell); }
   }
 
   /* Uses the existing QR check-in system, so the admin QR Check-In page recognises this pass. */

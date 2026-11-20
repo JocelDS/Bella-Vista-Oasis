@@ -96,6 +96,9 @@ function api_guard(): void
 
 function get_dashboard_stats(PDO $pdo, string $today, string $yesterday): array
 {
+    if (function_exists('appt_expire_pending')) {
+        appt_expire_pending($pdo);
+    }
     $stmt = $pdo->prepare(
         'SELECT appointment_date AS d, appointment_status AS s, COUNT(*) AS n
          FROM appointments
@@ -251,6 +254,9 @@ function get_booking_options(PDO $pdo): array
 
 function fetch_schedule(PDO $pdo, string $date, string $status, string $q, int $page, int $perPage = SCHEDULE_PER_PAGE): array
 {
+    if (function_exists('appt_expire_pending')) {
+        appt_expire_pending($pdo);
+    }
     $where  = 'a.appointment_date = ?';
     $params = [$date];
     if ($status !== 'all') {

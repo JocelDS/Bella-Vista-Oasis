@@ -58,7 +58,7 @@ $pages = max(1, (int)ceil($totalRows / $perPage));
 $pg = $showAll ? max(1, min($pages, (int)($_GET['page'] ?? 1))) : 1;
 $rows = $showAll ? array_slice($history, ($pg - 1) * $perPage, $perPage) : array_slice($history, 0, 5);
 
-$images = ['Discount' => 'treatment-single-room.jpg', 'Upgrade' => 'wellness-collage-1.jpg', 'Experience' => 'hero-spa.jpg', 'Add-on' => 'treatment-couples-suite.jpg', 'Product' => 'wellness-collage-2.jpg'];
+$images = ['Discount' => 'treatment-single-room.jpg', 'Upgrade' => 'wellness-collage-1.png', 'Experience' => 'hero-spa.jpg', 'Add-on' => 'treatment-couples-suite.jpg', 'Product' => 'wellness-collage-2.png'];
 function lr_icon(string $n): string
 {
     $p = [
